@@ -1,0 +1,128 @@
+Hướng Dẫn Triển Khai Toàn Diện: Hệ Thống Quản Lý Phát Hành Âm Nhạc (AKS Studio)
+Tài liệu này mô tả kiến trúc, quy trình, các tính năng quản lý và cách triển khai hệ thống CMS phát hành nhạc được xây dựng bằng Next.js, kết nối với MySQL/MariaDB và vận hành trên cPanel có hỗ trợ Node.js.
+
+Mục lục
+Kiến trúc Hệ thống & Công nghệ
+
+Cấu trúc Thư mục Dự án (Dựa trên repo aks-studio)
+
+Thiết lập Môi trường (Local & cPanel)
+
+Quy trình Phát hành cốt lõi (3 Bước)
+
+Ma trận Phân quyền Chi tiết (Cập nhật)
+
+Các Tính năng Quản lý Chính
+
+Quy chuẩn về Định dạng & Loại hình Phát hành
+
+Tự động hóa với CI/CD (GitHub Actions)
+
+Triển khai & Vận hành trên cPanel (Chi tiết)
+
+1. Kiến trúc Hệ thống & Công nghệ
+Frontend & Backend: Next.js (Sử dụng Pages Router hoặc App Router) cho giao diện hiện đại và API routes tích hợp.
+
+Database: MySQL / MariaDB để tương thích hoàn toàn với môi trường cPanel VNPT.
+
+Môi trường Triển khai: cPanel có hỗ trợ Node.js để vận hành ứng dụng Next.js một cách tự nhiên (giữ được SSR và API Routes).
+
+Quyền của Nghệ sĩ trên File Explorer có thể được giới hạn chỉ trong thư mục riêng của họ.
+
+6. Các Tính năng Quản lý Chính
+Ngoài quy trình phát hành, hệ thống còn cung cấp các công cụ quản lý toàn diện.
+
+6.1. Trình quản lý Tệp tin (File Explorer)
+Mục đích: Là một kho lưu trữ tập trung cho tất cả các tài sản số của hãng thu âm. Thay vì phải upload file lặp đi lặp lại cho mỗi lần phát hành, người dùng có thể quản lý chúng tại một nơi duy nhất.
+
+Đối tượng: Chủ yếu dành cho Hãng thu âm (Label Manager). Nghệ sĩ có thể được cấp quyền để xem và quản lý các file trong thư mục riêng của mình.
+
+Chức năng:
+
+Upload/Download: Tải lên và tải về các file tài sản (audio, video, artwork, hợp đồng, press kit...).
+
+Tổ chức: Tạo thư mục, đổi tên, di chuyển và xóa file/thư mục.
+
+Tích hợp: Khi tạo release, có thể chọn trực tiếp file audio hoặc artwork từ File Explorer thay vì phải upload từ máy tính.
+
+Xem trước: Xem nhanh nội dung các file ảnh, nghe thử file audio.
+
+6.2. Trang tổng quan & Phân tích (Dashboard & Analytics)
+Mục đích: Cung cấp cái nhìn trực quan về hiệu suất của các bản phát hành, giúp đưa ra quyết định kinh doanh.
+
+Đối tượng: Hãng thu âm xem được toàn bộ dữ liệu. Nghệ sĩ xem được dữ liệu của riêng các bản phát hành của mình.
+
+Chức năng:
+
+Thống kê: Hiển thị biểu đồ về tổng lượt stream, doanh thu ước tính, số lượt tải về.
+
+Phân tích sâu: Lọc dữ liệu theo nền tảng (Spotify, Apple Music...), theo quốc gia, theo từng bài hát hoặc album.
+
+Nguồn dữ liệu: Dữ liệu được cập nhật bằng cách import file báo cáo (CSV) do các nhà phân phối cung cấp, hoặc trong tương lai có thể tích hợp qua API trực tiếp.
+
+6.3. Quản lý Hồ sơ (Profiles)
+Mục đích: Xây dựng một cơ sở dữ liệu về các nghệ sĩ và người đóng góp, giúp việc thêm credit vào các bản phát hành trở nên nhanh chóng và nhất quán.
+
+Chức năng:
+
+Hãng thu âm: Có thể tạo và quản lý hồ sơ cho tất cả các vai trò (Nghệ sĩ, Nhạc sĩ, Nhà sản xuất...).
+
+Các vai trò khác: Có thể tự chỉnh sửa thông tin cá nhân trong hồ sơ của mình (tiểu sử, ảnh đại diện, liên kết mạng xã hội).
+
+7. Quy chuẩn về Định dạng & Loại hình Phát hành
+Định dạng File Bắt buộc
+File Audio: WAV, 24-bit, 44.1 kHz.
+
+Ảnh bìa (Artwork): JPG, kích thước 4000x4000 pixels.
+
+File Video: Không bắt buộc, nhưng nếu có sẽ được dùng để đăng ký YouTube Content ID.
+
+Các Loại hình Phát hành
+Single: Gồm 1-3 bài hát.
+
+EP (Extended Play): Gồm 4-6 bài hát.
+
+Album (LP - Long Play): Gồm từ 7 bài hát trở lên.
+
+Quy chuẩn về Album Tổng hợp
+Album Compilation (Tổng hợp): Không phân phối qua các kênh DSP chính thống để tránh các vấn đề phức tạp về bản quyền.
+
+8. Tự động hóa với CI/CD (GitHub Actions)
+Cấu hình CI/CD với GitHub Actions vẫn là phương pháp đề xuất để tự động hóa việc kiểm tra và triển khai, giảm thiểu lỗi và tăng tốc độ phát hành tính năng mới.
+
+9. Triển khai & Vận hành trên cPanel (Chi tiết)
+Đây là hướng dẫn từng bước để triển khai và quản lý ứng dụng Next.js trên môi trường cPanel có hỗ trợ Node.js.
+
+Bước 1: Chuẩn bị trên cPanel
+Tạo Database: Vào mục MySQL® Databases, tạo một database mới và một user mới. Gán toàn bộ quyền (All Privileges) cho user trên database đó.
+
+Tạo Ứng dụng Node.js:
+
+Vào mục Setup Node.js App.
+
+Nhấn Create Application.
+
+Application root: Trỏ tới thư mục bạn sẽ upload code lên, ví dụ /home/your_cpanel_user/aks-studio.
+
+Application startup file: Điền server.js.
+
+Bước 2: Cấu hình và Tải mã nguồn lên
+Cấu hình Biến môi trường: Trong trang quản lý Node.js App, thêm các biến môi trường cần thiết (DB_HOST, DB_USER...).
+
+Tải mã nguồn lên: Dùng File Manager hoặc Git™ Version Control của cPanel để đưa code vào thư mục đã khai báo.
+
+Bước 3: Cài đặt Dependencies và Chạy Ứng dụng
+Mở Terminal: Di chuyển vào thư mục dự án.
+
+Chạy npm install để cài đặt dependencies.
+
+Chạy npm run build để build ứng dụng cho môi trường production.
+
+Khởi động lại: Quay lại trang Setup Node.js App và nhấn Restart.
+
+Bước 4: Vận hành và Bảo trì
+Kiểm tra Logs: Sử dụng file log trong thư mục gốc của ứng dụng để chẩn đoán lỗi.
+
+Cập nhật ứng dụng: Tải code mới lên, chạy lại npm install và npm run build, sau đó Restart.
+
+Sao lưu (Backup): Thường xuyên sử dụng tính năng Backup của cPanel để sao lưu mã nguồn và database.
