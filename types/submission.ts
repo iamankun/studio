@@ -50,7 +50,6 @@ export interface TrackInfo {
   artistName: string
   artistFullName: string
   additionalArtists: AdditionalArtist[]
-  title: string
   isrc: string
   duration?: number
   fileSize?: number
@@ -285,7 +284,7 @@ export interface FileInfo {
   id: string
   name: string
   path: string
-  mimetype: string
+  mimeType: string
   size: number
   category: FileCategory
   folderId?: string
