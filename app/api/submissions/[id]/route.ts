@@ -60,16 +60,31 @@ export async function GET(
 ) {
     try {
         const submissionId = params.id
+        const { searchParams } = new URL(request.url)
+        const includeTracks = searchParams.get("includeTracks") === "true"
 
-        console.log(`📋 Getting submission ${submissionId}`)
+        console.log(`📋 Getting submission ${submissionId}${includeTracks ? ' with tracks' : ''}`)
 
         // First try multiDB (primary database)
         const multiDBResult = await multiDB.getSubmissionById(submissionId)
 
         if (multiDBResult?.success && multiDBResult.data) {
+            let responseData = multiDBResult.data
+
+            // If includeTracks is requested, fetch tracks for this submission
+            if (includeTracks) {
+                const tracksResult = await multiDB.getTracksBySubmissionId(submissionId)
+                if (tracksResult.success && tracksResult.data) {
+                    responseData = {
+                        ...responseData,
+                        tracks: tracksResult.data
+                    }
+                }
+            }
+
             return NextResponse.json({
                 success: true,
-                data: multiDBResult.data
+                data: responseData
             })
         }
 

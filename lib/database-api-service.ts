@@ -3,7 +3,19 @@
 // Service thống nhất cho tất cả database operations - SỬ DỤNG API ENDPOINTS
 
 import type { User } from "@/types/user"
-import type { Submission, SubmissionStatus, VideoInfo, ContributorInfo, FileInfo, FolderInfo } from "@/types/submission"
+import type { 
+  Submission, 
+  SubmissionStatus, 
+  VideoInfo, 
+  ContributorInfo, 
+  FileInfo, 
+  FolderInfo,
+  PrismaSubmission,
+  PrismaTrack,
+  PrismaSubmissionStatus,
+  convertLegacySubmissionToPrisma,
+  convertPrismaSubmissionToLegacy
+} from "@/types/submission"
 import { logger } from "@/lib/logger"
 
 export interface DatabaseResult<T = unknown> {
@@ -454,6 +466,256 @@ export class DatabaseApiService {
         error: errorMessage
       })
       return { success: false, message: "Delete service unavailable.", error: errorMessage };
+    }
+  }
+
+  // ==================== TRACK METHODS (NEW PRISMA-COMPATIBLE) ====================
+
+  /**
+   * Create a new track for a submission
+   */
+  public async createTrack(trackData: Omit<PrismaTrack, 'id' | 'createdAt' | 'updatedAt'>): Promise<DatabaseResult<PrismaTrack>> {
+    logger.info('DatabaseApiService: Creating track', {
+      component: 'DatabaseApiService',
+      action: 'createTrack',
+      data: { submissionId: trackData.submissionId, title: trackData.title }
+    })
+
+    try {
+      const response = await fetch('/api/tracks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(trackData)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        logger.info('DatabaseApiService: Track created', {
+          component: 'DatabaseApiService',
+          action: 'createTrack',
+          trackId: result.data?.id
+        })
+        return { success: true, data: result.data, source: 'API' };
+      } else {
+        logger.error('DatabaseApiService: Create track failed', {
+          component: 'DatabaseApiService',
+          action: 'createTrack',
+          error: result.error
+        })
+        return { success: false, message: result.error ?? 'Create track failed' };
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      logger.error('DatabaseApiService: Create track error', {
+        component: 'DatabaseApiService',
+        action: 'createTrack',
+        error: errorMessage
+      })
+      return { success: false, message: "Create track service unavailable.", error: errorMessage };
+    }
+  }
+
+  /**
+   * Update an existing track
+   */
+  public async updateTrack(trackId: string, updateData: Partial<PrismaTrack>): Promise<DatabaseResult<PrismaTrack>> {
+    logger.info('DatabaseApiService: Updating track', {
+      component: 'DatabaseApiService',
+      action: 'updateTrack',
+      data: { trackId }
+    })
+
+    try {
+      const response = await fetch(`/api/tracks/${trackId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        logger.info('DatabaseApiService: Track updated', {
+          component: 'DatabaseApiService',
+          action: 'updateTrack',
+          trackId: trackId
+        })
+        return { success: true, data: result.data, source: 'API' };
+      } else {
+        logger.error('DatabaseApiService: Track update failed', {
+          component: 'DatabaseApiService',
+          action: 'updateTrack',
+          error: result.error
+        })
+        return { success: false, message: result.error ?? 'Update track failed' };
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      logger.error('DatabaseApiService: Update track error', {
+        component: 'DatabaseApiService',
+        action: 'updateTrack',
+        error: errorMessage
+      })
+      return { success: false, message: "Update track service unavailable.", error: errorMessage };
+    }
+  }
+
+  /**
+   * Get all tracks for a specific submission
+   */
+  public async getTracksBySubmissionId(submissionId: string): Promise<DatabaseResult<PrismaTrack[]>> {
+    logger.info('DatabaseApiService: Getting tracks by submission ID', {
+      component: 'DatabaseApiService',
+      action: 'getTracksBySubmissionId',
+      data: { submissionId }
+    })
+
+    try {
+      const response = await fetch(`/api/submissions/${submissionId}/tracks`);
+      const result = await response.json();
+
+      if (result.success) {
+        return { success: true, data: result.data, source: 'API' };
+      } else {
+        return { success: false, data: [], message: result.error ?? 'Failed to get tracks' };
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      logger.error('DatabaseApiService: Get tracks by submission ID error', {
+        component: 'DatabaseApiService',
+        action: 'getTracksBySubmissionId',
+        error: errorMessage
+      })
+      return { success: false, data: [], message: "Get tracks service unavailable.", error: errorMessage };
+    }
+  }
+
+  /**
+   * Get a specific track by ID
+   */
+  public async getTrackById(trackId: string): Promise<DatabaseResult<PrismaTrack>> {
+    try {
+      const response = await fetch(`/api/tracks/${trackId}`);
+      const result = await response.json();
+
+      if (result.success) {
+        return { success: true, data: result.data, source: 'API' };
+      } else {
+        return { success: false, message: result.error ?? 'Failed to get track' };
+      }
+    } catch (error) {
+      console.error('API: Failed to get track by ID:', error);
+      return { success: false, message: "Track service unavailable." };
+    }
+  }
+
+  /**
+   * Delete a track
+   */
+  public async deleteTrack(trackId: string): Promise<DatabaseResult<boolean>> {
+    logger.info('DatabaseApiService: Deleting track', {
+      component: 'DatabaseApiService',
+      action: 'deleteTrack',
+      data: { trackId }
+    })
+
+    try {
+      const response = await fetch(`/api/tracks/${trackId}`, {
+        method: 'DELETE'
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        logger.info('DatabaseApiService: Track deleted', {
+          component: 'DatabaseApiService',
+          action: 'deleteTrack',
+          trackId: trackId
+        })
+        return { success: true, data: true, source: 'API' };
+      } else {
+        logger.error('DatabaseApiService: Track deletion failed', {
+          component: 'DatabaseApiService',
+          action: 'deleteTrack',
+          error: result.error
+        })
+        return { success: false, message: result.error ?? 'Track deletion failed' };
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      logger.error('DatabaseApiService: Delete track error', {
+        component: 'DatabaseApiService',
+        action: 'deleteTrack',
+        error: errorMessage
+      })
+      return { success: false, message: "Delete track service unavailable.", error: errorMessage };
+    }
+  }
+
+  /**
+   * Create submission with tracks in a transaction (Prisma-compatible)
+   */
+  public async createSubmissionWithTracks(
+    submissionData: Omit<PrismaSubmission, 'id' | 'createdAt' | 'updatedAt'>,
+    tracksData: Omit<PrismaTrack, 'id' | 'createdAt' | 'updatedAt' | 'submissionId'>[]
+  ): Promise<DatabaseResult<{ submission: PrismaSubmission; tracks: PrismaTrack[] }>> {
+    logger.info('DatabaseApiService: Creating submission with tracks', {
+      component: 'DatabaseApiService',
+      action: 'createSubmissionWithTracks',
+      data: { title: submissionData.title, trackCount: tracksData.length }
+    })
+
+    try {
+      const response = await fetch('/api/submissions/with-tracks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ submission: submissionData, tracks: tracksData })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        logger.info('DatabaseApiService: Submission with tracks created', {
+          component: 'DatabaseApiService',
+          action: 'createSubmissionWithTracks',
+          submissionId: result.data?.submission?.id
+        })
+        return { success: true, data: result.data, source: 'API' };
+      } else {
+        logger.error('DatabaseApiService: Create submission with tracks failed', {
+          component: 'DatabaseApiService',
+          action: 'createSubmissionWithTracks',
+          error: result.error
+        })
+        return { success: false, message: result.error ?? 'Create submission with tracks failed' };
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      logger.error('DatabaseApiService: Create submission with tracks error', {
+        component: 'DatabaseApiService',
+        action: 'createSubmissionWithTracks',
+        error: errorMessage
+      })
+      return { success: false, message: "Create submission with tracks service unavailable.", error: errorMessage };
+    }
+  }
+
+  /**
+   * Helper method to create submission from legacy format (backward compatibility)
+   */
+  public async createSubmissionFromLegacy(legacySubmission: Omit<Submission, 'id'>): Promise<DatabaseResult<{ submission: PrismaSubmission; tracks: PrismaTrack[] }>> {
+    try {
+      const { submission, tracks } = convertLegacySubmissionToPrisma(legacySubmission as Submission);
+      return await this.createSubmissionWithTracks(submission, tracks);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      logger.error('DatabaseApiService: Create submission from legacy error', {
+        component: 'DatabaseApiService',
+        action: 'createSubmissionFromLegacy',
+        error: errorMessage
+      })
+      return { success: false, message: "Legacy submission conversion failed.", error: errorMessage };
     }
   }
 

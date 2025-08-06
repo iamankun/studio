@@ -26,7 +26,12 @@ import type {
   LyricsStatus,
   Platform,
   ArtistPrimaryRole,
-  AdditionalArtistRole
+  AdditionalArtistRole,
+  PrismaSubmission,
+  PrismaTrack,
+  PrismaReleaseType,
+  PrismaSubmissionStatus,
+  convertLegacySubmissionToPrisma
 } from "@/types/submission"
 import {
   Rocket,
@@ -41,6 +46,7 @@ import {
 } from "lucide-react"
 import { useAuth } from "@/components/auth-provider"
 import { validateImageFile, validateAudioFile, getMinimumReleaseDate } from "@/lib/utils"
+import { multiDB } from "@/lib/database-api-service"
 
 interface AudioTrack {
   file: File
@@ -356,15 +362,16 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
         throw new Error(`Lỗi upload ảnh: ${imageResult.message}`);
       }
 
-      // Upload các file âm thanh
-      const audioUrls: string[] = [];
+      // Upload các file âm thanh và tạo track data
+      const tracksData: Omit<PrismaTrack, 'id' | 'createdAt' | 'updatedAt' | 'submissionId'>[] = [];
+      
       for (const track of audioTracks) {
         const audioFormData = new FormData();
         audioFormData.append("file", track.file);
         audioFormData.append("type", "audio");
         audioFormData.append("userId", currentUser.id);
         audioFormData.append("artistName", artistName);
-        audioFormData.append("songTitle", songTitle);
+        audioFormData.append("songTitle", track.info.songTitle);
         audioFormData.append("isrc", track.id);
 
         const audioResponse = await fetch("/api/upload", {
@@ -377,24 +384,77 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
           throw new Error(`Lỗi upload âm thanh ${track.file.name}: ${audioResult.message}`);
         }
 
-        audioUrls.push(audioResult.url);
+        // Create track data for Prisma structure
+        tracksData.push({
+          title: track.info.songTitle,
+          artist: track.info.artistName,
+          filePath: audioResult.url,
+          duration: track.info.duration || 0,
+          isrc: track.id,
+          fileName: track.file.name,
+          artistFullName: track.info.artistFullName,
+          fileSize: track.file.size,
+          format: track.file.type,
+          bitrate: null, // Will be populated by audio processing
+          sampleRate: null // Will be populated by audio processing
+        });
       }
 
-      const newSubmission: Submission = {
-        id: Date.now().toString(),
+      // Convert release type to Prisma enum
+      const prismaReleaseType: PrismaReleaseType = 
+        releaseType === 'single' ? PrismaReleaseType.SINGLE :
+        releaseType === 'ep' ? PrismaReleaseType.EP :
+        releaseType === 'album' ? PrismaReleaseType.ALBUM :
+        releaseType === 'lp' ? PrismaReleaseType.ALBUM :
+        PrismaReleaseType.SINGLE;
+
+      // Create submission data for Prisma structure
+      const submissionData: Omit<PrismaSubmission, 'id' | 'createdAt' | 'updatedAt'> = {
+        title: songTitle,
+        artist: artistName,
+        upc: null, // Will be generated later
+        type: prismaReleaseType,
+        coverImagePath: imageResult.url,
+        releaseDate: new Date(releaseDate),
+        status: PrismaSubmissionStatus.PENDING,
+        metadataLocked: false,
+        published: false,
+        albumName: albumName || null,
+        mainCategory: mainCategory,
+        subCategory: subCategory || null,
+        platforms: hasBeenReleased === "yes" ? { platforms } : null,
+        distributionLink: null,
+        distributionPlatforms: null,
+        statusVietnamese: "Đã nhận, đang chờ duyệt",
+        rejectionReason: null,
+        notes: hasLyrics === "yes" ? lyrics : null,
         userId: currentUser.id,
-        isrc: audioTracks[0]?.id || "",
+        labelId: currentUser.labelId || '' // Use user's label or default
+      };
+
+      // Use the new relational database service method
+      const result = await multiDB.createSubmissionWithTracks(submissionData, tracksData);
+
+      if (!result.success) {
+        throw new Error(result.message || "Không thể tạo submission");
+      }
+
+      // Convert back to legacy format for backward compatibility
+      const legacySubmission: Submission = {
+        id: result.data!.submission.id,
+        userId: currentUser.id,
+        isrc: tracksData[0]?.isrc || "",
         uploaderUsername: currentUser.username,
         artistName,
         songTitle,
         albumName,
         userEmail,
         imageFile: imageFile?.name ?? "",
-        imageUrl: imageResult.url, // Sử dụng URL từ kết quả upload
-        audioUrl: audioUrls.length === 1 ? audioUrls[0] : undefined, // Single track
-        audioUrls: audioUrls.length > 1 ? audioUrls : undefined, // Multiple tracks
-        audioFilesCount: audioTracks.length,
-        status: "Đã nhận, đang chờ duyệt", // Sử dụng enum đúng
+        imageUrl: imageResult.url,
+        audioUrl: tracksData.length === 1 ? tracksData[0].filePath : undefined,
+        audioUrls: tracksData.map(track => track.filePath),
+        audioFilesCount: tracksData.length,
+        status: "Đã nhận, đang chờ duyệt",
         submissionDate: new Date().toISOString(),
         mainCategory,
         subCategory,
@@ -407,17 +467,17 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
         releaseDate,
         artistRole,
         fullName,
-        additionalArtists: [], // Required by Submission type
-        trackInfos: audioTracks.map(track => track.info), // Map audio tracks to trackInfos
+        additionalArtists: [],
+        trackInfos: audioTracks.map(track => track.info),
       };
 
-      onSubmissionAdded(newSubmission);
+      onSubmissionAdded(legacySubmission);
 
       // Log the successful submission
-      logSubmissionActivity(newSubmission.id, 'create', 'success', {
+      logSubmissionActivity(result.data!.submission.id, 'create', 'success', {
         artistName,
         songTitle,
-        trackCount: audioTracks.length,
+        trackCount: tracksData.length,
         mainCategory,
         subCategory,
         releaseType,
