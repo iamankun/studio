@@ -11,7 +11,6 @@ var nextConfig = {
   reactStrictMode: true,
   experimental: {
     allowedDevOrigins: ["http://aks.ankun.dev", "http://*.aks.ankun.dev", "http://aks.wp.local", "http://*.aks.wp.local", "http://192.168.1.3:3000"],
-    serverComponentsExternalPackages: ['@neondatabase/serverless']
   },
   webpack: function webpack(config, _ref) {
     var dev = _ref.dev,

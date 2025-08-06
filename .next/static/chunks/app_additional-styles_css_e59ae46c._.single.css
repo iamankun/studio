@@ -1,0 +1,35 @@
+/* [project]/app/additional-styles.css [app-client] (css) */
+.mobile-menu-transition {
+  transition: height .3s ease-in-out, opacity .3s ease-in-out, transform .3s ease-in-out;
+}
+
+nav.fixed {
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  overflow-y: auto;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+#__next {
+  min-height: 100vh;
+}
+
+.main-container {
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+/*# sourceMappingURL=app_additional-styles_css_e59ae46c._.single.css.map*/

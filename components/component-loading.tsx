@@ -67,7 +67,7 @@ export function ComponentLoading({
                         <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-primary-foreground/30 rounded-full blur-lg animate-pulse"></div>
                         <div className={`relative ${sizeClasses[size].logo}`}>
                             <Image
-                                src="/loading.webm"
+                                src={process.env.LOGO}
                                 alt="An Kun Studio"
                                 width={80}
                                 height={80}

@@ -1,8 +1,8 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
-import { motion } from "framer-motion"
+import Image from "next/image"
+import { useEffect, useState, useCallback } from "react"
 import { Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -24,15 +24,13 @@ const DEFAULT_VIDEOS = [
     "OPf0YbXqDm0", // Mark Ronson - Uptown Funk
 ]
 
-interface BackgroundSettingsPanelProps {
-    onClose?: () => void;
-}
-
-export function BackgroundSettingsPanel({ onClose }: Readonly<BackgroundSettingsPanelProps>) {
+// No props needed for this component
+export function BackgroundSettingsPanel() {
     const [backgroundSettings, setBackgroundSettings] = useState<BackgroundSettings>(DEFAULT_BACKGROUND_SETTINGS)
     const [showCustomPanel, setShowCustomPanel] = useState(false)
     const [youtubeUrl, setYoutubeUrl] = useState("")
     const [overlayOpacity, setOverlayOpacity] = useState("0.5")
+    const [previewImageUrl, setPreviewImageUrl] = useState(backgroundSettings.imageUrl || "")
 
     useEffect(() => {
         // Load background settings
@@ -47,6 +45,7 @@ export function BackgroundSettingsPanel({ onClose }: Readonly<BackgroundSettings
             setBackgroundSettings(mergedSettings)
             setYoutubeUrl(mergedSettings.videoUrl ?? "")
             setOverlayOpacity(mergedSettings.opacity?.toString() ?? "0.5")
+            setPreviewImageUrl(mergedSettings.imageUrl || "")
         }
     }, [])
 
@@ -157,15 +156,56 @@ export function BackgroundSettingsPanel({ onClose }: Readonly<BackgroundSettings
                             id="backgroundType"
                             value={backgroundSettings.type}
                             onChange={(e) => {
-                                const newType = e.target.value as "gradient" | "video"
+                                const newType = e.target.value as "gradient" | "video" | "image"
                                 setBackgroundSettings(prev => ({ ...prev, type: newType }))
                             }}
                             className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-gray-200 text-sm"
                         >
                             <option value="gradient">Nền gradient</option>
                             <option value="video">Video nền</option>
+                            <option value="image">Ảnh nền</option>
                         </select>
                     </div>
+
+                    {backgroundSettings.type === "gradient" && (
+                        <div className="space-y-4 bg-black/30 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl p-6">
+                            <div className="space-y-2">
+                                <label htmlFor="gradient" className="block text-sm font-medium text-gray-200">
+                                    Chọn gradient
+                                </label>
+                                <select
+                                    id="gradient"
+                                    value={backgroundSettings.gradient}
+                                    onChange={(e) => {
+                                        setBackgroundSettings(prev => ({
+                                            ...prev,
+                                            gradient: e.target.value
+                                        }))
+                                    }}
+                                    className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-gray-200 text-sm"
+                                >
+                                    <option value="linear-gradient(135deg, #667eea 0%, #764ba2 100%)">Tím - Xanh</option>
+                                    <option value="linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%)">Hồng - Cam</option>
+                                    <option value="linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)">Xanh - Hồng nhạt</option>
+                                    <option value="linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)">Xanh lá - Xanh dương</option>
+                                    <option value="linear-gradient(135deg, #f6d365 0%, #fda085 100%)">Vàng - Cam</option>
+                                    <option value="linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)">Xanh lá nhạt</option>
+                                    <option value="linear-gradient(135deg, #5ee7df 0%, #b490ca 100%)">Xanh ngọc - Tím</option>
+                                    <option value="linear-gradient(135deg, #c471f5 0%, #fa71cd 100%)">Tím - Hồng</option>
+                                    <option value="linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)">Xanh dương - Xanh ngọc</option>
+                                </select>
+                            </div>
+                            
+                            {/* Hiển thị xem trước gradient */}
+                            <div className="mt-4">
+                                <p className="text-sm font-medium text-gray-200 mb-2">Xem trước:</p>
+                                <div 
+                                    className="w-full h-32 rounded-lg border border-gray-700"
+                                    style={{background: backgroundSettings.gradient}}
+                                />
+                            </div>
+                        </div>
+                    )}
 
                     {backgroundSettings.type === "video" && (
                         <div className="space-y-4 bg-black/30 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl p-6">
@@ -242,6 +282,52 @@ export function BackgroundSettingsPanel({ onClose }: Readonly<BackgroundSettings
                                         </div>
                                     </div>
                                 </>
+                            )}
+                        </div>
+                    )}
+
+                    {backgroundSettings.type === "image" && (
+                        <div className="space-y-4 bg-black/30 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl p-6">
+                            <div className="space-y-2">
+                                <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-200">
+                                    URL ảnh nền
+                                </label>
+                                <input
+                                    id="imageUrl"
+                                    type="text"
+                                    value={backgroundSettings.imageUrl}
+                                    onChange={(e) => {
+                                        const newUrl = e.target.value
+                                        setBackgroundSettings(prev => ({
+                                            ...prev,
+                                            imageUrl: newUrl,
+                                        }))
+                                        setPreviewImageUrl(newUrl)
+                                    }}
+                                    placeholder="https://example.com/image.jpg"
+                                    className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-gray-200 text-sm"
+                                />
+                                <div className="text-xs text-gray-400 mt-1">
+                                    Nhập URL của ảnh nền. Ảnh sẽ được căn giữa và tự động co dãn để phủ toàn màn hình.
+                                </div>
+                            </div>
+
+                            {backgroundSettings.imageUrl && (
+                                <div className="mt-4">
+                                    <p className="text-sm font-medium text-gray-200 mb-2">Xem trước:</p>
+                                    <div className="relative w-full h-32">
+                                        <Image
+                                            src={previewImageUrl || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><path fill="%23666" d="M21 5v6.59l-3-3.01-4 4.01-4-4-4 4-3-3.01V5h18zm-3 6.42l3 3.01V19H3v-5.58l3 2.99 4-4 4 4 4-4 3 3.01z"/></svg>'}
+                                            alt="Background preview"
+                                            className="rounded-lg border border-gray-700"
+                                            fill
+                                            style={{ objectFit: 'cover' }}
+                                            onError={() => {
+                                                setPreviewImageUrl('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><path fill="%23666" d="M21 5v6.59l-3-3.01-4 4.01-4-4-4 4-3-3.01V5h18zm-3 6.42l3 3.01V19H3v-5.58l3 2.99 4-4 4 4 4-4 3 3.01z"/></svg>')
+                                            }}
+                                        />
+                                    </div>
+                                </div>
                             )}
                         </div>
                     )}

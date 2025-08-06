@@ -1,6 +1,5 @@
 "use client"
-
-import { useEffect, useState, useRef } from 'react'
+import { useState, useEffect, useRef } from "react"
 import Image from 'next/image'
 import "@/components/awesome/css/all.min.css"
 
@@ -18,7 +17,7 @@ export function LoadingScreen({
     onComplete,
     title = "An Kun Studio",
     subtitle = "Đang chuyển hướng ...",
-    logoUrl = "@public/movies.png",
+    logoUrl = process.env.LOGO,
     isAnimation = true
 }: Readonly<LoadingScreenProps>) {
     const [progress, setProgress] = useState(0)
