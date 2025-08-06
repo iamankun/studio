@@ -2,7 +2,7 @@
 
 # Tác giả: An Kun
 
-# Công cụ: AKs Studio CMS v1.5.0-beta
+# Công cụ: AKs Studio CMS v2.0.0-beta
 
 ## 🎵 Giới thiệu
 
