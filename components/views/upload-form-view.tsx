@@ -414,7 +414,7 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
       onSubmissionAdded(newSubmission);
 
       // Log the successful submission
-      logSubmissionActivity('create', newSubmission.id, 'success', {
+      logSubmissionActivity(newSubmission.id, 'create', 'success', {
         artistName,
         songTitle,
         trackCount: audioTracks.length,
@@ -432,7 +432,7 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
       const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra khi gửi bài hát";
 
       // Log the submission error
-      logSubmissionActivity('create', 'unknown' as any, 'error', {
+      logSubmissionActivity('unknown', 'create', 'error', {
         artistName,
         songTitle,
         error: errorMessage,

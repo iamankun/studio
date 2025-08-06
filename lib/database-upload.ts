@@ -39,7 +39,7 @@ export async function uploadAvatarToDatabase(file: File, userId: string, userRol
 
         // Tạo File object từ buffer để phù hợp với API
         const avatarFile = new File([processedBuffer], `avatar-${userId}.jpg`, {
-            type: mimeType
+            type: mimeType as string
         });
 
         // Lưu vào cơ sở dữ liệu
