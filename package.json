@@ -19,7 +19,13 @@
     "verify-system": "node scripts/xac-minh-he-thong.js",
     "validate-env": "node scripts/validate-environment.mjs",
     "debug:routes": "node scripts/kiem-tra-api.mjs",
-    "debug:handlers": "node scripts/check-route-handlers.mjs"
+    "debug:handlers": "node scripts/check-route-handlers.mjs",
+    "migrate:db": "node scripts/migrate-database.mjs",
+    "migrate:db:dry-run": "node scripts/migrate-database.mjs --dry-run",
+    "migrate:db:force": "node scripts/migrate-database.mjs --force",
+    "test:complete": "node scripts/test-complete-implementation.mjs",
+    "test:complete:verbose": "node scripts/test-complete-implementation.mjs --verbose",
+    "validate:relational": "node scripts/validate-relational-implementation.mjs"
   },
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.5.2",
