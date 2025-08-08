@@ -1138,7 +1138,7 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
                   </p>
                 </div>
 
-                <div className="bg-secondary/50 border border-border p-4 rounded-lg">
+                <div className="bg-secondary/50 border border-border/50 p-4 rounded-lg">
                   <h4 className="font-semibold mb-2 text-foreground">📋 Tóm tắt thông tin</h4>
                   <div className="space-y-2 text-sm text-foreground">
                     <p><strong>Nghệ sĩ:</strong> {artistName || "Chưa nhập"}</p>

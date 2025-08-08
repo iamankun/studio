@@ -790,7 +790,9 @@ export class DatabaseApiService {
 
   public async getStatus(): Promise<{ api: boolean; prisma: boolean; database: boolean }> {
     try {
-      const response = await fetch('/api/database-status');
+      // Fix: sử dụng full URL khi chạy server-side
+      const baseUrl = typeof window !== 'undefined' ? '' : 'http://localhost:3000';
+      const response = await fetch(`${baseUrl}/api/database-status`);
       const result = await response.json();
       
       return {
@@ -815,7 +817,9 @@ export class DatabaseApiService {
     })
 
     try {
-      const response = await fetch('/api/database-status')
+      // Fix: sử dụng full URL khi chạy server-side
+      const baseUrl = typeof window !== 'undefined' ? '' : 'http://localhost:3000';
+      const response = await fetch(`${baseUrl}/api/database-status`)
       const result = await response.json()
       return { success: result.success, data: result.success, source: 'API' }
     } catch (error) {

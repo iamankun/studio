@@ -67,7 +67,7 @@ export function ComponentLoading({
                         <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-primary-foreground/30 rounded-full blur-lg animate-pulse"></div>
                         <div className={`relative ${sizeClasses[size].logo}`}>
                             <Image
-                                src={process.env.LOGO || "/logo.svg"}
+                                src={process.env.COMPANY_LOGO || "/logo.svg"}
                                 alt="An Kun Studio"
                                 width={80}
                                 height={80}

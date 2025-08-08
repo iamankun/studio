@@ -11,7 +11,7 @@ console.log('🔍 TESTING DIRECT DATABASE AUTHENTICATION');
 
 import { config } from 'dotenv';
 import pg from 'pg';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 // Load environment variables
 config({ path: '@/.env.local' });

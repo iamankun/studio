@@ -115,7 +115,7 @@ export function CollapsibleSidebar({ currentUser, currentView, onViewChange }: R
           <div className={`flex items-center ${collapsed ? "justify-center" : "mb-8"}`}>
             {!collapsed ? (
               <>
-                <img src="/public/media.webp" alt="An Kun Studio" className="h-8 w-auto mr-3 flex-shrink-0" />
+                <img src={process.env.COMPANY_LOGO || "/logo.svg"} alt="An Kun Studio" className="h-8 w-auto mr-3 flex-shrink-0" />
 
                 <h1 className="text-2xl font-dosis-bold text-white">An Kun Studio</h1>
                 <Button
@@ -129,7 +129,7 @@ export function CollapsibleSidebar({ currentUser, currentView, onViewChange }: R
               </>
             ) : (
               <div className="flex flex-col items-center">
-                  <img src="/public/media.webp" alt="An Kun Studio" className="h-8 w-8 object-contain" />
+                  <img src={process.env.COMPANY_LOGO || "/logo.svg"} alt="An Kun Studio" className="h-8 w-8 object-contain" />
                 <Button
                   variant="ghost"
                   size="icon"

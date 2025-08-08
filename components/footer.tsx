@@ -34,7 +34,7 @@ export function Footer() {
       <div className="container mx-auto px-4 text-center">
         <div className="flex items-center justify-center mb-2">
           <img
-            src={footerSettings.logoUrl || "/placeholder.svg"}
+            src={footerSettings.logoUrl || process.env.COMPANY_LOGO || "/logo.svg"}
             alt="Logo"
             className="h-8 w-8 mr-2 rounded object-cover"
             onError={(e) => {
