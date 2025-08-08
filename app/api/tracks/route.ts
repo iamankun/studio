@@ -140,6 +140,9 @@ export async function POST(request: NextRequest) {
       format: trackData.format || null,
       bitrate: trackData.bitrate || null,
       sampleRate: trackData.sampleRate || null,
+      mainCategory: trackData.mainCategory || null,
+      subCategory: trackData.subCategory || null,
+      lyrics: trackData.lyrics || null,
       submissionId: trackData.submissionId
     };
 
@@ -214,7 +217,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "Track not found",
+          message: "Bạn đang ngay ngất, bỗng nhạc biến mất",
         },
         { status: 404 },
       )
@@ -243,7 +246,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: result.message || "Failed to update track",
+          message: result.message || "Ui za, giai điệu đứt quản vì mạng",
         },
         { status: 500 },
       )
@@ -253,14 +256,14 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        message: "Failed to update track",
+        message: "Giai điệu không thể gửi vì có vấn đề xử lí tải lên",
       },
       { status: 500 },
     )
   }
 }
 
-// DELETE method - remove track
+// Xóa nhạc - remove track
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -285,13 +288,13 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "Authentication required",
+          message: "Yêu cầu xác minh danh tính",
         },
         { status: 401 },
       )
     }
 
-    // Check permissions (only Label Manager can delete tracks)
+    // Chỉ có thể yêu cầu xóa thông qua gửi yêu cầu
     const canDelete = AuthorizationService.canDeleteSubmission(currentUser)
 
     if (!canDelete.allowed) {
@@ -311,14 +314,14 @@ export async function DELETE(request: NextRequest) {
       console.log("✅ Track deleted successfully")
       return NextResponse.json({
         success: true,
-        message: "Track deleted successfully",
+        message: "Nhạc đã đi rồi",
         id: trackId,
       })
     } else {
       return NextResponse.json(
         {
           success: false,
-          message: result.message || "Failed to delete track",
+          message: result.message || "Nhạc không thể xóa",
         },
         { status: 500 },
       )
@@ -328,7 +331,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        message: "Failed to delete track",
+        message: "Nhạc không thể xóa",
       },
       { status: 500 },
     )

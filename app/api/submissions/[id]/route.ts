@@ -3,10 +3,10 @@ import { multiDB } from "@/lib/database-api-service"
 
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const submissionId = params.id
+        const { id: submissionId } = await params
         const updateData = await request.json()
 
         console.log(`📝 Updating submission ${submissionId}`)
@@ -56,10 +56,10 @@ export async function PUT(
 // Get a specific submission by ID
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const submissionId = params.id
+        const { id: submissionId } = await params
         const { searchParams } = new URL(request.url)
         const includeTracks = searchParams.get("includeTracks") === "true"
 
@@ -78,7 +78,7 @@ export async function GET(
                     responseData = {
                         ...responseData,
                         tracks: tracksResult.data
-                    }
+                    } as any // Type assertion to allow tracks property
                 }
             }
 
@@ -111,10 +111,10 @@ export async function GET(
 // Delete a submission
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const submissionId = params.id
+        const { id: submissionId } = await params
 
         console.log(`🗑️ Deleting submission ${submissionId}`)
 

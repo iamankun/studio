@@ -12,20 +12,24 @@ import {
 } from "@/lib/constants"
 
 const DEFAULT_VIDEOS = [
-    "dQw4w9WgXcQ", // Rick Astley - Never Gonna Give You Up
-    "kJQP7kiw5Fk", // Despacito
-    "fJ9rUzIMcZQ", // Bohemian Rhapsody
-    "9bZkp7q19f0", // Gangnam Style
-    "hTWKbfoikeg", // Smells Like Teen Spirit
-    "YQHsXMglC9A", // Hello - Adele
-    "CevxZvSJLk8", // Katy Perry - Roar
-    "JGwWNGJdvx8", // Shape of You
-    "RgKAFK5djSk", // Wiz Khalifa - See You Again
-    "OPf0YbXqDm0", // Mark Ronson - Uptown Funk
+    "dQw4w9WgXcQ",
+    "kJQP7kiw5Fk",
+    "fJ9rUzIMcZQ",
+    "9bZkp7q19f0",
+    "hTWKbfoikeg", 
+    "YQHsXMglC9A",
+    "CevxZvSJLk8",
+    "JGwWNGJdvx8",
+    "RgKAFK5djSk",
+    "OPf0YbXqDm0",
 ]
 
 // No props needed for this component
-export function BackgroundSettingsPanel() {
+interface BackgroundSettingsPanelProps {
+    onClose?: () => void;
+}
+
+export function BackgroundSettingsPanel({ onClose }: BackgroundSettingsPanelProps = {}) {
     const [backgroundSettings, setBackgroundSettings] = useState<BackgroundSettings>(DEFAULT_BACKGROUND_SETTINGS)
     const [showCustomPanel, setShowCustomPanel] = useState(false)
     const [youtubeUrl, setYoutubeUrl] = useState("")

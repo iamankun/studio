@@ -9,7 +9,7 @@ import { logger } from "@/lib/logger"
 // Helper function để lấy user từ request (sử dụng session, token, etc.)
 async function getUserFromRequest(request: NextRequest): Promise<User | null> {
   try {
-    // Trong production, bạn sẽ parse JWT token hoặc session
+    // Trong sản xuất, bạn sẽ gán JWT token
     const authHeader = request.headers.get('authorization')
     if (!authHeader) return null
 
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     const submissionData: Omit<PrismaSubmission, 'id' | 'createdAt' | 'updatedAt'> = {
       ...submission,
       userId: currentUser.id,
-      labelId: submission.labelId || currentUser.labelId || ''
+      labelId: submission.labelId || ''
     };
 
     // Validate tracks data
@@ -71,7 +71,10 @@ export async function POST(request: NextRequest) {
       fileSize: track.fileSize || null,
       format: track.format || null,
       bitrate: track.bitrate || null,
-      sampleRate: track.sampleRate || null
+      sampleRate: track.sampleRate || null,
+      mainCategory: track.mainCategory || null,
+      subCategory: track.subCategory || null,
+      lyrics: track.lyrics || null
     }));
 
     // Create submission with tracks using the database service

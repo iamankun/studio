@@ -152,7 +152,7 @@ export interface PrismaSubmission {
   id: string
   title: string
   artist: string
-  upc: string | null
+  UPC: string | null
   type: PrismaReleaseType
   coverImagePath: string
   releaseDate: Date
@@ -168,6 +168,11 @@ export interface PrismaSubmission {
   statusVietnamese: string | null
   rejectionReason: string | null
   notes: string | null
+  // Signature fields
+  signedDocumentPath: string | null
+  signedAt: Date | null
+  signerFullName: string | null
+  isDocumentSigned: boolean
   userId: string
   labelId: string
   createdAt: Date
@@ -187,6 +192,9 @@ export interface PrismaTrack {
   format: string | null
   bitrate: string | null
   sampleRate: string | null
+  mainCategory: string | null
+  subCategory: string | null
+  lyrics: string | null
   submissionId: string
   createdAt: Date
   updatedAt: Date
@@ -282,7 +290,45 @@ export interface PrismaFileFolder {
   updatedAt: Date
 }
 
-// ==================== LEGACY INTERFACES (DEPRECATED) ====================
+// ==================== EXPORT & DOCUMENT TYPES ====================
+
+export interface ExportTemplate {
+  id: string
+  name: string
+  description: string | null
+  fields: Record<string, unknown>
+  format: string
+  isActive: boolean
+  createdBy: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Export {
+  id: string
+  templateId: string
+  filePath: string
+  fileName: string
+  format: string
+  recordCount: number
+  exportedBy: string
+  createdAt: Date
+}
+
+export interface SignatureDocument {
+  id: string
+  submissionId: string
+  documentPath: string
+  signedPath: string | null
+  signerName: string | null
+  signedAt: Date | null
+  isCompleted: boolean
+  templateData: Record<string, unknown>
+  createdAt: Date
+  updatedAt: Date
+}
+
+// ==================== ENHANCED TYPES ====================
 // Keep for backward compatibility but mark as deprecated
 
 /** @deprecated Use PrismaTrack instead */
@@ -300,6 +346,9 @@ export interface TrackInfo {
   bitrate?: string
   sampleRate?: string
   filePath?: string
+  mainCategory?: string | null
+  subCategory?: string | null
+  lyrics?: string | null
 }
 
 export interface AdditionalArtist {
@@ -651,7 +700,7 @@ export function convertLegacySubmissionToPrisma(
     id: legacySubmission.id,
     title: legacySubmission.songTitle,
     artist: legacySubmission.artistName,
-    upc: legacySubmission.upc || null,
+    UPC: legacySubmission.upc || null,
     type: releaseTypeMap[legacySubmission.releaseType] || PrismaReleaseType.SINGLE,
     coverImagePath: legacySubmission.imageFile || legacySubmission.imageUrl,
     releaseDate: new Date(legacySubmission.releaseDate),
@@ -667,11 +716,16 @@ export function convertLegacySubmissionToPrisma(
     statusVietnamese: legacySubmission.statusVietnamese || null,
     rejectionReason: legacySubmission.rejectionReason || null,
     notes: legacySubmission.notes || null,
+    // Signature fields - defaults
+    signedDocumentPath: null,
+    signedAt: null,
+    signerFullName: null,
+    isDocumentSigned: false,
     userId: legacySubmission.userId,
     labelId: legacySubmission.labelId || '' // This should be provided by the caller
   };
 
-  const prismaTracks: Omit<PrismaTrack, 'id' | 'createdAt' | 'updatedAt' | 'submissionId'>[] = 
+  const prismaTracks: Omit<PrismaTrack, 'id' | 'createdAt' | 'updatedAt' | 'submissionId'>[] =
     legacySubmission.trackInfos?.map(trackInfo => ({
       title: trackInfo.songTitle,
       artist: trackInfo.artistName,
@@ -683,7 +737,10 @@ export function convertLegacySubmissionToPrisma(
       fileSize: trackInfo.fileSize || null,
       format: trackInfo.format || null,
       bitrate: trackInfo.bitrate || null,
-      sampleRate: trackInfo.sampleRate || null
+      sampleRate: trackInfo.sampleRate || null,
+      mainCategory: null, // Will be set from submission
+      subCategory: null,  // Will be set from submission
+      lyrics: null        // Individual track lyrics
     })) || [];
 
   return { submission: prismaSubmission, tracks: prismaTracks };
@@ -722,7 +779,7 @@ export function convertPrismaSubmissionToLegacy(
     artistName: track.artist,
     artistFullName: track.artistFullName || '',
     additionalArtists: [], // This would need to be populated from contributors
-    isrc: track.isrc || '',
+    isrc: track.isrc || '', // Được tạo tự đồng từ quá trình release phát hành đã gửi
     duration: track.duration,
     fileSize: track.fileSize || undefined,
     format: track.format || undefined,
@@ -734,7 +791,7 @@ export function convertPrismaSubmissionToLegacy(
   const legacySubmission: Submission = {
     id: prismaSubmission.id,
     isrc: prismaTracks[0]?.isrc || '',
-    upc: prismaSubmission.upc || undefined,
+    upc: prismaSubmission.UPC || undefined,
     uploaderUsername: '', // This would need to be populated from user data
     artistName: prismaSubmission.artist,
     songTitle: prismaSubmission.title,

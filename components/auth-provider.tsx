@@ -13,6 +13,8 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<boolean>
   logout: () => void
   loading: boolean
+  showLoginModal: () => void
+  showRegisterModal: () => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -93,13 +95,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setShowLogin(true)
   }, [])
 
+  const showLoginModal = useCallback(() => {
+    setShowLogin(true)
+    setShowRegister(false)
+  }, [])
+
+  const showRegisterModal = useCallback(() => {
+    setShowRegister(true)
+    setShowLogin(false)
+  }, [])
+
   // Cung cấp context cho toàn bộ ứng dụng
   const value = useMemo(() => ({
     user,
     login,
     logout,
     loading,
-  }), [user, login, logout, loading])
+    showLoginModal,
+    showRegisterModal,
+  }), [user, login, logout, loading, showLoginModal, showRegisterModal])
 
   if (loading) {
     return (

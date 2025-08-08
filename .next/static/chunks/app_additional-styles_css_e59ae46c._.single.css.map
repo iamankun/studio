@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["turbopack:///[project]/app/additional-styles.css"],"sourcesContent":["/* Mobile menu transitions */\n.mobile-menu-transition {\n    transition: height 0.3s ease-in-out, opacity 0.3s ease-in-out, transform 0.3s ease-in-out;\n}\n\n/* Ensure fixed nav bar doesn't flicker */\nnav.fixed {\n    transform: translateZ(0);\n    will-change: transform;\n    backface-visibility: hidden;\n}\n\n/* Prevent content shift on page load and ensure scrolling works */\nhtml,\nbody {\n    height: 100%;\n        overflow-x: hidden;\n    }\n    \n    body {\n        overflow-y: auto;\n    }\n    \n    /* Smooth scrolling for better UX */\n    html {\n        scroll-behavior: smooth;\n    }\n    \n    /* Ensure main containers don't interfere with scrolling */\n    #__next {\n        min-height: 100vh;\n    }\n    \n    /* Make sure content can scroll properly */\n    .main-container {\n        min-height: 100vh;\n        overflow-y: auto;\n}"],"names":[],"mappings":"AACA;;;;AAKA;;;;;;;AAOA;;;;;AAMI;;;;AAKA;;;;AAKA;;;;AAKA"}}]
-}

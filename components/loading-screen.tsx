@@ -1,6 +1,5 @@
 "use client"
-import { useState, useEffect, useRef } from "react"
-import Image from 'next/image'
+import { useState, useEffect, useRef, useCallback } from "react"
 import "@/components/awesome/css/all.min.css"
 
 interface LoadingScreenProps {
@@ -13,18 +12,40 @@ interface LoadingScreenProps {
 }
 
 export function LoadingScreen({
-    duration = 3000,
     onComplete,
     title = "An Kun Studio",
     subtitle = "Đang chuyển hướng ...",
-    logoUrl = process.env.LOGO,
-    isAnimation = true
 }: Readonly<LoadingScreenProps>) {
     const [progress, setProgress] = useState(0)
     const [visible, setVisible] = useState(true)
     const progressIntervalRef = useRef<NodeJS.Timeout | null>(null)
     const completeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
     const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+    const completeLoading = useCallback(() => {
+        completeTimeoutRef.current = setTimeout(() => {
+            setVisible(false)
+            if (onComplete) {
+                onComplete()
+            }
+        }, 500)
+    }, [onComplete])
+
+    const startProgress = useCallback(() => {
+        progressIntervalRef.current = setInterval(() => {
+            setProgress(prev => {
+                const newProgress = prev + (Math.random() * 10 + 2) // 2-12% increment
+                if (newProgress >= 100) {
+                    if (progressIntervalRef.current) {
+                        clearInterval(progressIntervalRef.current)
+                    }
+                    completeLoading()
+                    return 100
+                }
+                return newProgress
+            })
+        }, 150)
+    }, [completeLoading])
 
     useEffect(() => {
         startProgress()
@@ -35,36 +56,21 @@ export function LoadingScreen({
         const hideTimeout = hideTimeoutRef.current
 
         return () => {
-            if (progressInterval) clearInterval(progressInterval)
-            if (completeTimeout) clearTimeout(completeTimeout)
-            if (hideTimeout) clearTimeout(hideTimeout)
-        }
-    }, [])
-
-    const startProgress = () => {
-        progressIntervalRef.current = setInterval(() => {
-            setProgress(prev => {
-                const newProgress = prev + (Math.random() * 10 + 2) // 2-12% increment
-                if (newProgress >= 100) {
-                    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current)
-                    completeLoading()
-                    return 100
-                }
-                return newProgress
-            })
-        }, 150)
-    }
-
-    const completeLoading = () => {
-        completeTimeoutRef.current = setTimeout(() => {
-            setVisible(false)
-            if (onComplete) {
-                onComplete()
+            if (progressInterval) {
+                clearInterval(progressInterval)
             }
-        }, 500)
-    }
+            if (completeTimeout) {
+                clearTimeout(completeTimeout)
+            }
+            if (hideTimeout) {
+                clearTimeout(hideTimeout)
+            }
+        }
+    }, [startProgress])
 
-    if (!visible) return null
+    if (!visible) {
+        return null
+    }
 
     return (
         <div className={`fixed top-0 left-0 w-full h-full bg-gradient-to-br from-gray-950 via-black to-gray-900 
@@ -104,9 +110,9 @@ export function LoadingScreen({
 
             {/* Loading Info Text */}
             <div className="absolute bottom-4 text-center text-xs text-gray-500">
-                <p><i className="fas fa-info-circle mr-1"></i> Digital Music Distribution Platform</p>
+                <p><i className="fas fa-info-circle mr-1"></i> {process.env.COMPANY_NAME}</p>
                 <p className="mt-1">
-                    <i className="fas fa-copyright mr-1"></i> An Kun Studio 2025
+                    <i className="fas fa-copyright mr-1"></i> {process.env.COMPANY_NAME} 2025
                 </p>
             </div>
         </div>

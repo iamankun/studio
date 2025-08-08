@@ -13,9 +13,9 @@ import type {
   PrismaSubmission,
   PrismaTrack,
   PrismaSubmissionStatus,
-  convertLegacySubmissionToPrisma,
   convertPrismaSubmissionToLegacy
 } from "@/types/submission"
+import { convertLegacySubmissionToPrisma } from "@/types/submission"
 import { logger } from "@/lib/logger"
 
 export interface DatabaseResult<T = unknown> {
