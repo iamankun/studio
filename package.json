@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "node scripts/build-optimization.mjs && next build",
     "start": "next start",
     "lint": "next lint",
+    "postinstall": "prisma generate || true",
     "generate": "node src/data/tao-du-lieu-mau.js",
     "debug:api": "node scripts/test-submissions-api.mjs",
     "debug:db": "node scripts/kiem-tra-ket-noi-neon.mjs",

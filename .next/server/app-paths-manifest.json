@@ -28,11 +28,11 @@
   "/api/upload/avatar/update-profile/route": "app/api/upload/avatar/update-profile/route.js",
   "/api/upload/route": "app/api/upload/route.js",
   "/_not-found/page": "app/_not-found/page.js",
-  "/log-console/page": "app/log-console/page.js",
   "/debug/page": "app/debug/page.js",
+  "/log-console/page": "app/log-console/page.js",
   "/page": "app/page.js",
   "/test-error/page": "app/test-error/page.js",
   "/test-simple/page": "app/test-simple/page.js",
-  "/video-test-advanced/page": "app/video-test-advanced/page.js",
-  "/video-test/page": "app/video-test/page.js"
+  "/video-test/page": "app/video-test/page.js",
+  "/video-test-advanced/page": "app/video-test-advanced/page.js"
 }

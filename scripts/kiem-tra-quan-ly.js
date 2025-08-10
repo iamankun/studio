@@ -185,8 +185,8 @@ const quickTests = {
     }
 };
 
-// Export cho sử dụng bên ngoài
-module.exports = {
+// Export cho sử dụng bên ngoài - ES module compatible
+export {
     runTest,
     runAllTests,
     testScripts,
