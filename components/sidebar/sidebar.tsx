@@ -76,7 +76,7 @@ export function Sidebar({ currentView, onViewChange, user, onLogout }: SidebarPr
         <div className="flex items-center justify-between">
           {!isCollapsed && (
             <div className="flex items-center space-x-3">
-              <img src="/face.png" alt="AKs Studio" className="h-8 w-8 rounded" />
+              <img src={process.env.COMPANY_LOGO || "/logo.svg"} alt="AKs Studio" className="h-8 w-8 rounded" />
               <div>
                 <h2 className="text-lg font-bold text-white">AKs Studio</h2>
                 <p className="text-xs text-gray-400">v1.2.0-beta</p>

@@ -16,17 +16,81 @@ export type AdditionalArtistRole =
   | "songwriter"
   | "instrumental"
 
+// ==================== PRISMA-COMPATIBLE ENUMS ====================
+// These match the Prisma schema exactly
+
+export enum PrismaUserRole {
+  ARTIST = "ARTIST",
+  COMPOSER = "COMPOSER", 
+  PRODUCER = "PRODUCER",
+  PERFORMER = "PERFORMER",
+  LABEL_MANAGER = "LABEL_MANAGER",
+  ADMINISTRATOR = "ADMINISTRATOR"
+}
+
+export enum PrismaSubmissionStatus {
+  PENDING = "PENDING",
+  APPROVED = "APPROVED", 
+  REJECTED = "REJECTED",
+  PROCESSING = "PROCESSING",
+  PUBLISHED = "PUBLISHED",
+  CANCELLED = "CANCELLED",
+  DRAFT = "DRAFT"
+}
+
+export enum PrismaReleaseType {
+  SINGLE = "SINGLE",
+  EP = "EP",
+  ALBUM = "ALBUM", 
+  COMPILATION = "COMPILATION"
+}
+
+export enum PrismaContributorRole {
+  COMPOSER = "COMPOSER",
+  LYRICIST = "LYRICIST",
+  PRODUCER = "PRODUCER",
+  PERFORMER = "PERFORMER",
+  VOCALIST = "VOCALIST",
+  RAPPER = "RAPPER"
+}
+
+export enum PrismaApprovalType {
+  DSP = "DSP",
+  CONTENT_ID = "CONTENT_ID",
+  ACR_CLOUD = "ACR_CLOUD",
+  LABEL_REVIEW = "LABEL_REVIEW"
+}
+
+export enum PrismaFileCategory {
+  AUDIO = "AUDIO",
+  VIDEO = "VIDEO",
+  IMAGE = "IMAGE",
+  DOCUMENT = "DOCUMENT",
+  OTHER = "OTHER"
+}
+
+// ==================== LEGACY TYPES (DEPRECATED) ====================
+// Keep for backward compatibility but mark as deprecated
+
+/** @deprecated Use PrismaReleaseType instead */
 export type ReleaseType = "single" | "ep" | "lp" | "album" | "compilation"
 
+/** @deprecated Use appropriate category system instead */
 export type MainCategory = "pop" | "singer-songwriter" | "hiphoprap" | "edm" | "rnb" | "ballad" | "acoustic" | "indie" | "other_main"
+/** @deprecated Use appropriate category system instead */
 export type SubCategory = "official" | "cover" | "vpop" | "lofi" | "chill" | "trap" | "house" | "alternative" | "folk" | "other_sub"
 
+/** @deprecated Use boolean fields instead */
 export type CopyrightOwnershipStatus = "yes" | "no"
+/** @deprecated Use boolean fields instead */
 export type ReleaseHistoryStatus = "yes" | "no"
+/** @deprecated Use boolean fields instead */
 export type LyricsStatus = "yes" | "no"
 
+/** @deprecated Use platform-specific fields instead */
 export type Platform = "youtube" | "spotify" | "apple_music" | "soundcloud" | "other_platform"
 
+/** @deprecated Use PrismaSubmissionStatus instead */
 export type SubmissionStatus =
   | "pending"
   | "approved"
@@ -43,6 +107,231 @@ export type SubmissionStatus =
   | "Đã hủy"
   | "Bản nháp"
 
+// ==================== PRISMA-COMPATIBLE INTERFACES ====================
+// These match the Prisma schema exactly
+
+export interface PrismaUser {
+  id: string
+  email: string
+  name: string | null
+  password: string
+  roles: PrismaUserRole[]
+  createdAt: Date
+  updatedAt: Date
+  labelId: string | null
+}
+
+export interface PrismaProfile {
+  id: string
+  bio: string | null
+  avatarUrl: string | null
+  phone: string | null
+  artistName: string | null
+  fullName: string | null
+  facebookUrl: string | null
+  instagramUrl: string | null
+  youtubeUrl: string | null
+  spotifyUrl: string | null
+  appleMusicUrl: string | null
+  soundcloudUrl: string | null
+  userId: string
+  socialLinks: Record<string, unknown> | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface PrismaLabel {
+  id: string
+  name: string
+  ownerId: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface PrismaSubmission {
+  id: string
+  title: string
+  artist: string
+  UPC: string | null
+  type: PrismaReleaseType
+  coverImagePath: string
+  releaseDate: Date
+  status: PrismaSubmissionStatus
+  metadataLocked: boolean
+  published: boolean
+  albumName: string | null
+  mainCategory: string | null
+  subCategory: string | null
+  platforms: Record<string, unknown> | null
+  distributionLink: string | null
+  distributionPlatforms: Record<string, unknown> | null
+  statusVietnamese: string | null
+  rejectionReason: string | null
+  notes: string | null
+  // Signature fields
+  signedDocumentPath: string | null
+  signedAt: Date | null
+  signerFullName: string | null
+  isDocumentSigned: boolean
+  userId: string
+  labelId: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface PrismaTrack {
+  id: string
+  title: string
+  artist: string
+  filePath: string
+  duration: number
+  isrc: string | null
+  fileName: string | null
+  artistFullName: string | null
+  fileSize: number | null
+  format: string | null
+  bitrate: string | null
+  sampleRate: string | null
+  mainCategory: string | null
+  subCategory: string | null
+  lyrics: string | null
+  submissionId: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface PrismaVideo {
+  id: string
+  title: string
+  artist: string
+  youtubeVideoId: string | null
+  youtubeUrl: string | null
+  thumbnailUrl: string | null
+  duration: number | null
+  description: string | null
+  tags: string | null
+  category: string | null
+  language: string | null
+  contentIdEnabled: boolean
+  contentIdStatus: string | null
+  userId: string
+  labelId: string
+  submissionId: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface PrismaSubmissionContributor {
+  id: string
+  role: string
+  percentage: number | null
+  userId: string
+  submissionId: string
+  createdAt: Date
+}
+
+export interface PrismaTrackContributor {
+  id: string
+  role: PrismaContributorRole
+  percentage: number | null
+  userId: string
+  trackId: string
+  createdAt: Date
+}
+
+export interface PrismaVideoContributor {
+  id: string
+  role: string
+  percentage: number | null
+  userId: string
+  videoId: string
+  createdAt: Date
+}
+
+export interface PrismaSubmissionApproval {
+  id: string
+  type: PrismaApprovalType
+  isApproved: boolean
+  reason: string | null
+  submissionId: string
+  approverId: string
+  createdAt: Date
+}
+
+export interface PrismaSubmissionComment {
+  id: string
+  content: string
+  userId: string
+  submissionId: string
+  createdAt: Date
+}
+
+export interface PrismaFile {
+  id: string
+  name: string
+  path: string
+  mimetype: string
+  size: number
+  category: PrismaFileCategory
+  folderId: string | null
+  userId: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface PrismaFileFolder {
+  id: string
+  name: string
+  path: string
+  parentId: string | null
+  ownerId: string | null
+  isPublic: boolean
+  createdAt: Date
+  updatedAt: Date
+}
+
+// ==================== EXPORT & DOCUMENT TYPES ====================
+
+export interface ExportTemplate {
+  id: string
+  name: string
+  description: string | null
+  fields: Record<string, unknown>
+  format: string
+  isActive: boolean
+  createdBy: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Export {
+  id: string
+  templateId: string
+  filePath: string
+  fileName: string
+  format: string
+  recordCount: number
+  exportedBy: string
+  createdAt: Date
+}
+
+export interface SignatureDocument {
+  id: string
+  submissionId: string
+  documentPath: string
+  signedPath: string | null
+  signerName: string | null
+  signedAt: Date | null
+  isCompleted: boolean
+  templateData: Record<string, unknown>
+  createdAt: Date
+  updatedAt: Date
+}
+
+// ==================== ENHANCED TYPES ====================
+// Keep for backward compatibility but mark as deprecated
+
+/** @deprecated Use PrismaTrack instead */
 export interface TrackInfo {
   id?: string
   fileName: string
@@ -50,7 +339,6 @@ export interface TrackInfo {
   artistName: string
   artistFullName: string
   additionalArtists: AdditionalArtist[]
-  title: string
   isrc: string
   duration?: number
   fileSize?: number
@@ -58,6 +346,9 @@ export interface TrackInfo {
   bitrate?: string
   sampleRate?: string
   filePath?: string
+  mainCategory?: string | null
+  subCategory?: string | null
+  lyrics?: string | null
 }
 
 export interface AdditionalArtist {
@@ -73,6 +364,7 @@ export interface TextStyle {
   font: string
 }
 
+/** @deprecated Use PrismaSubmission with related PrismaTrack[] instead */
 export interface Submission {
   id: string
   isrc: string
@@ -285,7 +577,7 @@ export interface FileInfo {
   id: string
   name: string
   path: string
-  mimetype: string
+  mimeType: string
   size: number
   category: FileCategory
   folderId?: string
@@ -366,4 +658,188 @@ export function fromSimpleSubmission(simple: SimpleSubmission, userId: string): 
     rejectionReason: simple.rejection_reason,
     isrc: simple.isrc_code || ''
   }
+}
+
+// ==================== PRISMA CONVERSION UTILITIES ====================
+// Functions to convert between legacy flat structure and new relational structure
+
+/**
+ * Convert legacy Submission with trackInfos array to Prisma relational structure
+ */
+export function convertLegacySubmissionToPrisma(
+  legacySubmission: Submission
+): { submission: Omit<PrismaSubmission, 'createdAt' | 'updatedAt'>, tracks: Omit<PrismaTrack, 'id' | 'createdAt' | 'updatedAt' | 'submissionId'>[] } {
+  // Convert legacy status to Prisma status
+  const statusMap: Record<string, PrismaSubmissionStatus> = {
+    'pending': PrismaSubmissionStatus.PENDING,
+    'approved': PrismaSubmissionStatus.APPROVED,
+    'rejected': PrismaSubmissionStatus.REJECTED,
+    'processing': PrismaSubmissionStatus.PROCESSING,
+    'published': PrismaSubmissionStatus.PUBLISHED,
+    'cancelled': PrismaSubmissionStatus.CANCELLED,
+    'draft': PrismaSubmissionStatus.DRAFT,
+    'Đã nhận, đang chờ duyệt': PrismaSubmissionStatus.PENDING,
+    'Đã duyệt, từ chối phát hành': PrismaSubmissionStatus.REJECTED,
+    'Đã duyệt, đang chờ phát hành!': PrismaSubmissionStatus.APPROVED,
+    'Đã phát hành, đang chờ ra mắt': PrismaSubmissionStatus.PROCESSING,
+    'Hoàn thành phát hành!': PrismaSubmissionStatus.PUBLISHED,
+    'Đã hủy': PrismaSubmissionStatus.CANCELLED,
+    'Bản nháp': PrismaSubmissionStatus.DRAFT
+  };
+
+  // Convert legacy release type to Prisma release type
+  const releaseTypeMap: Record<string, PrismaReleaseType> = {
+    'single': PrismaReleaseType.SINGLE,
+    'ep': PrismaReleaseType.EP,
+    'lp': PrismaReleaseType.ALBUM,
+    'album': PrismaReleaseType.ALBUM,
+    'compilation': PrismaReleaseType.COMPILATION
+  };
+
+  const prismaSubmission: Omit<PrismaSubmission, 'createdAt' | 'updatedAt'> = {
+    id: legacySubmission.id,
+    title: legacySubmission.songTitle,
+    artist: legacySubmission.artistName,
+    UPC: legacySubmission.upc || null,
+    type: releaseTypeMap[legacySubmission.releaseType] || PrismaReleaseType.SINGLE,
+    coverImagePath: legacySubmission.imageFile || legacySubmission.imageUrl,
+    releaseDate: new Date(legacySubmission.releaseDate),
+    status: statusMap[legacySubmission.status] || PrismaSubmissionStatus.PENDING,
+    metadataLocked: legacySubmission.metadataLocked || false,
+    published: legacySubmission.published || false,
+    albumName: legacySubmission.albumName || null,
+    mainCategory: legacySubmission.mainCategory || null,
+    subCategory: legacySubmission.subCategory || null,
+    platforms: legacySubmission.platforms ? { platforms: legacySubmission.platforms } : null,
+    distributionLink: legacySubmission.distributionLink || null,
+    distributionPlatforms: legacySubmission.distributionPlatforms ? { platforms: legacySubmission.distributionPlatforms } : null,
+    statusVietnamese: legacySubmission.statusVietnamese || null,
+    rejectionReason: legacySubmission.rejectionReason || null,
+    notes: legacySubmission.notes || null,
+    // Signature fields - defaults
+    signedDocumentPath: null,
+    signedAt: null,
+    signerFullName: null,
+    isDocumentSigned: false,
+    userId: legacySubmission.userId,
+    labelId: legacySubmission.labelId || '' // This should be provided by the caller
+  };
+
+  const prismaTracks: Omit<PrismaTrack, 'id' | 'createdAt' | 'updatedAt' | 'submissionId'>[] =
+    legacySubmission.trackInfos?.map(trackInfo => ({
+      title: trackInfo.songTitle,
+      artist: trackInfo.artistName,
+      filePath: trackInfo.filePath || '',
+      duration: trackInfo.duration || 0,
+      isrc: trackInfo.isrc || null,
+      fileName: trackInfo.fileName || null,
+      artistFullName: trackInfo.artistFullName || null,
+      fileSize: trackInfo.fileSize || null,
+      format: trackInfo.format || null,
+      bitrate: trackInfo.bitrate || null,
+      sampleRate: trackInfo.sampleRate || null,
+      mainCategory: null, // Will be set from submission
+      subCategory: null,  // Will be set from submission
+      lyrics: null        // Individual track lyrics
+    })) || [];
+
+  return { submission: prismaSubmission, tracks: prismaTracks };
+}
+
+/**
+ * Convert Prisma relational structure back to legacy flat structure for backward compatibility
+ */
+export function convertPrismaSubmissionToLegacy(
+  prismaSubmission: PrismaSubmission,
+  prismaTracks: PrismaTrack[]
+): Submission {
+  // Convert Prisma status back to legacy status
+  const statusMap: Record<PrismaSubmissionStatus, SubmissionStatus> = {
+    [PrismaSubmissionStatus.PENDING]: 'Đã nhận, đang chờ duyệt',
+    [PrismaSubmissionStatus.APPROVED]: 'Đã duyệt, đang chờ phát hành!',
+    [PrismaSubmissionStatus.REJECTED]: 'Đã duyệt, từ chối phát hành',
+    [PrismaSubmissionStatus.PROCESSING]: 'Đã phát hành, đang chờ ra mắt',
+    [PrismaSubmissionStatus.PUBLISHED]: 'Hoàn thành phát hành!',
+    [PrismaSubmissionStatus.CANCELLED]: 'Đã hủy',
+    [PrismaSubmissionStatus.DRAFT]: 'Bản nháp'
+  };
+
+  // Convert Prisma release type back to legacy release type
+  const releaseTypeMap: Record<PrismaReleaseType, ReleaseType> = {
+    [PrismaReleaseType.SINGLE]: 'single',
+    [PrismaReleaseType.EP]: 'ep',
+    [PrismaReleaseType.ALBUM]: 'album',
+    [PrismaReleaseType.COMPILATION]: 'compilation'
+  };
+
+  const trackInfos: TrackInfo[] = prismaTracks.map(track => ({
+    id: track.id,
+    fileName: track.fileName || '',
+    songTitle: track.title,
+    artistName: track.artist,
+    artistFullName: track.artistFullName || '',
+    additionalArtists: [], // This would need to be populated from contributors
+    isrc: track.isrc || '', // Được tạo tự đồng từ quá trình release phát hành đã gửi
+    duration: track.duration,
+    fileSize: track.fileSize || undefined,
+    format: track.format || undefined,
+    bitrate: track.bitrate || undefined,
+    sampleRate: track.sampleRate || undefined,
+    filePath: track.filePath
+  }));
+
+  const legacySubmission: Submission = {
+    id: prismaSubmission.id,
+    isrc: prismaTracks[0]?.isrc || '',
+    upc: prismaSubmission.UPC || undefined,
+    uploaderUsername: '', // This would need to be populated from user data
+    artistName: prismaSubmission.artist,
+    songTitle: prismaSubmission.title,
+    albumName: prismaSubmission.albumName || undefined,
+    userEmail: '', // This would need to be populated from user data
+    imageFile: prismaSubmission.coverImagePath,
+    imageUrl: prismaSubmission.coverImagePath,
+    audioUrl: prismaTracks[0]?.filePath || undefined,
+    audioUrls: prismaTracks.map(track => track.filePath),
+    videoUrl: undefined,
+    videoFile: undefined,
+    audioFilesCount: prismaTracks.length,
+    submissionDate: prismaSubmission.createdAt.toISOString(),
+    status: statusMap[prismaSubmission.status],
+    mainCategory: (prismaSubmission.mainCategory as MainCategory) || 'other_main',
+    subCategory: (prismaSubmission.subCategory as SubCategory) || undefined,
+    releaseType: releaseTypeMap[prismaSubmission.type],
+    isCopyrightOwner: 'yes', // Default value, should be determined from business logic
+    hasBeenReleased: 'no', // Default value, should be determined from business logic
+    platforms: [], // This would need to be extracted from platforms JSON
+    hasLyrics: 'no', // Default value, should be determined from business logic
+    lyrics: undefined,
+    notes: prismaSubmission.notes || undefined,
+    fullName: '', // This would need to be populated from user data
+    artistRole: 'singer', // Default value, should be determined from business logic
+    additionalArtists: [], // This would need to be populated from contributors
+    trackInfos: trackInfos,
+    releaseDate: prismaSubmission.releaseDate.toISOString(),
+    titleStyle: undefined,
+    albumStyle: undefined,
+    userId: prismaSubmission.userId,
+    distributionLink: prismaSubmission.distributionLink || undefined,
+    distributionPlatforms: prismaSubmission.distributionPlatforms ? 
+      (prismaSubmission.distributionPlatforms as { platforms?: { platform: string; url: string; logo: string; }[] }).platforms : 
+      undefined,
+    title: prismaSubmission.title,
+    artist: prismaSubmission.artist,
+    coverImagePath: prismaSubmission.coverImagePath,
+    metadataLocked: prismaSubmission.metadataLocked,
+    published: prismaSubmission.published,
+    statusVietnamese: prismaSubmission.statusVietnamese || undefined,
+    rejectionReason: prismaSubmission.rejectionReason || undefined,
+    labelId: prismaSubmission.labelId,
+    videos: [], // This would need to be populated from related videos
+    contributors: [], // This would need to be populated from related contributors
+    createdAt: prismaSubmission.createdAt.toISOString(),
+    updatedAt: prismaSubmission.updatedAt.toISOString()
+  };
+
+  return legacySubmission;
 }

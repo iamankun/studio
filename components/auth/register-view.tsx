@@ -275,18 +275,30 @@ export function RegisterView({ onRegister, onSwitchToLogin }: Readonly<RegisterV
                             )}
                         </Button>
 
-                        <button
+                        {/* Switch to Login Button */}
+                        <Button
                             type="button"
+                            variant="outline"
+                            size="sm"
                             onClick={() => {
                                 logUIInteraction('button', 'switch-to-login', {
                                     from: 'register'
                                 });
                                 onSwitchToLogin();
                             }}
-                            className="w-full text-sm text-muted-foreground hover:text-primary transition-colors"
+                            className="h-10 bg-gradient-to-r from-blue-500/10 to-indigo-600/10 
+                              border-blue-500/30 hover:border-blue-500/50 text-foreground hover:text-blue-500
+                              hover:bg-gradient-to-r hover:from-blue-500/20 hover:to-indigo-600/20
+                              transition-all duration-300 backdrop-blur-sm group relative overflow-hidden
+                              hover:shadow-lg hover:shadow-blue-500/20"
                         >
-                            Already have an account? Login
-                        </button>
+                            <span className="relative z-10 flex items-center gap-2">
+                                <i className="fas fa-sign-in-alt text-xs"></i>
+                                Already have an account? <strong>Login</strong>
+                            </span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 
+                              translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                        </Button>
                     </form>
                 </CardContent>
             </Card>

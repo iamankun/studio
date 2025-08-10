@@ -1,8 +1,9 @@
 // Định nghĩa kiểu dữ liệu cho cài đặt background
 export interface BackgroundSettings {
-    type: "gradient" | "video";
+    type: "gradient" | "video" | "image";
     gradient: string;
     videoUrl: string;
+    imageUrl: string; // URL của ảnh nền
     opacity: number;
     randomVideo: boolean;
     videoList: string[];
@@ -24,6 +25,7 @@ export const DEFAULT_BACKGROUND_SETTINGS: BackgroundSettings = {
     type: "gradient",
     gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", // Gradient mặc định từ settings-view
     videoUrl: "",
+    imageUrl: "", // URL ảnh nền mặc định trống
     opacity: 0.3,
     randomVideo: true,
     videoList: DEFAULT_VIDEO_LIST,

@@ -154,7 +154,7 @@ interface AksDataProps {
   currentUser: User | null; // Hoặc User nếu bạn chắc chắn luôn có user khi vào view này
 }
 
-export default function aksdata({ currentUser }: AksDataProps) {
+export default function AksData({ currentUser }: AksDataProps) {
   const [files, setFiles] = useState<FileItem[]>(sampleFiles)
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
   const [viewMode, setViewMode] = useState<"list" | "grid">("list")

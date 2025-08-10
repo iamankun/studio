@@ -28,8 +28,8 @@ interface TopNavBarProps {
 }
 
 export function TopNavBar({ currentView, onViewChange }: TopNavBarProps) {
-    const { user, logout } = useAuth();
-    const isMobile = useIsMobile();
+    const { user, logout, showLoginModal, showRegisterModal } = useAuth()
+    const isMobile = useIsMobile()
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -182,6 +182,45 @@ export function TopNavBar({ currentView, onViewChange }: TopNavBarProps) {
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
+                    )}
+
+                    {/* Auth Buttons - Only show when not logged in */}
+                    {!user && (
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={showLoginModal}
+                                className="h-9 px-3 text-muted-foreground hover:text-primary hover:bg-primary/10 
+                                  transition-all duration-300 border border-transparent hover:border-primary/20
+                                  backdrop-blur-sm group relative overflow-hidden"
+                            >
+                                <span className="relative z-10 flex items-center gap-2">
+                                    <User className="h-4 w-4" />
+                                    Login
+                                </span>
+                                <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 
+                                  translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
+                            </Button>
+
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={showRegisterModal}
+                                className="h-9 px-3 bg-gradient-to-r from-primary/10 to-purple-600/10 
+                                  border-primary/30 hover:border-primary/50 text-foreground hover:text-primary
+                                  hover:bg-gradient-to-r hover:from-primary/20 hover:to-purple-600/20
+                                  transition-all duration-300 backdrop-blur-sm group relative overflow-hidden
+                                  hover:shadow-lg hover:shadow-primary/20"
+                            >
+                                <span className="relative z-10 flex items-center gap-2">
+                                    <i className="fas fa-user-plus text-xs"></i>
+                                    Register
+                                </span>
+                                <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/10 to-primary/0 
+                                  translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                            </Button>
+                        </div>
                     )}
 
                     {isMobile && (

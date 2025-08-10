@@ -17,7 +17,7 @@ export const APP_CONFIG = {
     DEV: {
         ENABLE_LOGGING: true,
         MOCK_SLOW_RESPONSES: false,
-        SHOW_DEBUG_INFO: process.env.NODE_ENV === 'development'
+        SHOW_DEBUG_INFO: process.env.NODE_ENV === 'production'
     }
 }
 

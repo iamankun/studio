@@ -31,7 +31,7 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
             <AlertTriangle className="h-20 w-20 text-red-500 mx-auto mb-6" />
             <h1 className="text-2xl font-bold mb-4">Something went wrong</h1>
             <p className="mb-6 text-gray-300">
-              {this.state.error?.message || "An unexpected error occurred"}
+              {this.state.error?.message ?? "An unexpected error occurred"}
             </p>
             <Button
               onClick={() => this.setState({ hasError: false })}

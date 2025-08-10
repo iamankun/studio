@@ -240,11 +240,11 @@ export function SettingsView() {
                 <h4 className="text-sm font-semibold mb-2">Xem trước:</h4>
                 <div className="flex items-center space-x-4">
                   <img
-                    src={appSettings.logoUrl || "/movies.webp"}
+                    src={appSettings.logoUrl || process.env.COMPANY_LOGO || "/logo.svg"}
                     alt="App Logo"
                     className="h-8 w-8 rounded object-cover"
                     onError={(e) => {
-                      ; (e.target as HTMLImageElement).src = appSettings.logoUrl || "/face.png"
+                      ; (e.target as HTMLImageElement).src = process.env.COMPANY_LOGO || "/logo.svg"
                     }}
                   />
                   <div>

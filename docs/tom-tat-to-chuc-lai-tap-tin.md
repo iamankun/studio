@@ -44,10 +44,27 @@
 
 1. **Di chuyển tài liệu**:
    - ✅ Đã di chuyển tất cả tài liệu `.md` vào thư mục `docs/`
-   - ✅ Chỉ giữ lại `README.md`, `STATUS.md` và `LICENSE.md` ở thư mục gốc
+   - ✅ Chỉ giữ lại `README.md` ở thư mục gốc
+   - ✅ Đã cập nhật `docs/README.md` với danh sách tài liệu mới
 
 2. **Di chuyển script PowerShell**:
    - ✅ Đã di chuyển `dev.ps1` và `test-api.ps1` vào thư mục `scripts/`
+
+## ✅ HOÀN THÀNH: Tổ chức lại File/Folder Structure (08/08/2025)
+
+**Các file đã di chuyển vào docs/ (08/08/2025):**
+- `API_MIGRATION_GUIDE.md` → `docs/API_MIGRATION_GUIDE.md`
+- `PACKAGE_CLEANUP_SUMMARY.md` → `docs/PACKAGE_CLEANUP_SUMMARY.md`
+- `PRISMA_SCHEMA_SYNC_SUMMARY.md` → `docs/PRISMA_SCHEMA_SYNC_SUMMARY.md`
+- `PROJECT_ANALYSIS_AND_FIXES.md` → `docs/PROJECT_ANALYSIS_AND_FIXES.md`
+- `quatrinh.md` → `docs/quatrinh.md`
+- `STEP_7_5_TESTING_GUIDE.md` → `docs/STEP_7_5_TESTING_GUIDE.md`
+
+**Trạng thái cuối cùng:**
+- ✅ Thư mục gốc chỉ còn `README.md`
+- ✅ Tất cả tài liệu đã được tổ chức trong `docs/`
+- ✅ Cấu trúc tuân thủ quy tắc tổ chức tập tin
+- ✅ Đã cập nhật `docs/README.md` với danh sách đầy đủ
    - ✅ Đã cập nhật đường dẫn trong `test-api.ps1` từ `.\logs\api-test` thành `..\logs\api-test`
 
 3. **Cập nhật tham chiếu**:

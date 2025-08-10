@@ -1,9 +1,17 @@
 import { NextResponse } from "next/server"
-import { multiDB } from "@/lib/database-api-service"
 
 export async function GET() {
   try {
-    const status = await multiDB.getStatus()
+    // Test database configuration thay vì gọi API service (tránh infinite loop)
+    const dbUrl = process.env.DATABASE_URL
+    const hasDbUrl = !!dbUrl
+    const isValidDbUrl = dbUrl?.startsWith('postgresql://') || dbUrl?.startsWith('postgres://')
+
+    const status = {
+      api: true, // API đang chạy
+      prisma: hasDbUrl && isValidDbUrl,
+      database: hasDbUrl && isValidDbUrl,
+    }
 
     let primary: string = "api";
     if (status.database) {

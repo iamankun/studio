@@ -3,10 +3,10 @@ import { multiDB } from "@/lib/database-api-service"
 
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const submissionId = params.id
+        const { id: submissionId } = await params
         const updateData = await request.json()
 
         console.log(`📝 Updating submission ${submissionId}`)
@@ -56,20 +56,35 @@ export async function PUT(
 // Get a specific submission by ID
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const submissionId = params.id
+        const { id: submissionId } = await params
+        const { searchParams } = new URL(request.url)
+        const includeTracks = searchParams.get("includeTracks") === "true"
 
-        console.log(`📋 Getting submission ${submissionId}`)
+        console.log(`📋 Getting submission ${submissionId}${includeTracks ? ' with tracks' : ''}`)
 
         // First try multiDB (primary database)
         const multiDBResult = await multiDB.getSubmissionById(submissionId)
 
         if (multiDBResult?.success && multiDBResult.data) {
+            let responseData = multiDBResult.data
+
+            // If includeTracks is requested, fetch tracks for this submission
+            if (includeTracks) {
+                const tracksResult = await multiDB.getTracksBySubmissionId(submissionId)
+                if (tracksResult.success && tracksResult.data) {
+                    responseData = {
+                        ...responseData,
+                        tracks: tracksResult.data
+                    } as any // Type assertion to allow tracks property
+                }
+            }
+
             return NextResponse.json({
                 success: true,
-                data: multiDBResult.data
+                data: responseData
             })
         }
 
@@ -96,10 +111,10 @@ export async function GET(
 // Delete a submission
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const submissionId = params.id
+        const { id: submissionId } = await params
 
         console.log(`🗑️ Deleting submission ${submissionId}`)
 

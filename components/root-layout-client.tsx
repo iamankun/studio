@@ -15,15 +15,29 @@ interface RootLayoutClientProps {
 
 export function RootLayoutClient({ children, className }: RootLayoutClientProps) {
     const [isLoading, setIsLoading] = useState(true)
+    const [isClient, setIsClient] = useState(false)
 
     useEffect(() => {
-        // Giả lập thời gian tải trang
-        const timer = setTimeout(() => {
-            setIsLoading(false)
-        }, 3000)
-
-        return () => clearTimeout(timer)
+        // Fix hydration mismatch: đảm bảo chỉ chạy trên client
+        setIsClient(true)
+        
+        // Không cần timer ở đây, để LoadingScreen tự quản lý
+        // Timer sẽ được handle bởi LoadingScreen component
     }, [])
+
+    // Prevent hydration mismatch: render basic content on server
+    if (!isClient) {
+        return (
+            <body className={className} suppressHydrationWarning>
+                <div className="min-h-screen bg-black flex items-center justify-center">
+                    <div className="text-white text-center">
+                        <h1 className="text-2xl font-bold mb-2">An Kun Studio</h1>
+                        <p className="text-gray-300">Đang tải...</p>
+                    </div>
+                </div>
+            </body>
+        )
+    }
 
     return (
         <body className={className} suppressHydrationWarning>

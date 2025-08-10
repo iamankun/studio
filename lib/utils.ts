@@ -6,7 +6,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function generateISRC(user: any, counter: number): { isrc: string; newCounter: number } {
+// Type cho ISRC generation - user parameter hiện tại chưa được sử dụng
+interface ISRCUser {
+  id?: string
+  name?: string
+}
+
+export function generateISRC(_user: ISRCUser | null, counter: number): { isrc: string; newCounter: number } {
   const prefix = "VNA2P"
   const currentYear = new Date().getFullYear().toString().slice(-2)
   const paddedCounter = counter.toString().padStart(5, "0")
@@ -113,7 +119,9 @@ export async function validateImageFile(file: File): Promise<{ valid: boolean; e
 
 // Utility function to format file sizes
 export function formatFileSize(bytes: number, decimalPoint?: number): string {
-  if (bytes === 0) return '0 Bytes'
+  if (bytes === 0) {
+    return '0 Bytes'
+  }
   const k = 1024
   const dm = decimalPoint || 2
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
@@ -128,6 +136,8 @@ export function generateId(prefix: string = 'ID'): string {
 
 // Utility function to truncate text
 export function truncateText(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text
+  if (text.length <= maxLength) {
+    return text
+  }
   return text.slice(0, maxLength) + '...'
 }

@@ -4,6 +4,20 @@
 
 /* Import Dosis font for fallback (in case the Next.js font loader fails) */
 @import url("https://fonts.googleapis.com/css2?family=Dosis:wght@300;400;500;600;700;800&display=swap");
+
+/* Fix animation delays for loading dots to avoid inline styles */
+@layer utilities {
+  .animate-delay-0 {
+    animation-delay: 0s;
+  }
+  .animate-delay-200 {
+    animation-delay: 0.2s;
+  }
+  .animate-delay-400 {
+    animation-delay: 0.4s;
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -53,13 +67,14 @@
 
 @layer base {
   * {
-    @apply border-border;
-      font-family: var(font-dosis), "Dosis", system-ui, sans-serif;
+    border-color: hsl(var(--border));
+    font-family: var(--font-dosis), "Dosis", system-ui, sans-serif;
   }
 
   body {
-    @apply bg-background text-foreground;
-    font-family: var(font-dosis), "Dosis", system-ui, sans-serif;
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: var(--font-dosis), "Dosis", system-ui, sans-serif;
     overflow-x: hidden;
       overflow-y: auto;
       height: 100%;
