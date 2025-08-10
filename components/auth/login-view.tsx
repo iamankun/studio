@@ -172,7 +172,7 @@ export function LoginView({ onLogin, onSwitchToRegister, onSwitchToForgot }: Rea
           <div className="relative w-20 h-20 mx-auto mb-2">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-purple-600/20 rounded-full blur-lg"></div>
             <Image
-              src={process.env.COMPANY_LOGO || "/logo.png"}
+              src={process.env.COMPANY_LOGO || "/logo.svg"}
               alt={process.env.COMPANY_NAME || "Digital Music Distribution"}
               fill
               className="object-cover rounded-full p-1 bg-background/10 backdrop-blur-xl border border-white/20 hover:border-white/40 transition-all duration-300 hover:scale-105"

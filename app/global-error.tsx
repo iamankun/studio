@@ -16,7 +16,7 @@ export default function GlobalError({
             <body className="bg-gradient-to-br from-gray-900 via-gray-950 to-purple-950 text-white min-h-screen flex items-center justify-center relative">
                 {/* Logo và nhận diện thương hiệu */}
                 <div className="absolute top-8 left-1/2 -translate-x-1/2 flex flex-col items-center">
-                    <Image src="/face.png" alt="AKs Studio" width={56} height={56} className="rounded-full border-2 border-purple-500 shadow-lg" />
+                    <Image src={process.env.COMPANY_AVATAR || "/face.png"} alt="AKs Studio" width={56} height={56} className="rounded-full border-2 border-purple-500 shadow-lg" />
                     <span className="mt-2 text-lg font-bold tracking-wide text-purple-300">AKs Studio</span>
                 </div>
                 <div className="text-center max-w-md mx-auto p-6 bg-black/60 rounded-xl shadow-2xl border border-gray-800 backdrop-blur-md">

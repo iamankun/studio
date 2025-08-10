@@ -1,5 +1,6 @@
 import type { Config } from 'tailwindcss'
 import defaultTheme from 'tailwindcss/defaultTheme'
+import tailwindcssAnimate from 'tailwindcss-animate'
 
 const config: Config = {
     darkMode: "class",
@@ -23,6 +24,7 @@ const config: Config = {
                 dosis: ["var(--font-dosis)", ...defaultTheme.fontFamily.sans],
             },
             colors: {
+                // Custom shadcn/ui colors
                 border: "hsl(var(--border))",
                 input: "hsl(var(--input))",
                 ring: "hsl(var(--ring))",
@@ -78,7 +80,7 @@ const config: Config = {
             },
         },
     },
-    plugins: [require("tailwindcss-animate")],
+    plugins: [tailwindcssAnimate],
 }
 
 export default config

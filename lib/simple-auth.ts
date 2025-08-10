@@ -57,18 +57,23 @@ export function clearUser(): void {
   }
 }
 
-export function authenticateUser(username: string, password: string): User | null {
-  // Tài khoản admin mặc định - chỉ dùng cho môi trường phát triển
-  // Trong môi trường production, hãy thay đổi logic này để sử dụng xác thực thực tế
-  if (username === "admin" && password === "adminpassword") {
+import type { User } from '@/types/user';
+import { authenticateUserWithDatabase } from './database-auth'
+
+export async function authenticateUser(username: string, password: string): Promise<User | null> {
+  // Sử dụng credentials từ .env.local
+  const adminUsername = process.env.ADMIN_USERNAME || "ankunstudio"
+  const adminPassword = process.env.ADMIN_PASSWORD || "@iamAnKun"
+  
+  if (username === adminUsername && password === adminPassword) {
     return {
       id: "1",
-      username: "admin",
+      username: adminUsername,
       role: "Label Manager", 
-      fullName: "Administrator",
-      email: "admin@yourdomain.com",
-      avatar: "/face.png",
-      bio: "Digital Music Distribution Platform for independent artists and labels",
+      fullName: process.env.COMPANY_NAME || "An Kun Studio Digital Music Distribution",
+      email: process.env.COMPANY_EMAIL || "admin@ankun.dev",
+      avatar: process.env.COMPANY_AVATAR || "/face.png",
+      bio: process.env.COMPANY_DESCRIPTION || "Send Gift Your Song to The World",
       socialLinks: {
         facebook: "",
         youtube: "",
@@ -79,18 +84,11 @@ export function authenticateUser(username: string, password: string): User | nul
       },
       createdAt: new Date().toISOString(),
       isrcCodePrefix: "VNA2P",
-      backgroundSettings: {
-        type: "video",
-        gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        videoUrl: "",
-        opacity: 0.3,
-        playlist: "PLrAKWdKgX5mxuE6w5DAR5NEeQrwunsSeO",
-      },
     }
   }
 
-  // Có thể thêm logic check database ở đây
-  return null
+  // Fallback to database authentication
+  return await authenticateUserWithDatabase(username, password)
 }
 
 export function updateUser(userData: Partial<User>): boolean {

@@ -29,7 +29,7 @@ const AuthContent = ({ children, showLogin, showSettings, setShowSettings }: Aut
         <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20 shadow-lg hover:border-white/40 transition-all duration-300 
           hover:shadow-primary/20 group relative">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <Image src="/face.png" alt="Logo" width={32} height={32}
+          <Image src={process.env.COMPANY_AVATAR || "/face.png"} alt="Logo" width={32} height={32}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" priority />
         </div>
         <span className="font-semibold text-foreground/90 bg-gradient-to-r from-white to-white/80 bg-clip-text hover:text-transparent transition-all duration-300">
@@ -81,7 +81,7 @@ const AuthContent = ({ children, showLogin, showSettings, setShowSettings }: Aut
         <div className="absolute -top-24 left-1/2 transform -translate-x-1/2 w-20 h-20">
           <div className="w-full h-full rounded-full backdrop-blur-sm border border-white/20
                        shadow-[0_8px_32px_rgba(0,0,0,0.2)] transition-all duration-300">
-            <Image src="/public/media.webp" alt="An Kun Studio Logo Media" width={100} height={100} className="w-full h-full object-cover rounded-full" priority />
+            <Image src={process.env.COMPANY_LOGO || "/logo.svg"} alt="An Kun Studio Logo" width={100} height={100} className="w-full h-full object-cover rounded-full" priority />
           </div>
         </div>
 
