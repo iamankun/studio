@@ -32,7 +32,7 @@ export function MyProfileView({ showModal }: MyProfileViewProps) {
     },
   });
   // No need to store the File object since we're uploading immediately
-  const [avatarPreview, setAvatarPreview] = useState("/face.png");
+  const [avatarPreview, setAvatarPreview] = useState(process.env.COMPANY_AVATAR || "/face.png");
 
   // Initialize form data when user data is available
   useEffect(() => {
@@ -42,7 +42,7 @@ export function MyProfileView({ showModal }: MyProfileViewProps) {
         fullName: currentUser.fullName || "",
         email: currentUser.email || "",
         bio: currentUser.bio || "",
-        avatar: currentUser.avatar || "/face.png",
+        avatar: currentUser.avatar || process.env.COMPANY_AVATAR || "/face.png",
         socialLinks: {
           facebook: currentUser.socialLinks?.facebook || "",
           youtube: currentUser.socialLinks?.youtube || "",
@@ -52,7 +52,7 @@ export function MyProfileView({ showModal }: MyProfileViewProps) {
           instagram: currentUser.socialLinks?.instagram || "",
         },
       });
-      setAvatarPreview(currentUser.avatar || "/face.png");
+      setAvatarPreview(currentUser.avatar || process.env.COMPANY_AVATAR || "/face.png");
     }
   }, [currentUser]);
 
@@ -188,7 +188,7 @@ export function MyProfileView({ showModal }: MyProfileViewProps) {
         role: currentUser.role,
         table: currentUser.role === "Label Manager" ? "label_manager" : "artist",
         // Nếu formData.avatar không có, sử dụng avatarPreview nếu khác với mặc định
-        avatar: formData.avatar || (avatarPreview !== "/face.png" ? avatarPreview : currentUser.avatar),
+        avatar: formData.avatar || (avatarPreview !== (process.env.COMPANY_AVATAR || "/face.png") ? avatarPreview : currentUser.avatar),
         // Đảm bảo socialLinks chỉ có giá trị không rỗng
         socialLinks: Object.fromEntries(
           Object.entries(formData.socialLinks).filter(([, value]) => value.trim() !== "")
@@ -449,7 +449,7 @@ export function MyProfileView({ showModal }: MyProfileViewProps) {
                       className="object-cover w-full h-full"
                       priority
                       onError={(e) => {
-                        e.currentTarget.src = "/face.png";
+                        e.currentTarget.src = process.env.COMPANY_AVATAR || "/face.png";
                       }}
                     />
                   ) : (

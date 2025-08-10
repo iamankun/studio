@@ -105,7 +105,7 @@ export function Sidebar({ currentView, onViewChange, user, onLogout }: SidebarPr
       <div className="p-4 border-t border-gray-700">
         <div className={`flex items-center ${isCollapsed ? "justify-center" : "space-x-3"}`}>
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user?.avatar ? user.avatar : "/face.png"} />
+            <AvatarImage src={user?.avatar ? user.avatar : process.env.COMPANY_AVATAR || "/face.png"} />
             <AvatarFallback>{user?.username ? user.username.charAt(0).toUpperCase() : "U"}</AvatarFallback>
           </Avatar>
           {!isCollapsed && (

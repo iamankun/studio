@@ -75,7 +75,7 @@ export function LogoutView({ onLogout, onCancel, userName, userRole }: Readonly<
                 <CardHeader className="text-center space-y-6">
                     <div className="relative w-24 h-24 mx-auto transform hover:scale-105 transition-transform duration-300">
                         <Image
-                            src="/face.png"
+                            src={process.env.COMPANY_AVATAR || "/face.png"}
                             alt="Logo"
                             fill
                             className="object-cover rounded-full p-1.5 bg-background/40 backdrop-blur-sm 

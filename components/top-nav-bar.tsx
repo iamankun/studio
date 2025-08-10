@@ -68,7 +68,7 @@ export function TopNavBar({ currentView, onViewChange }: TopNavBarProps) {
             <div className="flex justify-between items-center px-4 py-2">
                 <Link href="/" className="flex items-center gap-2">
                     <div className="bg-primary/10 rounded-full p-1.5">
-                        <Image src="/face.png" alt="AKs Studio Logo" className="h-7 w-7" width={28} height={28} />
+                        <Image src={process.env.COMPANY_AVATAR || "/face.png"} alt="AKs Studio Logo" className="h-7 w-7" width={28} height={28} />
                     </div>
                     {!isCollapsed && (
                         <span className="font-dosis-semibold text-lg whitespace-nowrap ml-1">AKs Studio</span>
@@ -113,7 +113,7 @@ export function TopNavBar({ currentView, onViewChange }: TopNavBarProps) {
                                 <Button variant="ghost" size="sm" className="flex items-center gap-2 hover:bg-primary/10">
                                     <Avatar className="w-8 h-8">
                                         <AvatarImage
-                                            src={user.avatar || "/face.png"}
+                                            src={user.avatar || process.env.COMPANY_AVATAR || "/face.png"}
                                             alt={user.fullName || user.username || "User avatar"}
                                         />
                                         <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium text-sm">

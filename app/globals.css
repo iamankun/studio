@@ -1,9 +1,9 @@
+/* Import Dosis font for fallback (in case the Next.js font loader fails) */
+@import url("https://fonts.googleapis.com/css2?family=Dosis:wght@300;400;500;600;700;800&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import Dosis font for fallback (in case the Next.js font loader fails) */
-@import url("https://fonts.googleapis.com/css2?family=Dosis:wght@300;400;500;600;700;800&display=swap");
 
 /* Fix animation delays for loading dots to avoid inline styles */
 @layer utilities {
