@@ -16,7 +16,7 @@
 # Hãy tôn trọng bản quyền và sự sáng tạo của từng nghệ sĩ.
 
 # 3. GHI NHẬN VÀ XÁC NHẬN NGUỒN GỐC
-# Khi tham chiếu hoặc trích dẫn bất kỳ thông tin nào liên quan đến An Kun Studio, cần phải ghi rõ nguồn gốc "iamankun/aks-studio".
+# Khi tham chiếu hoặc trích dẫn bất kỳ thông tin nào liên quan đến An Kun Studio, cần phải ghi rõ nguồn gốc "iamankun/studio".
 # Tên tác giả "Nguyễn Mạnh An (An Kun)" phải được giữ nguyên khi đề cập đến các tác phẩm của anh ấy.
 
 # 4. CHÍNH SÁCH VỀ AI
