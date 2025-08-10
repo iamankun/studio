@@ -15,7 +15,7 @@ model User {
   email         String       @unique
   name          String?
   password      String
-  roles         UserRole[]   @default([]) // KHÔNG cấp mặc định - user bị hạn chế
+  roles         UserRole[]   @default([]) // Hạn chế tính năng vì chưa được quyền truy cập vào hệ thống
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
@@ -24,7 +24,7 @@ model User {
   labelId       String?
   label         Label?       @relation(fields: [labelId], references: [id])
   files         File[]
-  activityLogs  ActivityLog[]
+  nhatKy        nhatKy[]
   videos        Video[]      @relation("VideoCreator")
   fileFolders   FileFolder[]
 
@@ -33,6 +33,10 @@ model User {
   videoContributions      VideoContributor[]
   comments                SubmissionComment[]
   approvals               SubmissionApproval[]
+  
+  // Export & Document Relations
+  exportTemplatesCreated  ExportTemplate[] @relation("ExportTemplateCreator")
+  exportsCreated          Export[] @relation("ExportCreator")
 }
 
 model Profile {
@@ -42,21 +46,21 @@ model Profile {
   phone         String? @unique
   artistName    String? // Tên nghệ sĩ
   fullName      String? // Tên đầy đủ theo giấy tờ
-  
+  verified      Boolean? // Trạng thái xác minh khi đầy đủ các thông tin
   // Social Links (bắt buộc)
-  facebookUrl   String?
-  instagramUrl  String?
-  youtubeUrl    String?
-  
+  facebookUrl   String? // Link đến trang Facebook của nghệ sĩ, thêm logic chuyển đổi nếu họ chỉ nhập ID, @
+  instagramUrl  String? // Link đến trang Instagram của nghệ sĩ, thêm logic chuyển đổi nếu họ chỉ nhập ID, @
+  youtubeUrl    String? // Link đến trang YouTube của nghệ sĩ, thêm logic chuyển đổi nếu họ chỉ nhập ID, @
+
   // Streaming Platforms (tùy chọn)
-  spotifyUrl    String?
-  appleMusicUrl String?
-  soundcloudUrl String?
-  
+  spotifyUrl    String? // Link đến trang Spotify của nghệ sĩ, thêm logic chuyển đổi nếu họ chỉ nhập ID, @
+  appleMusicUrl String? // Link đến trang Apple Music của nghệ sĩ, thêm logic chuyển đổi nếu họ chỉ nhập ID, @
+  soundcloudUrl String? // Link đến trang SoundCloud của nghệ sĩ, thêm logic chuyển đổi nếu họ chỉ nhập ID, @
+
   userId        String @unique
   user          User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  socialLinks   Json?   // Backup cho các links khác
-  
+  socialLinks   Json?   // Backup cho các links khác, thêm logic chuyển đổi nếu họ chỉ nhập ID, @
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -77,39 +81,41 @@ model Submission {
   id              String    @id @default(cuid())
   title           String
   artist          String
-  upc             String?   @unique
-  type            ReleaseType @default(SINGLE)
+  UPC             String?   @unique // Mã đóng gói sản phẩm do cung cấp sau nên sẽ chưa có và nhập sau
+  type            ReleaseType @default(SINGLE) // Loại phát hành sẽ giữa trên số bài hát và thể loại.
   coverImagePath  String
   releaseDate     DateTime
   status          SubmissionStatus @default(PENDING)
   metadataLocked  Boolean   @default(false)
   published       Boolean   @default(false)
-  
-  // Thông tin bổ sung từ source code
   albumName       String?
   mainCategory    String?
   subCategory     String?
   platforms       Json?     // Danh sách platforms phân phối
   distributionLink String?  // Link FFM.to, etc.
   distributionPlatforms Json? // Chi tiết platforms với URL
-  
-  // Vietnamese status support
+
+  // Hỗ trợ trạng thái tiếng Việt
   statusVietnamese String?
   rejectionReason  String?
-  notes           String?
-
+  notes           String?     // Ghi chú chung cho submission
+  
+  // Thông tin ký xác nhận
+  signedDocumentPath String?  // Đường dẫn đến file PDF đã ký
+  signedAt         DateTime? // Thời gian ký xác nhận
+  signerFullName   String?   // Tên người ký (phải khớp với fullName)
+  isDocumentSigned Boolean   @default(false) // Trạng thái đã ký
   userId          String
   user            User      @relation("SubmissionCreator", fields: [userId], references: [id])
-
   labelId         String
   label           Label     @relation(fields: [labelId], references: [id])
-
   tracks          Track[]
   videos          Video[]   @relation("SubmissionVideos")
   contributors    SubmissionContributor[]
   comments        SubmissionComment[]
   approvals       SubmissionApproval[]
-
+  signatureDocument SignatureDocument? @relation("SubmissionSignature")
+  
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 }
@@ -120,59 +126,48 @@ model Track {
   artist        String
   filePath      String
   duration      Int         // in seconds
-  isrc          String?     @unique
-  
-  // Metadata bổ sung từ mẫu MAU/
+  isrc          String?     @unique // Chỉ được gán thủ công khi hoàn thành release
   fileName      String?
-  artistFullName String?
+  artistFullName String?    // Tên đầy đủ nghệ sĩ từ Profile
   fileSize      Int?
-  format        String?     // WAV, MP3, etc.
-  bitrate       String?     // 24-bit, etc.
-  sampleRate    String?     // 44.1 kHz, etc.
-
+  format        String?     // Chỉ chấp nhận WAV, 2 kênh stereo, 16-24 bit, 44.1+ kHz, >2s
+  bitrate       String?     // 16-bit hoặc 24-bit
+  sampleRate    String?     // 44.1 kHz tối thiểu đến 192 kHz tối đa
+  
+  // Metadata bổ sung
+  mainCategory  String?     // Thể loại chính
+  subCategory   String?     // Thể loại phụ
+  lyrics        String?     // Lời bài hát riêng cho từng track
+  
   submissionId  String
   submission    Submission  @relation(fields: [submissionId], references: [id], onDelete: Cascade)
-
   contributors  TrackContributor[]
-
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 }
 
-// --- VIDEO MODEL (Chỉ cấp thông tin - theo MAU/) ---
+// --- VIDEO MODEL (Chỉ cấp thông tin) ---
 model Video {
   id            String      @id @default(cuid())
   title         String
   artist        String
-  
-  // CHỈ CẤP THÔNG TIN VIDEO - KHÔNG CẦN FILE VIDEO
-  // Thông tin này dùng cho YouTube Content ID
   youtubeVideoId   String?  // ID video trên YouTube
   youtubeUrl       String?  // URL đầy đủ của video
   thumbnailUrl     String?  // URL thumbnail từ YouTube
   duration         Int?     // Thời lượng (seconds)
-  
-  // Thông tin từ mẫu MAU/ để đăng ký Content ID
   description      String?  // Mô tả video
   tags             String?  // Tags, keywords
   category         String?  // Thể loại video
   language         String?  // Ngôn ngữ
-  
-  // Thông tin cho YouTube Content ID
   contentIdEnabled Boolean @default(false)
-  contentIdStatus  String? // Trạng thái đăng ký Content ID
-  
+  contentIdStatus  String? // Mặc định đã có on nếu video đó đã duyệt
   userId        String
   user          User        @relation("VideoCreator", fields: [userId], references: [id])
-  
   labelId       String
   label         Label       @relation(fields: [labelId], references: [id])
-  
   submissionId  String?
   submission    Submission? @relation("SubmissionVideos", fields: [submissionId], references: [id])
-  
   contributors  VideoContributor[]
-  
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 }
@@ -185,7 +180,6 @@ model FileFolder {
   parentId      String?
   parent        FileFolder? @relation("FolderHierarchy", fields: [parentId], references: [id])
   children      FileFolder[] @relation("FolderHierarchy")
-  
   files         File[]
   
   // Permissions
@@ -203,12 +197,10 @@ model SubmissionContributor {
   id            String @id @default(cuid())
   role          String
   percentage    Float? // Phần trăm đóng góp
-  
   userId        String
   user          User   @relation(fields: [userId], references: [id])
   submissionId  String
   submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
-  
   createdAt     DateTime @default(now())
 }
 
@@ -216,12 +208,10 @@ model TrackContributor {
   id            String @id @default(cuid())
   role          ContributorRole
   percentage    Float?
-  
   userId        String
   user          User   @relation(fields: [userId], references: [id])
   trackId       String
   track         Track  @relation(fields: [trackId], references: [id], onDelete: Cascade)
-  
   createdAt     DateTime @default(now())
 }
 
@@ -229,12 +219,10 @@ model VideoContributor {
   id            String @id @default(cuid())
   role          String // Director, Editor, etc.
   percentage    Float?
-  
   userId        String
   user          User   @relation(fields: [userId], references: [id])
   videoId       String
   video         Video  @relation(fields: [videoId], references: [id], onDelete: Cascade)
-  
   createdAt     DateTime @default(now())
 }
 
@@ -243,26 +231,20 @@ model SubmissionApproval {
   type            ApprovalType
   isApproved      Boolean
   reason          String?   // Lý do từ chối (nếu có)
-
   submissionId    String
   submission      Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
-
   approverId      String
   approver        User @relation(fields: [approverId], references: [id])
-
   createdAt       DateTime @default(now())
 }
 
 model SubmissionComment {
   id            String @id @default(cuid())
   content       String
-
   userId        String
   user          User   @relation(fields: [userId], references: [id])
-
   submissionId  String
   submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
-
   createdAt     DateTime @default(now())
 }
 
@@ -279,21 +261,61 @@ model File {
   // Folder relationship
   folderId  String?
   folder    FileFolder? @relation(fields: [folderId], references: [id])
-  
   userId    String?
   user      User?       @relation(fields: [userId], references: [id])
-  
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 }
 
-model ActivityLog {
+model nhatKy {
   id        String      @id @default(cuid())
   action    String
   details   Json?
   userId    String?
   user      User?       @relation(fields: [userId], references: [id])
   createdAt DateTime    @default(now())
+}
+
+// --- EXPORT & DOCUMENT MANAGEMENT ---
+model ExportTemplate {
+  id          String @id @default(cuid())
+  name        String @unique
+  description String?
+  fields      Json   // Các field được chọn để export
+  format      String // CSV, XLSX, TXT, PDF
+  isActive    Boolean @default(true)
+  createdBy   String
+  creator     User   @relation("ExportTemplateCreator", fields: [createdBy], references: [id])
+  exports     Export[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Export {
+  id         String @id @default(cuid())
+  templateId String
+  template   ExportTemplate @relation(fields: [templateId], references: [id])
+  filePath   String
+  fileName   String
+  format     String
+  recordCount Int
+  exportedBy String
+  exporter   User   @relation("ExportCreator", fields: [exportedBy], references: [id])
+  createdAt  DateTime @default(now())
+}
+
+model SignatureDocument {
+  id             String @id @default(cuid())
+  submissionId   String @unique
+  submission     Submission @relation("SubmissionSignature", fields: [submissionId], references: [id])
+  documentPath   String
+  signedPath     String?
+  signerName     String?
+  signedAt       DateTime?
+  isCompleted    Boolean @default(false)
+  templateData   Json    // Data used to generate the document
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 // --- DISTRIBUTION PLATFORMS ---
@@ -303,59 +325,60 @@ model DistributionPlatform {
   logoUrl     String?
   apiEndpoint String?
   isActive    Boolean @default(true)
-  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
 // --- CÁC BỘ TRẠNG THÁI & VAI TRÒ (Cập nhật với Vietnamese support) ---
+// Một user có thể có nhiều vai trò được gán, họ có thể là nghệ sĩ, nhà sản xuất, hoặc người viết lời, nhãn đĩa, người biểu diễn.
 enum UserRole {
-  ARTIST
-  COMPOSER
-  PRODUCER
-  PERFORMER
-  LABEL_MANAGER
-  ADMINISTRATOR
+  ARTIST // Nghệ sĩ là người sở hữu tác phẩm cũng như tạo track, release và thêm hồ sơ mới của Composer, producer và performer nhưng artist không thể xem các hồ sơ khác ngoài dữ liệu của Artist
+  COMPOSER // Sáng tác và viết lời bài hát
+  PRODUCER // Nhà sản xuất âm nhạc
+  PERFORMER // Người biểu diễn, có hồ sơ được quản lí bởi Label Manager và Artist
+  LABEL_MANAGER // Quản lý hãng đĩa, ngang như quản trị viên
+  ADMINISTRATOR // Quản trị viên hệ thống
 }
 
 enum SubmissionStatus {
-  PENDING                    // "Đã nhận, đang chờ duyệt"
+  PENDING                    // "Đã gửi, bạn có thể sửa hoặc hủy nếu như chưa chuyển sang đã duyệt"
   APPROVED                   // "Đã duyệt, đang chờ phát hành!"
-  REJECTED                   // "Đã duyệt, từ chối phát hành"
+  REJECTED                   // "Từ chối phát hành, cần chỉnh sửa"
   PROCESSING                 // "Đã phát hành, đang chờ ra mắt"
   PUBLISHED                  // "Hoàn thành phát hành!"
-  CANCELLED                  // "Đã hủy"
-  DRAFT                      // "Bản nháp"
+  CANCELLED                  // "Đã hủy phát hành, do bạn yêu cầu hoặc vì bạn đã vi phạm chính sách của chúng tôi"
+  DRAFT                      // "Bản nháp, bạn cần sớm hoàn thành"
 }
 
 enum ReleaseType {
-  SINGLE
-  EP
-  ALBUM
-  COMPILATION
+  SINGLE // Album đơn - Single (1 - 3 bài tối thiểu 1, 2 bài có thể instrumental hoặc cái gì đó khác) - Dạng này phổ biến
+  EP // Album extended play - EP (4 - 6 bài tối thiểu 4) - Dạng này phổ biến
+  ALBUM // Album đầy đủ - Album (7 bài trở lên) - Thường không có vì album chỉ có thể do hãng đĩa tổng hợp
+  COMPILATION // Album tổng hợp - Compilation (Album tổng hợp các bài hát từ nghệ sĩ khác nhau) - Không có vì không có trang âm nhạc nào phát hành dạng này
 }
 
 enum ContributorRole {
-  COMPOSER
-  LYRICIST
-  PRODUCER
-  PERFORMER
-  VOCALIST
-  RAPPER
+  COMPOSER // Người sáng tác
+  LYRICIST // Người viết lời
+  SINGERSONGWRITER // Người sáng tác và biểu diễn
+  PRODUCER // Nhà sản xuất
+  PERFORMER // Người biểu diễn
+  VOCALIST // Ca sĩ
+  RAPPER // Rapper
 }
 
 enum ApprovalType {
-  DSP
-  CONTENT_ID
-  ACR_CLOUD
-  LABEL_REVIEW
+  DSP // Dịch vụ phân phối
+  CONTENT_ID // Nhận diện nội dung
+  ACR_CLOUD // ACR Cloud
+  LABEL_REVIEW // Đánh giá của hãng đĩa
 }
 
 enum FileCategory {
-  AUDIO
-  VIDEO
-  IMAGE
-  DOCUMENT
-  OTHER
+  AUDIO // Âm thanh
+  VIDEO // Video
+  IMAGE // Hình ảnh
+  DOCUMENT // Tài liệu
+  OTHER // Khác
 }
 

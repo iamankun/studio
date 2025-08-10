@@ -4,11 +4,11 @@ import { useState, useEffect } from "react"
 
 export function Footer() {
   const [footerSettings, setFooterSettings] = useState({
-    companyName: "AKs Studio",
-    version: "1.2.0-beta",
-    logoUrl: "/favicon.ico",
-    websiteUrl: "/",
-    description: "Phân phối Nhạc Kỹ thuật số",
+    companyName: process.env.COMPANY_NAME,
+    version: process.env.VERSION,
+    logoUrl: process.env.LOGOICO,
+    websiteUrl: process.env.COMPANY_URL,
+    description: process.env.COMPANY_DESCRIPTION,
   })
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export function Footer() {
       <div className="container mx-auto px-4 text-center">
         <div className="flex items-center justify-center mb-2">
           <img
-            src={footerSettings.logoUrl || "/placeholder.svg"}
+            src={footerSettings.logoUrl || process.env.COMPANY_LOGO || "/logo.svg"}
             alt="Logo"
             className="h-8 w-8 mr-2 rounded object-cover"
             onError={(e) => {
@@ -57,7 +57,7 @@ export function Footer() {
         <p className="text-gray-500 text-xs font-dosis-light">
           Được phát triển bởi{" "}
           <a
-            href={footerSettings.websiteUrl}
+            href={process.env.COMPANY_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="text-purple-400 hover:text-purple-300 transition-colors"

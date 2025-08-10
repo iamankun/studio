@@ -121,37 +121,69 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: "Authentication required" }, { status: 401 });
     }
 
-    // Add required fields với user_id từ current user
-    const submission = {
-      id: `sub-${Date.now()}`,
-      ...submissionData,
-      user_id: currentUser.id, // Đảm bảo submission thuộc về user hiện tại
-      artist_id: currentUser.id, // Nếu là artist
-      status: submissionData.status ?? "pending",
-      submission_date: new Date().toISOString().split("T")[0],
-      created_at: new Date().toISOString(),
-    }
+    // Check if this is a relational submission (has submission and tracks)
+    if (submissionData.submission && submissionData.tracks) {
+      // Handle relational submission creation
+      const result = await multiDB.createSubmissionWithTracks(
+        submissionData.submission,
+        submissionData.tracks
+      );
 
-    // Use multiDB (NEON)
-    const result = await multiDB.createSubmission(submission)
-
-    if (result.success) {
-      logger.info('API Submission POST - success', { id: submission.id });
-      return NextResponse.json({
-        success: true,
-        message: "Submission created successfully",
-        id: submission.id,
-        userRole: currentUser.role
-      })
+      if (result.success) {
+        logger.info('API Submission POST - relational success', { 
+          id: result.data?.submission.id,
+          trackCount: result.data?.tracks.length 
+        });
+        return NextResponse.json({
+          success: true,
+          message: "Submission with tracks created successfully",
+          data: result.data,
+          userRole: currentUser.role
+        })
+      } else {
+        logger.error('API Submission POST - relational DB error', result.error);
+        return NextResponse.json(
+          {
+            success: false,
+            message: result.message || "Failed to create submission with tracks",
+          },
+          { status: 500 },
+        )
+      }
     } else {
-      logger.error('API Submission POST - DB error', result.error);
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Failed to create submission",
-        },
-        { status: 500 },
-      )
+      // Handle legacy submission creation (backward compatibility)
+      const submission = {
+        id: `sub-${Date.now()}`,
+        ...submissionData,
+        user_id: currentUser.id, // Đảm bảo submission thuộc về user hiện tại
+        artist_id: currentUser.id, // Nếu là artist
+        status: submissionData.status ?? "pending",
+        submission_date: new Date().toISOString().split("T")[0],
+        created_at: new Date().toISOString(),
+      }
+
+      // Use multiDB (NEON) - legacy method
+      const result = await multiDB.createSubmission(submission)
+
+      if (result.success) {
+        logger.info('API Submission POST - legacy success', { id: submission.id });
+        return NextResponse.json({
+          success: true,
+          message: "Submission created successfully",
+          data: result.data,
+          id: submission.id,
+          userRole: currentUser.role
+        })
+      } else {
+        logger.error('API Submission POST - legacy DB error', result.error);
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Failed to create submission",
+          },
+          { status: 500 },
+        )
+      }
     }
   } catch (error) {
     logger.error('API Submission POST - Exception', error);

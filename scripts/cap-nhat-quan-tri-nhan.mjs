@@ -2,7 +2,7 @@
 // Cập nhật tài khoản admin -> ankunstudio với password @iamAnKun
 
 import pg from 'pg';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { config } from 'dotenv';
 
 // Load environment variables
@@ -76,7 +76,7 @@ async function updateAdminAccount() {
             console.log('   ➕ Creating new ankunstudio admin user...');
             const insertResult = await client.query(`
                 INSERT INTO label_manager (username, email, password_hash, full_name, avatar, bio, created_at, updated_at)
-                VALUES ('ankunstudio', 'admin@ankun.dev', $1, 'An Kun Studio Admin', '/Logo-An-Kun-Studio-Black.png', 'An Kun Studio Digital Music Distribution Admin', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                VALUES ('ankunstudio', 'admin@ankun.dev', $1, 'An Kun Studio Admin', '/logo.svg', 'An Kun Studio Digital Music Distribution Admin', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                 RETURNING id, username, email
             `, [hashedPassword]);
 

@@ -11,8 +11,8 @@ const dosis = Dosis({
 })
 
 export const metadata: Metadata = {
-  title: "AKs Studio - Digital Music Distribution",
-  description: "Professional music distribution platform for independent artists and labels",
+  title: process.env.COMPANY_NAME,
+  description: process.env.COMPANY_DESCRIPTION,
 }
 
 export default function RootLayout({
@@ -23,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="vi" suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/media.webp" />
+        <link rel="icon" href={process.env.COMPANY_LOGOICO} />
       </head>
       <RootLayoutClient className={dosis.className}>
         {children}

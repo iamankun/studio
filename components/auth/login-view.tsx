@@ -29,9 +29,8 @@ export function LoginView({ onLogin, onSwitchToRegister, onSwitchToForgot }: Rea
   const [usernameError, setUsernameError] = useState("")
   const [passwordError, setPasswordError] = useState("")
   const [appSettings] = useState({
-    appName: userRole ?? "An Kun Studio",
-    logoUrl: "/face.png",
-    logoAlt: "Face AK"
+    appName: process.env.COMPANY_NAME,
+    logoUrl: process.env.COMPANY_LOGO,
   })
 
   // Greetings in different languages - wrapped in useMemo
@@ -173,15 +172,15 @@ export function LoginView({ onLogin, onSwitchToRegister, onSwitchToForgot }: Rea
           <div className="relative w-20 h-20 mx-auto mb-2">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-purple-600/20 rounded-full blur-lg"></div>
             <Image
-              src={appSettings.logoUrl}
-              alt={appSettings.logoAlt}
+              src={process.env.COMPANY_LOGO || "/logo.png"}
+              alt={process.env.COMPANY_NAME || "Digital Music Distribution"}
               fill
               className="object-cover rounded-full p-1 bg-background/10 backdrop-blur-xl border border-white/20 hover:border-white/40 transition-all duration-300 hover:scale-105"
               priority
             />
           </div>
           <p className="text-muted-foreground text-sm animate-fade-in">
-            {userRole || "Welcome back to AKs Studio"}
+            {userRole || `Welcome back to ${process.env.COMPANY_NAME}`}
           </p>
           <h2 className="text-2xl font-bold bg-clip-text text-transparent 
             bg-gradient-to-r from-indigo-500 to-pink-500 select-none">
@@ -289,31 +288,54 @@ export function LoginView({ onLogin, onSwitchToRegister, onSwitchToForgot }: Rea
               )}
             </Button>
 
-            <div className="flex flex-col space-y-2 text-center text-sm">
-              <button
+            <div className="flex flex-col space-y-3 text-center text-sm">
+              {/* Quên mật khẩu bằng nút */}
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => {
                   logUIInteraction('button', 'forgot-password', {
                     source: 'login-view'
                   });
                   onSwitchToForgot();
                 }}
-                className={linkTransitionClasses}
+                className="h-9 text-muted-foreground hover:text-primary hover:bg-primary/10 
+                  transition-all duration-300 border border-transparent hover:border-primary/20
+                  backdrop-blur-sm group relative overflow-hidden"
               >
-                Forgot password?
-              </button>
-              <button
+                <span className="relative z-10 flex items-center gap-2">
+                  <i className="fas fa-key text-xs"></i>
+                  Forgot password?
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 
+                  translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
+              </Button>
+
+              {/* Đăng ký với nút */}
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => {
                   logUIInteraction('button', 'switch-to-register', {
                     source: 'login-view'
                   });
                   onSwitchToRegister();
                 }}
-                className={linkTransitionClasses}
+                className="h-10 bg-gradient-to-r from-primary/10 to-purple-600/10 
+                  border-primary/30 hover:border-primary/50 text-foreground hover:text-primary
+                  hover:bg-gradient-to-r hover:from-primary/20 hover:to-purple-600/20
+                  transition-all duration-300 backdrop-blur-sm group relative overflow-hidden
+                  hover:shadow-lg hover:shadow-primary/20"
               >
-                Don&apos;t have an account? Register
-              </button>
+                <span className="relative z-10 flex items-center gap-2">
+                  <i className="fas fa-user-plus text-xs"></i>
+                  Don&apos;t have an account? <strong>Register</strong>
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/10 to-primary/0 
+                  translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+              </Button>
             </div>
           </form>
         </CardContent>

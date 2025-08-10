@@ -321,7 +321,7 @@ export function TestTerminalLogs() {
                                         ) : (
                                             <div className="p-4 space-y-2">
                                                 {logs.map((log, index) => (
-                                                    <div key={index} className="p-3 bg-secondary/50 border border-border rounded-md">
+                                                    <div key={index} className="p-3 bg-secondary/50 border border-border/50 rounded-md">
                                                         <div className="flex items-start justify-between">
                                                             <div className="flex items-center space-x-2">
                                                                 <Badge className={getLevelColor(log.level)}>
@@ -339,7 +339,7 @@ export function TestTerminalLogs() {
                                                         {log.data && (
                                                             <details className="mt-1">
                                                                 <summary className="text-xs text-muted-foreground cursor-pointer">Data</summary>
-                                                                <pre className="mt-1 text-xs p-2 bg-muted/50 border border-border rounded overflow-auto">
+                                                                <pre className="mt-1 text-xs p-2 bg-muted/50 border border-border/50 rounded overflow-auto">
                                                                     {JSON.stringify(log.data, null, 2)}
                                                                 </pre>
                                                             </details>

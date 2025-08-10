@@ -26,8 +26,12 @@ import type {
   LyricsStatus,
   Platform,
   ArtistPrimaryRole,
-  AdditionalArtistRole
+  AdditionalArtistRole,
+  PrismaSubmission,
+  PrismaTrack,
+  convertLegacySubmissionToPrisma
 } from "@/types/submission"
+import { PrismaReleaseType, PrismaSubmissionStatus } from "@/types/submission"
 import {
   Rocket,
   UserIcon,
@@ -41,6 +45,7 @@ import {
 } from "lucide-react"
 import { useAuth } from "@/components/auth-provider"
 import { validateImageFile, validateAudioFile, getMinimumReleaseDate } from "@/lib/utils"
+import { multiDB } from "@/lib/database-api-service"
 
 interface AudioTrack {
   file: File
@@ -80,11 +85,11 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string>("")
   const [audioTracks, setAudioTracks] = useState<AudioTrack[]>([])
 
-  // Audio player state
+  // Hiển thị player
   const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null)
   const audioRefs = useRef<{ [key: string]: HTMLAudioElement }>({})
 
-  // Set minimum release date and user data on component mount
+  // Lựa chọn ngày phát hành tối thiểu và thông tin người dùng
   useEffect(() => {
     setReleaseDate(getMinimumReleaseDate())
     if (currentUser) {
@@ -201,11 +206,16 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
       setPlatforms(prev => [...prev, platform])
     } else {
       setPlatforms(prev => prev.filter(p => p !== platform))
-      }
-  }    // File upload handlers
+    }
+  }
+
+  // File upload handlers
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
+    const { files } = event.target
+    const file = files?.[0]
+    if (!file) {
+      return
+    }
 
     try {
       const validation = await validateImageFile(file)
@@ -222,8 +232,10 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
   }
 
   const handleAudioUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (!files || files.length === 0) return
+    const { files } = event.target
+    if (!files || files.length === 0) {
+      return
+    }
 
     Array.from(files).forEach(async (file) => {
       try {
@@ -231,16 +243,18 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
         if (!validation.valid) {
           showModal("Lỗi", [`${file.name}: ${validation.errors.join(", ")}`], "error")
           return
-        } const { isrc, newCounter } = generateISRC(currentUser, lastISRCCounter)
-        setLastISRCCounter(newCounter)
+        }
+        
+        // Không tự động tạo ISRC khi upload track
+        // ISRC sẽ được tạo ở giai đoạn release hoặc người dùng có thể nhập ISRC cũ
+        const trackId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
         const newTrack: AudioTrack = {
           file,
-          id: isrc,
+          id: trackId,
           info: {
             fileName: file.name,
-            title: file.name.replace(/\.[^/.]+$/, ""), // Default to filename without extension
-            isrc: isrc,
+            isrc: "", // Để trống, sẽ điền sau
             songTitle: file.name.replace(/\.[^/.]+$/, ""), // Default to filename without extension
             artistName: artistName,
             artistFullName: fullName,
@@ -253,7 +267,7 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
         showModal("Lỗi", [`Có lỗi xảy ra khi tải file ${file.name}`], "error")
       }
     })
-    }
+  }
 
   const removeAudioTrack = (trackId: string) => {
     setAudioTracks(prev => prev.filter(track => track.id !== trackId))
@@ -267,16 +281,16 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
     }
   }
 
-  // ISRC function - generates proper formatted ISRC code
+  // ISRC Management Functions
   const generateISRC = (user: User, lastCounter: number) => {
-  // Format: VNA2P2500001 where:
-  // VN - Country code for Vietnam
-  // A2P - Issuer code for An Kun Studio
-  // 25 - Year (2025)
-  // 00001 - Sequential 5-digit number
+    // Định dạng: VNA2P2500001
+    // VN - Mã quốc gia cho Việt Nam
+    // A2P - Mã nhà phát hành cho An Kun Studio
+    // 25 - Năm (2025)
+    // 00001 - Số thứ tự 5 chữ số
 
     const newCounter = lastCounter + 1
-    const year = new Date().getFullYear().toString().slice(2) // Get last 2 digits of year
+    const year = new Date().getFullYear().toString().slice(2)
     const isrc = `VNA2P${year}${String(newCounter).padStart(5, "0")}`
 
     return {
@@ -285,20 +299,78 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
     }
   }
 
+  // Update ISRC for a specific track
+  const updateTrackISRC = (trackId: string, isrc: string) => {
+    setAudioTracks(prev =>
+      prev.map((track) => {
+        if (track.id === trackId) {
+          return {
+            ...track,
+            info: {
+              ...track.info,
+              isrc: isrc
+            }
+          }
+        }
+        return track
+      })
+    )
+  }
+
+  // Generate ISRC for all tracks that don't have one (called during submission)
+  const generateISRCForAllTracks = () => {
+    let counter = lastISRCCounter
+    
+    setAudioTracks(prev =>
+      prev.map((track) => {
+        if (!track.info.isrc || track.info.isrc === "") {
+          const { isrc, newCounter } = generateISRC(currentUser, counter)
+          counter = newCounter
+          return {
+            ...track,
+            info: {
+              ...track.info,
+              isrc: isrc
+            }
+          }
+        }
+        return track
+      })
+    )
+    
+    setLastISRCCounter(counter)
+  }
+
   // Form submission handler
   const handleSubmit = async () => {
     // Validation
     const validationErrors = [];
 
     // Check required fields
-    if (!songTitle.trim()) validationErrors.push("Vui lòng nhập tên bài hát");
-    if (!artistName.trim()) validationErrors.push("Vui lòng nhập tên nghệ sĩ");
-    if (!fullName.trim()) validationErrors.push("Vui lòng nhập họ tên đầy đủ");
-    if (!userEmail.trim()) validationErrors.push("Vui lòng nhập email");
-    if (!userEmail.includes('@')) validationErrors.push("Email không hợp lệ");
-    if (audioTracks.length === 0) validationErrors.push("Vui lòng upload ít nhất một file nhạc");
-    if (!imageFile) validationErrors.push("Vui lòng upload ảnh bìa");
-    if (!releaseDate) validationErrors.push("Vui lòng chọn ngày phát hành");
+    if (!songTitle.trim()) {
+      validationErrors.push("Vui lòng nhập tên bài hát");
+    }
+    if (!artistName.trim()) {
+      validationErrors.push("Vui lòng nhập tên nghệ sĩ");
+    }
+    if (!fullName.trim()) {
+      validationErrors.push("Vui lòng nhập họ tên đầy đủ");
+    }
+    if (!userEmail.trim()) {
+      validationErrors.push("Vui lòng nhập email");
+    }
+    if (!userEmail.includes('@')) {
+      validationErrors.push("Email không hợp lệ");
+    }
+    if (audioTracks.length === 0) {
+      validationErrors.push("Vui lòng upload ít nhất một file nhạc");
+    }
+    if (!imageFile) {
+      validationErrors.push("Vui lòng upload ảnh bìa");
+    }
+    if (!releaseDate) {
+      validationErrors.push("Vui lòng chọn ngày phát hành");
+    }
 
     // Check for empty required fields in audio tracks
     const invalidTracks = audioTracks.filter(track => !track.info.songTitle.trim());
@@ -332,8 +404,14 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
         releaseType
       });
 
-      const { isrc, newCounter } = generateISRC(currentUser, lastISRCCounter);
-      setLastISRCCounter(newCounter);
+      // Generate ISRC for tracks that don't have one yet
+      generateISRCForAllTracks();
+
+      // Wait a bit for state to update
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Get the first track's ISRC for the image upload (legacy compatibility)
+      const firstTrackISRC = audioTracks[0]?.info.isrc || `VNA2P${new Date().getFullYear().toString().slice(2)}00001`;
 
       // Upload ảnh bìa
       const imageFormData = new FormData();
@@ -344,7 +422,7 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
       imageFormData.append("userId", currentUser.id);
       imageFormData.append("artistName", artistName);
       imageFormData.append("songTitle", songTitle);
-      imageFormData.append("isrc", isrc);
+      imageFormData.append("isrc", firstTrackISRC);
 
       const imageResponse = await fetch("/api/upload", {
         method: "POST",
@@ -356,15 +434,16 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
         throw new Error(`Lỗi upload ảnh: ${imageResult.message}`);
       }
 
-      // Upload các file âm thanh
-      const audioUrls: string[] = [];
+      // Upload các file âm thanh và tạo track data
+      const tracksData: Omit<PrismaTrack, 'id' | 'createdAt' | 'updatedAt' | 'submissionId'>[] = [];
+      
       for (const track of audioTracks) {
         const audioFormData = new FormData();
         audioFormData.append("file", track.file);
         audioFormData.append("type", "audio");
         audioFormData.append("userId", currentUser.id);
         audioFormData.append("artistName", artistName);
-        audioFormData.append("songTitle", songTitle);
+        audioFormData.append("songTitle", track.info.songTitle);
         audioFormData.append("isrc", track.id);
 
         const audioResponse = await fetch("/api/upload", {
@@ -377,24 +456,85 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
           throw new Error(`Lỗi upload âm thanh ${track.file.name}: ${audioResult.message}`);
         }
 
-        audioUrls.push(audioResult.url);
+        // Tạo dữ liệu track cho cấu trúc Prisma
+        tracksData.push({
+          title: track.info.songTitle,
+          artist: track.info.artistName,
+          filePath: audioResult.url,
+          duration: track.info.duration || 0,
+          isrc: track.id,
+          fileName: track.file.name,
+          artistFullName: track.info.artistFullName,
+          fileSize: track.file.size,
+          format: track.file.type,
+          bitrate: null, // Sẽ được điền bởi xử lý bitrate
+          sampleRate: null, // Sẽ được điền bởi xử lý GHz
+          mainCategory: track.info.mainCategory || null,
+          subCategory: track.info.subCategory || null,
+          lyrics: track.info.lyrics || null
+        });
       }
 
-      const newSubmission: Submission = {
-        id: Date.now().toString(),
+      // Convert release type to Prisma enum
+      const prismaReleaseType: PrismaReleaseType = 
+        releaseType === 'single' ? PrismaReleaseType.SINGLE :
+        releaseType === 'ep' ? PrismaReleaseType.EP :
+        releaseType === 'album' ? PrismaReleaseType.ALBUM :
+        releaseType === 'lp' ? PrismaReleaseType.ALBUM :
+        PrismaReleaseType.SINGLE;
+
+      // Tạo yêu cầu dữ liệu cho cấu trúc Prisma
+      const submissionData: Omit<PrismaSubmission, 'id' | 'createdAt' | 'updatedAt'> = {
+        title: songTitle,
+        artist: artistName,
+        UPC: null, // Điền sau bởi hãng
+        type: prismaReleaseType,
+        coverImagePath: imageResult.url,
+        releaseDate: new Date(releaseDate),
+        status: PrismaSubmissionStatus.PENDING,
+        metadataLocked: false,
+        published: false,
+        albumName: albumName || null,
+        mainCategory: mainCategory,
+        subCategory: subCategory || null,
+        platforms: hasBeenReleased === "yes" ? { platforms } : null,
+        distributionLink: null,
+        distributionPlatforms: null,
+        statusVietnamese: "Đã nhận, đang chờ duyệt",
+        rejectionReason: null,
+        notes: hasLyrics === "yes" ? lyrics : null,
+        // Signature fields
+        signedDocumentPath: null,
+        signedAt: null,
+        signerFullName: null,
+        isDocumentSigned: false,
         userId: currentUser.id,
-        isrc: audioTracks[0]?.id || "",
+        labelId: currentUser.id // Dùng ID của user hiện tại
+      };
+
+      // Dùng mới dữ liệu dịch vụ
+      const result = await multiDB.createSubmissionWithTracks(submissionData, tracksData);
+
+      if (!result.success) {
+        throw new Error(result.message || "Không thể tạo submission");
+      }
+
+      // Chuyển đổi về định dạng cũ để tương thích ngược
+      const legacySubmission: Submission = {
+        id: result.data!.submission.id,
+        userId: currentUser.id,
+        isrc: tracksData[0]?.isrc || "",
         uploaderUsername: currentUser.username,
         artistName,
         songTitle,
         albumName,
         userEmail,
         imageFile: imageFile?.name ?? "",
-        imageUrl: imageResult.url, // Sử dụng URL từ kết quả upload
-        audioUrl: audioUrls.length === 1 ? audioUrls[0] : undefined, // Single track
-        audioUrls: audioUrls.length > 1 ? audioUrls : undefined, // Multiple tracks
-        audioFilesCount: audioTracks.length,
-        status: "Đã nhận, đang chờ duyệt", // Sử dụng enum đúng
+        imageUrl: imageResult.url,
+        audioUrl: tracksData.length === 1 ? tracksData[0].filePath : undefined,
+        audioUrls: tracksData.map(track => track.filePath),
+        audioFilesCount: tracksData.length,
+        status: "Đã nhận, đang chờ duyệt",
         submissionDate: new Date().toISOString(),
         mainCategory,
         subCategory,
@@ -407,32 +547,32 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
         releaseDate,
         artistRole,
         fullName,
-        additionalArtists: [], // Required by Submission type
-        trackInfos: audioTracks.map(track => track.info), // Map audio tracks to trackInfos
+        additionalArtists: [],
+        trackInfos: audioTracks.map(track => track.info),
       };
 
-      onSubmissionAdded(newSubmission);
+      onSubmissionAdded(legacySubmission);
 
-      // Log the successful submission
-      logSubmissionActivity('create', newSubmission.id, 'success', {
+      // Ghi nhật ký hoạt động
+      logSubmissionActivity(result.data!.submission.id, 'create', 'success', {
         artistName,
         songTitle,
-        trackCount: audioTracks.length,
+        trackCount: tracksData.length,
         mainCategory,
         subCategory,
         releaseType,
         releaseDate
       });
 
-      // Reset form
+      // Làm mới biểu mẫu
       resetForm();
 
       showModal("Thành công", ["Đã gửi bài hát để chờ duyệt!"], "success");
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra khi gửi bài hát";
 
-      // Log the submission error
-      logSubmissionActivity('create', 'unknown' as any, 'error', {
+      // Ghi nhật ký lỗi không xác định
+      logSubmissionActivity('Không xác định', 'create', 'error', {
         artistName,
         songTitle,
         error: errorMessage,
@@ -469,18 +609,18 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
       <div className="max-w-4xl mx-auto p-6 space-y-8">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">🎵 Upload Nhạc Để Phát Hành Toàn Cầu</h1>
-            <p className="text-muted-foreground">Tải lên nhạc của bạn và chia sẻ với thế giới</p>
+            <h1 className="text-3xl font-bold mb-2">🎵 Upload nhạc để phát hành toàn cầu</h1>
+            <p className="text-muted-foreground">{process.env.COMPANY_DESCRIPTION}</p>
           </div>
           <div className="flex items-center">
-            <ThemeToggle />
+            <ThemeToggle/>
           </div>
         </div>
 
         <Tabs
           defaultValue="basic"
           className="w-full"
-                                        onValueChange={(value) => {
+          onValueChange={(value) => {
             logUIInteraction('tab', value as any, {
               formStep: value
             });
@@ -517,7 +657,7 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
                       id="fullName"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Ví dụ: Nguyễn Văn A"
+                      placeholder="Ví dụ: Nguyễn Mạnh A"
                     />
                   </div>
 
@@ -527,7 +667,7 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
                       id="artistName"
                       value={artistName}
                       onChange={(e) => setArtistName(e.target.value)}
-                      placeholder="Ví dụ: AnKun"
+                      placeholder="Ví dụ: An Kun"
                     />
                   </div>
                 </div>
@@ -540,7 +680,7 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
                       type="email"
                       value={userEmail}
                       onChange={(e) => setUserEmail(e.target.value)}
-                      placeholder="email@example.com"
+                      placeholder={process.env.COMPANY_EMAIL}
                     />
                   </div>
 
@@ -580,7 +720,7 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
                       id="albumName"
                       value={albumName}
                       onChange={(e) => setAlbumName(e.target.value)}
-                      placeholder="Tên album (nếu có)"
+                      placeholder="Tên bài hát - Single hoặc Album - EP"
                     />
                   </div>
                 </div>
@@ -611,13 +751,13 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
                       className="mb-4"
                     >
                       <UploadIcon className="mr-2 h-4 w-4" />
-                      Chọn ảnh bìa
+                      Chọn bìa ảnh đĩa
                     </Button>
                     {imagePreviewUrl && (
                       <div className="mt-4">
                         <img
                           src={imagePreviewUrl}
-                          alt="Preview"
+                          alt="Xem trước nè"
                           className="mx-auto max-w-xs rounded-lg"
                         />
                         <Button
@@ -661,64 +801,94 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
 
                     {audioTracks.length > 0 && (
                       <div className="mt-4 space-y-4">
-                        {audioTracks.map((track, index) => (<div key={track.id} className="border rounded-lg p-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="font-medium">{track.file.name}</span>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => toggleAudioPlayback(track.id, URL.createObjectURL(track.file))}
-                              >
-                                {currentlyPlaying === track.id ? (
-                                  <Pause className="h-4 w-4" />
-                                ) : (
-                                  <Play className="h-4 w-4" />
-                                )}
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => removeAudioTrack(track.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                        {audioTracks.map((track, index) => (
+                          <div key={track.id} className="border rounded-lg p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-medium">{track.file.name}</span>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => toggleAudioPlayback(track.id, URL.createObjectURL(track.file))}
+                                >
+                                  {currentlyPlaying === track.id ? (
+                                    <Pause className="h-4 w-4" />
+                                  ) : (
+                                    <Play className="h-4 w-4" />
+                                  )}
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeAudioTrack(track.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </div>
-                          </div>
 
                           {/* Track title input field */}
-                          <div className="mb-4">
-                            <Label htmlFor={`track-title-${track.id}`}>Tên bài hát</Label>
-                            <Input
-                              id={`track-title-${track.id}`}
-                              value={track.info.songTitle}
-                              onChange={(e) => {
-                                setAudioTracks(prev =>
-                                  prev.map(t => {
-                                    if (t.id === track.id) {
-                                      return {
-                                        ...t,
-                                        info: {
-                                          ...t.info,
-                                          songTitle: e.target.value
-                                        }
-                                      };
-                                    }
-                                    return t;
-                                  })
-                                );
-                              }}
-                              placeholder="Nhập tên bài hát"
-                              className="mt-1"
-                            />
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                              <Label htmlFor={`track-title-${track.id}`}>Tên bài hát</Label>
+                              <Input
+                                id={`track-title-${track.id}`}
+                                value={track.info.songTitle}
+                                onChange={(e) => {
+                                  setAudioTracks(prev =>
+                                    prev.map(t => {
+                                      if (t.id === track.id) {
+                                        return {
+                                          ...t,
+                                          info: {
+                                            ...t.info,
+                                            songTitle: e.target.value
+                                          }
+                                        };
+                                      }
+                                      return t;
+                                    })
+                                  );
+                                }}
+                                placeholder="Nhập tên bài hát"
+                                className="mt-1"
+                              />
+                            </div>
+
+                            <div>
+                              <Label htmlFor={`track-isrc-${track.id}`}>
+                                ISRC (tùy chọn) 
+                                <span className="text-sm text-gray-500 ml-1">
+                                  - Để trống nếu chưa có, sẽ tự tạo khi release
+                                </span>
+                              </Label>
+                              <Input
+                                id={`track-isrc-${track.id}`}
+                                value={track.info.isrc}
+                                onChange={(e) => updateTrackISRC(track.id, e.target.value)}
+                                placeholder="VNA2P25XXXXX hoặc để trống"
+                                className="mt-1"
+                                maxLength={12}
+                              />
+                              {track.info.isrc && (
+                                <p className="text-xs text-green-600 mt-1">
+                                  ✓ ISRC đã có: {track.info.isrc}
+                                </p>
+                              )}
+                              {!track.info.isrc && (
+                                <p className="text-xs text-blue-600 mt-1">
+                                  📋 Sẽ tự tạo ISRC khi gửi submission
+                                </p>
+                              )}
+                            </div>
                           </div>
 
                           {/* Additional Artists for this track */}
                           <div className="mt-4">
                             <div className="flex items-center justify-between mb-2">
-                              <Label>Nghệ sĩ phối hợp (tùy chọn)</Label>
+                              <Label>Nghệ sĩ tham gia ft. (tùy chọn)</Label>
                               <Button
                                 type="button"
                                 variant="outline"
@@ -739,7 +909,7 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
                                 />
                                 <Input
                                   placeholder="Họ tên đầy đủ"
-                                  value={artist.fullName || ""}
+                                  value={artist.fullName || "Theo giấy tờ CCCD"}
                                   onChange={(e) => updateAdditionalArtist(track.id, artistIndex, 'fullName', e.target.value)}
                                 />
                                 <Select
@@ -964,11 +1134,11 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
                     min={getMinimumReleaseDate()}
                   />
                   <p className="text-sm text-muted-foreground mt-1">
-                    Ngày phát hành phải ít nhất 2 ngày kể từ hôm nay
+                    Ngày phát hành phải ít nhất 2 ngày kể từ hôm nay hoặc đã từng phát hành thì nhập ngày cũ
                   </p>
                 </div>
 
-                <div className="bg-secondary/50 border border-border p-4 rounded-lg">
+                <div className="bg-secondary/50 border border-border/50 p-4 rounded-lg">
                   <h4 className="font-semibold mb-2 text-foreground">📋 Tóm tắt thông tin</h4>
                   <div className="space-y-2 text-sm text-foreground">
                     <p><strong>Nghệ sĩ:</strong> {artistName || "Chưa nhập"}</p>
@@ -996,7 +1166,7 @@ export default function UploadFormView({ onSubmissionAdded, showModal }: Readonl
                   ) : (
                     <>
                       <Rocket className="mr-2 h-4 w-4" />
-                      Gửi để chờ duyệt
+                      Gửi để tớ duyệt nhanh duyệt lẹ nào
                     </>
                   )}
                 </Button>

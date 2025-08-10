@@ -3,7 +3,7 @@
 
 import { config } from 'dotenv';
 import pg from 'pg';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 config({ path: '../.env.local' });
 
