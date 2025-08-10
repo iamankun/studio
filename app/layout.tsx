@@ -1,14 +1,10 @@
 import type { Metadata } from "next"
-import { Dosis } from "next/font/google"
 import { RootLayoutClient } from "@/components/root-layout-client"
 import "./globals.css"
 import "./additional-styles.css"
 
-const dosis = Dosis({ 
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-dosis",
-})
+// Using local font fallback instead of Google Fonts for build reliability
+const fontClass = "font-sans"
 
 export const metadata: Metadata = {
   title: process.env.COMPANY_NAME,
@@ -25,7 +21,7 @@ export default function RootLayout({
       <head>
         <link rel="icon" href={process.env.COMPANY_LOGOICO} />
       </head>
-      <RootLayoutClient className={dosis.className}>
+      <RootLayoutClient className={fontClass}>
         {children}
       </RootLayoutClient>
     </html>
