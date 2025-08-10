@@ -1,30 +1,6 @@
 // Đơn giản hóa authentication - chỉ localStorage
-export interface User {
-  id: string
-  username: string
-  role: string
-  fullName: string
-  email: string
-  avatar: string
-  bio: string
-  socialLinks: {
-    facebook: string
-    youtube: string
-    spotify: string
-    appleMusic: string
-    tiktok: string
-    instagram: string
-  }
-  createdAt: string
-  isrcCodePrefix?: string
-  backgroundSettings?: {
-    type: string
-    gradient: string
-    videoUrl: string
-    opacity: number
-    playlist: string
-  }
-}
+import type { User } from '@/types/user';
+import { authenticateUserWithDatabase } from './database-auth'
 
 export function getStoredUser(): User | null {
   if (typeof window === 'undefined') return null
@@ -56,9 +32,6 @@ export function clearUser(): void {
     console.error("Failed to clear user:", error)
   }
 }
-
-import type { User } from '@/types/user';
-import { authenticateUserWithDatabase } from './database-auth'
 
 export async function authenticateUser(username: string, password: string): Promise<User | null> {
   // Sử dụng credentials từ .env.local
