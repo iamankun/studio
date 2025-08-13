@@ -63,7 +63,7 @@ async function stabilityTest() {
         // Test 3: Database Schema
         console.log('\n🗄️ TEST 3: Database Schema');
         console.log('---------------------------');
-        const requiredTables = ['artist', 'label_manager', 'submissions'];
+        const requiredTables = ['User', 'Label', 'Submission', 'nhatKy'];
         let tableCount = 0;
 
         for (const table of requiredTables) {
