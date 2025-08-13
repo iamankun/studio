@@ -1,25 +1,25 @@
 // scripts/kiem-tra-database.js
 // Script kiểm tra kết nối database và tạo bảng nếu cần
 
-const { PrismaClient } = require('@prisma/client')
+import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function kiemTraDatabase() {
   console.log('🔍 Đang kiểm tra kết nối database...')
-  
+
   try {
     // Kiểm tra kết nối
     await prisma.$connect()
     console.log('✅ Kết nối database thành công!')
-    
+
     // Kiểm tra schema hiện tại
     console.log('📊 Đang kiểm tra schema hiện tại...')
-    
+
     // Thử query một bảng có thể không tồn tại để xem lỗi
     try {
       const nhatKyCount = await prisma.nhatKy.count()
       console.log(`✅ Bảng nhatKy đã tồn tại với ${nhatKyCount} bản ghi`)
-      
+
       // Hiển thị 5 bản ghi mới nhất nếu có
       if (nhatKyCount > 0) {
         const latestLogs = await prisma.nhatKy.findMany({
@@ -27,7 +27,7 @@ async function kiemTraDatabase() {
           orderBy: { createdAt: 'desc' },
           include: { user: true }
         })
-        
+
         console.log('\n📝 5 bản ghi nhật ký gần nhất:')
         latestLogs.forEach((log, index) => {
           console.log(`   ${index + 1}. [${new Date(log.createdAt).toLocaleString()}] ${log.action}`)
@@ -43,12 +43,12 @@ async function kiemTraDatabase() {
         console.error('❌ Lỗi khi truy vấn bảng nhatKy:', error.message)
       }
     }
-    
+
     // Kiểm tra bảng User
     try {
       const userCount = await prisma.user.count()
       console.log(`✅ Bảng User đã tồn tại với ${userCount} bản ghi`)
-      
+
       // Hiển thị thông tin tài khoản admin nếu có
       if (userCount > 0) {
         const adminUser = await prisma.user.findFirst({
@@ -63,7 +63,7 @@ async function kiemTraDatabase() {
             label: true
           }
         })
-        
+
         if (adminUser) {
           console.log('\n👤 Thông tin tài khoản quản trị:')
           console.log(`   - ID: ${adminUser.id}`)
@@ -74,7 +74,33 @@ async function kiemTraDatabase() {
           console.log(`   - Tạo lúc: ${new Date(adminUser.createdAt).toLocaleString()}`)
         } else {
           console.log('⚠️ Chưa có tài khoản quản trị trong hệ thống')
-          console.log('💡 Chạy script migrate-database.js để tạo tài khoản quản trị')
+          // Tạo tài khoản đầu tiên nếu chưa có
+          console.log('� Đang tạo tài khoản ankunstudio đầu tiên với đủ quyền...')
+          try {
+            const newUser = await prisma.user.create({
+              data: {
+                email: 'ankunstudio@ankun.dev',
+                name: 'An Kun Studio',
+                password: '@iamAnKun',
+                roles: ['ADMINISTRATOR', 'LABEL_MANAGER', 'ARTIST'],
+                isActive: true,
+                profile: {
+                  create: {
+                    displayName: 'An Kun',
+                    bio: 'Tài khoản hệ thống đầu tiên, đủ quyền quản trị, label manager và nghệ sĩ.'
+                  }
+                }
+              },
+              include: { profile: true }
+            })
+            console.log('✅ Đã tạo tài khoản ankunstudio thành công:')
+            console.log(`   - Email: ${newUser.email}`)
+            console.log(`   - Tên: ${newUser.name}`)
+            console.log(`   - Vai trò: ${JSON.stringify(newUser.roles)}`)
+            console.log(`   - Tạo lúc: ${new Date(newUser.createdAt).toLocaleString()}`)
+          } catch (err) {
+            console.error('❌ Lỗi khi tạo tài khoản đầu tiên:', err.message)
+          }
         }
       }
     } catch (error) {
@@ -85,14 +111,14 @@ async function kiemTraDatabase() {
         console.error('❌ Lỗi khi truy vấn bảng User:', error.message)
       }
     }
-    
+
     // Kiểm tra URL kết nối database
     const databaseUrl = process.env.DATABASE_URL || 'Không tìm thấy DATABASE_URL'
     console.log('🔗 Database URL hiện tại:', databaseUrl.replace(/:[^:]*@/, ':****@'))
-    
+
     // Kiểm tra các bảng khác
     console.log('\n📋 Kiểm tra các bảng khác:')
-    
+
     // Kiểm tra bảng Label
     try {
       const labelCount = await prisma.label.count()
@@ -100,7 +126,7 @@ async function kiemTraDatabase() {
     } catch (error) {
       console.log(`   - Bảng Label: ❌ Chưa tồn tại`)
     }
-    
+
     // Kiểm tra bảng Submission
     try {
       const submissionCount = await prisma.submission.count()
@@ -108,7 +134,7 @@ async function kiemTraDatabase() {
     } catch (error) {
       console.log(`   - Bảng Submission: ❌ Chưa tồn tại`)
     }
-    
+
     // Kiểm tra bảng Track
     try {
       const trackCount = await prisma.track.count()
@@ -116,7 +142,7 @@ async function kiemTraDatabase() {
     } catch (error) {
       console.log(`   - Bảng Track: ❌ Chưa tồn tại`)
     }
-    
+
     // Kiểm tra bảng File
     try {
       const fileCount = await prisma.file.count()
@@ -124,7 +150,7 @@ async function kiemTraDatabase() {
     } catch (error) {
       console.log(`   - Bảng File: ❌ Chưa tồn tại`)
     }
-    
+
     // Kiểm tra bảng FileFolder
     try {
       const folderCount = await prisma.fileFolder.count()
@@ -132,7 +158,7 @@ async function kiemTraDatabase() {
     } catch (error) {
       console.log(`   - Bảng FileFolder: ❌ Chưa tồn tại`)
     }
-    
+
     // Hiển thị trạng thái migration
     console.log('\n🔄 Trạng thái Migration:')
     try {
@@ -146,7 +172,7 @@ async function kiemTraDatabase() {
       console.log('   ❌ Không thể truy cập lịch sử migrations')
       console.log('   💡 Cần chạy prisma migrate để khởi tạo migrations')
     }
-    
+
   } catch (error) {
     console.error('❌ Lỗi kết nối database:', error.message)
     console.log('💡 Kiểm tra lại DATABASE_URL trong file .env.local')
