@@ -1,23 +1,38 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { StatusIndicator } from "@/components/status-indicator"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { Settings, Save, ImageIcon, Globe, Palette, HelpCircle, Mail, Database } from "lucide-react"
-import { useSystemStatus } from "@/components/system-status-provider"
-import { useAuth } from "@/components/auth-provider"
-import Image from "next/image"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StatusIndicator } from "@/components/status-indicator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import {
+  Settings,
+  Save,
+  ImageIcon,
+  Globe,
+  Palette,
+  HelpCircle,
+  Mail,
+  Database,
+} from "lucide-react";
+import { useSystemStatus } from "@/components/system-status-provider";
+import { useAuth } from "@/components/auth-provider";
+import Image from "next/image";
 
 export function SettingsView() {
   const { user: currentUser } = useAuth();
-  const { status, checkAllSystems } = useSystemStatus()
+  const { status, checkAllSystems } = useSystemStatus();
 
   // Email settings removed - managed through environment variables
 
@@ -26,13 +41,14 @@ export function SettingsView() {
     logoUrl: "/face.png",
     homeUrl: "/",
     version: "1.0.0",
-  })
+  });
 
-  const [appMode, setAppMode] = useState("demo") // demo or production
+  const [appMode, setAppMode] = useState("demo"); // demo or production
 
   const [backgroundSettings, setBackgroundSettings] = useState({
     type: "gradient",
-    gradient: "linear-gradient(135deg,rgba(102, 126, 234, 0.14) 0%,rgba(118, 75, 162, 0.17) 100%)",
+    gradient:
+      "linear-gradient(135deg,rgba(102, 126, 234, 0.14) 0%,rgba(118, 75, 162, 0.17) 100%)",
     videoUrl: "",
     opacity: 0.3,
     randomVideo: true,
@@ -48,28 +64,30 @@ export function SettingsView() {
       "RgKAFK5djSk",
       "OPf0YbXqDm0",
     ],
-  })
+  });
 
   const [footerSettings, setFooterSettings] = useState({
-    companyName: "AKs Studio", // Giá trị mặc định
-    version: "1.0.0", // Giá trị mặc định
-    logoUrl: "/face.png", // Giá trị mặc định
-    websiteUrl: "/", // Giá trị mặc định
-    description: "Digital Music Distribution",
-  })
+    companyName: process.env.COMPANY_NAME ?? "AKs Studio", // Giá trị mặc định
+    version: process.version ?? "Chưa có thông tin phiên bản", // Giá trị mặc định
+    logoUrl: process.env.COMPANY_LOGO ?? "/face.png", // Giá trị mặc định
+    websiteUrl: process.env.COMPANY_WEBSITE ?? "domain.com", // Giá trị mặc định
+    description: process.env.COMPANY_DESCRIPTION ?? "The Title",
+  });
 
   // Database settings removed - managed through environment variables
 
   useEffect(() => {
     // Load all settings
-    loadSettings()
-  }, [])
+    loadSettings();
+  }, []);
 
   if (!currentUser) {
     return (
       <div className="p-6 min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">Đang tải thông tin</h2>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">
+            Đang tải thông tin
+          </h2>
           <p className="text-gray-500">Vui lòng chờ trong giây lát...</p>
         </div>
       </div>
@@ -78,85 +96,98 @@ export function SettingsView() {
 
   const loadSettings = () => {
     // Load app mode from localStorage
-    const savedMode = localStorage.getItem("APP_MODE")
+    const savedMode = localStorage.getItem("APP_MODE");
     if (savedMode) {
-      setAppMode(savedMode)
+      setAppMode(savedMode);
     }
 
     // Email settings are now managed through environment variables
 
     // Load app settings
-    const savedApp = localStorage.getItem("appSettings_v2")
+    const savedApp = localStorage.getItem("appSettings_v2");
     if (savedApp) {
-      setAppSettings(JSON.parse(savedApp))
+      setAppSettings(JSON.parse(savedApp));
     }
 
     // Load background settings
-    const savedBackground = localStorage.getItem("backgroundSettings_v2")
+    const savedBackground = localStorage.getItem("backgroundSettings_v2");
     if (savedBackground) {
-      setBackgroundSettings(JSON.parse(savedBackground))
+      setBackgroundSettings(JSON.parse(savedBackground));
     }
 
     // Load footer settings
-    const savedFooter = localStorage.getItem("footerSettings_v2")
+    const savedFooter = localStorage.getItem("footerSettings_v2");
     if (savedFooter) {
-      setFooterSettings(JSON.parse(savedFooter))
+      setFooterSettings(JSON.parse(savedFooter));
     } else {
       // Cập nhật footerSettings nếu appSettings đã được tải, hoặc dùng giá trị mặc định
       if (savedApp) {
-        const parsedApp = JSON.parse(savedApp)
+        const parsedApp = JSON.parse(savedApp);
         setFooterSettings((prev) => ({
           ...prev,
           companyName: parsedApp.appName,
           version: parsedApp.version,
           logoUrl: parsedApp.logoUrl,
           websiteUrl: parsedApp.homeUrl,
-        }))
+        }));
       }
     }
 
     // Database settings are now managed through environment variables
-  }
+  };
 
   // Email settings handlers removed - now managed through environment variables
 
   const handleSaveAppSettings = () => {
-    localStorage.setItem("appSettings_v2", JSON.stringify(appSettings))
-    showModal("Lưu thành công", ["Đã lưu cài đặt ứng dụng!"], "success")
+    localStorage.setItem("appSettings_v2", JSON.stringify(appSettings));
+    showModal("Lưu thành công", ["Đã lưu cài đặt ứng dụng!"], "success");
     // Update favicon
-    const favicon = document.querySelector("link[rel*='icon']") as HTMLLinkElement
+    const favicon = document.querySelector(
+      "link[rel*='icon']"
+    ) as HTMLLinkElement;
     if (favicon) {
-      favicon.href = appSettings.logoUrl
+      favicon.href = appSettings.logoUrl;
     }
     // Update title
-    document.title = `${appSettings.appName} - Digital Music Distribution`
-  }
+    document.title = `${appSettings.appName} - Digital Music Distribution`;
+  };
 
   const handleSaveBackgroundSettings = () => {
-    localStorage.setItem("backgroundSettings_v2", JSON.stringify(backgroundSettings))
-    window.dispatchEvent(new CustomEvent("backgroundUpdate", { detail: backgroundSettings }))
-    showModal("Lưu thành công", ["Đã lưu cài đặt background!"], "success")
-  }
+    localStorage.setItem(
+      "backgroundSettings_v2",
+      JSON.stringify(backgroundSettings)
+    );
+    window.dispatchEvent(
+      new CustomEvent("backgroundUpdate", { detail: backgroundSettings })
+    );
+    showModal("Lưu thành công", ["Đã lưu cài đặt background!"], "success");
+  };
 
   const handleSaveFooterSettings = () => {
-    localStorage.setItem("footerSettings_v2", JSON.stringify(footerSettings))
-    window.dispatchEvent(new CustomEvent("footerUpdate", { detail: footerSettings }))
-    showModal("Lưu thành công", ["Đã lưu cài đặt footer!"], "success")
-  }
+    localStorage.setItem("footerSettings_v2", JSON.stringify(footerSettings));
+    window.dispatchEvent(
+      new CustomEvent("footerUpdate", { detail: footerSettings })
+    );
+    showModal("Lưu thành công", ["Đã lưu cài đặt footer!"], "success");
+  };
 
   // Database and SMTP handlers removed - now managed through environment variables
 
   // Helper function to show modal (can be moved to a context or prop if needed more globally)
-  const showModal = (title: string, messages: string[], type: "error" | "success" = "error") => {
+  const showModal = (
+    title: string,
+    messages: string[],
+    type: "error" | "success" = "error"
+  ) => {
     const event = new CustomEvent("showGlobalNotification", {
       detail: {
         title,
         message: messages.join(" "),
         type,
       },
-    })
-    window.dispatchEvent(event)
-  }
+    });
+    window.dispatchEvent(event);
+  };
 
   return (
     <div className="p-2 md:p-6">
@@ -167,13 +198,16 @@ export function SettingsView() {
         </h2>
         <div className="flex items-center space-x-4">
           <div className="text-sm">
-            <span className="text-gray-400">SMTP:</span> <StatusIndicator status={status.smtp} />
+            <span className="text-gray-400">SMTP:</span>{" "}
+            <StatusIndicator status={status.smtp} />
           </div>
           <div className="text-sm">
-            <span className="text-gray-400">DB:</span> <StatusIndicator status={status.database} />
+            <span className="text-gray-400">DB:</span>{" "}
+            <StatusIndicator status={status.database} />
           </div>
           <div className="text-sm">
-            <span className="text-gray-400">Storage:</span> <StatusIndicator status={status.localStorage} />
+            <span className="text-gray-400">Storage:</span>{" "}
+            <StatusIndicator status={status.localStorage} />
           </div>
         </div>
       </div>
@@ -202,7 +236,12 @@ export function SettingsView() {
                   <Label>Tên ứng dụng</Label>
                   <Input
                     value={appSettings.appName}
-                    onChange={(e) => setAppSettings({ ...appSettings, appName: e.target.value })}
+                    onChange={(e) =>
+                      setAppSettings({
+                        ...appSettings,
+                        appName: e.target.value,
+                      })
+                    }
                     placeholder="[Điều chỉnh tên trong ứng dụng]"
                     className="mt-1"
                   />
@@ -211,7 +250,12 @@ export function SettingsView() {
                   <Label>Phiên bản</Label>
                   <Input
                     value={appSettings.version}
-                    onChange={(e) => setAppSettings({ ...appSettings, version: e.target.value })}
+                    onChange={(e) =>
+                      setAppSettings({
+                        ...appSettings,
+                        version: e.target.value,
+                      })
+                    }
                     placeholder={appSettings.version}
                     className="mt-1"
                   />
@@ -220,7 +264,12 @@ export function SettingsView() {
                   <Label>Logo URL (Favicon)</Label>
                   <Input
                     value={appSettings.logoUrl}
-                    onChange={(e) => setAppSettings({ ...appSettings, logoUrl: e.target.value })}
+                    onChange={(e) =>
+                      setAppSettings({
+                        ...appSettings,
+                        logoUrl: e.target.value,
+                      })
+                    }
                     placeholder={appSettings.logoUrl}
                     className="mt-1"
                   />
@@ -229,7 +278,12 @@ export function SettingsView() {
                   <Label>Trang chủ URL (Click logo)</Label>
                   <Input
                     value={appSettings.homeUrl}
-                    onChange={(e) => setAppSettings({ ...appSettings, homeUrl: e.target.value })}
+                    onChange={(e) =>
+                      setAppSettings({
+                        ...appSettings,
+                        homeUrl: e.target.value,
+                      })
+                    }
                     placeholder={appSettings.homeUrl}
                     className="mt-1"
                   />
@@ -239,17 +293,28 @@ export function SettingsView() {
               <div className="border border-gray-600 rounded-lg p-4 bg-gray-700">
                 <h4 className="text-sm font-semibold mb-2">Xem trước:</h4>
                 <div className="flex items-center space-x-4">
-                  <img
-                    src={appSettings.logoUrl || process.env.COMPANY_LOGO || "/logo.svg"}
+                  <Image
+                    src={
+                      appSettings.logoUrl ||
+                      process.env.COMPANY_LOGO ||
+                      "/logo.svg"
+                    }
                     alt="App Logo"
+                    width={32}
+                    height={32}
                     className="h-8 w-8 rounded object-cover"
                     onError={(e) => {
-                      ; (e.target as HTMLImageElement).src = process.env.COMPANY_LOGO || "/logo.svg"
+                      (e.target as HTMLImageElement).src =
+                        process.env.COMPANY_LOGO || "/logo.svg";
                     }}
                   />
                   <div>
-                    <h3 className="font-semibold text-white">{appSettings.appName}</h3>
-                    <p className="text-sm text-gray-400">v{appSettings.version}</p>
+                    <h3 className="font-semibold text-white">
+                      {appSettings.appName}
+                    </h3>
+                    <p className="text-sm text-gray-400">
+                      v{appSettings.version}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -282,7 +347,12 @@ export function SettingsView() {
                 <Label>Loại Background</Label>
                 <Select
                   value={backgroundSettings.type}
-                  onValueChange={(value) => setBackgroundSettings({ ...backgroundSettings, type: value })}
+                  onValueChange={(value) =>
+                    setBackgroundSettings({
+                      ...backgroundSettings,
+                      type: value,
+                    })
+                  }
                 >
                   <SelectTrigger className="mt-1">
                     <SelectValue />
@@ -299,7 +369,12 @@ export function SettingsView() {
                   <Label>CSS Gradient</Label>
                   <Textarea
                     value={backgroundSettings.gradient}
-                    onChange={(e) => setBackgroundSettings({ ...backgroundSettings, gradient: e.target.value })}
+                    onChange={(e) =>
+                      setBackgroundSettings({
+                        ...backgroundSettings,
+                        gradient: e.target.value,
+                      })
+                    }
                     placeholder="linear-gradient(135deg,rgba(102, 126, 234, 0.19) 0%,rgba(118, 75, 162, 0.2) 100%)"
                     className="mt-1"
                     rows={3}
@@ -313,7 +388,10 @@ export function SettingsView() {
                     <Switch
                       checked={backgroundSettings.randomVideo}
                       onCheckedChange={(checked) =>
-                        setBackgroundSettings({ ...backgroundSettings, randomVideo: checked })
+                        setBackgroundSettings({
+                          ...backgroundSettings,
+                          randomVideo: checked,
+                        })
                       }
                     />
                     <Label>Video ngẫu nhiên</Label>
@@ -324,8 +402,13 @@ export function SettingsView() {
                       <Label>YouTube URL</Label>
                       <Input
                         value={backgroundSettings.videoUrl}
-                        onChange={(e) => setBackgroundSettings({ ...backgroundSettings, videoUrl: e.target.value })}
-                        placeholder="https://www.youtube.com/watch?v=..."
+                        onChange={(e) =>
+                          setBackgroundSettings({
+                            ...backgroundSettings,
+                            videoUrl: e.target.value,
+                          })
+                        }
+                        placeholder="Dán link YouTube"
                         className="mt-1"
                       />
                     </div>
@@ -338,7 +421,9 @@ export function SettingsView() {
                       onChange={(e) =>
                         setBackgroundSettings({
                           ...backgroundSettings,
-                          videoList: e.target.value.split("\n").filter((id) => id.trim()),
+                          videoList: e.target.value
+                            .split("\n")
+                            .filter((id) => id.trim()),
                         })
                       }
                       placeholder="dQw4w9WgXcQ&#10;kJQP7kiw5Fk&#10;..."
@@ -358,7 +443,10 @@ export function SettingsView() {
                   step="0.1"
                   value={backgroundSettings.opacity}
                   onChange={(e) =>
-                    setBackgroundSettings({ ...backgroundSettings, opacity: Number.parseFloat(e.target.value) })
+                    setBackgroundSettings({
+                      ...backgroundSettings,
+                      opacity: Number.parseFloat(e.target.value),
+                    })
                   }
                   className="w-full mt-1"
                 />
@@ -390,7 +478,12 @@ export function SettingsView() {
                   <Label>Label records</Label>
                   <Input
                     value={footerSettings.companyName}
-                    onChange={(e) => setFooterSettings({ ...footerSettings, companyName: e.target.value })}
+                    onChange={(e) =>
+                      setFooterSettings({
+                        ...footerSettings,
+                        companyName: e.target.value,
+                      })
+                    }
                     placeholder={appSettings.appName}
                     className="mt-1"
                   />
@@ -399,16 +492,26 @@ export function SettingsView() {
                   <Label>Phiên bản</Label>
                   <Input
                     value={footerSettings.version}
-                    onChange={(e) => setFooterSettings({ ...footerSettings, version: e.target.value })}
-                    placeholder="1.2.0-beta"
+                    onChange={(e) =>
+                      setFooterSettings({
+                        ...footerSettings,
+                        version: e.target.value,
+                      })
+                    }
+                    placeholder={process.env.version}
                     className="mt-1"
                   />
                 </div>
                 <div>
-                  <Label>Logo URL</Label>
+                  <Label>{process.env.COMPANY_NAME} Logo URL</Label>
                   <Input
                     value={footerSettings.logoUrl}
-                    onChange={(e) => setFooterSettings({ ...footerSettings, logoUrl: e.target.value })}
+                    onChange={(e) =>
+                      setFooterSettings({
+                        ...footerSettings,
+                        logoUrl: e.target.value,
+                      })
+                    }
                     placeholder={appSettings.logoUrl}
                     className="mt-1"
                   />
@@ -417,7 +520,12 @@ export function SettingsView() {
                   <Label>Website URL</Label>
                   <Input
                     value={footerSettings.websiteUrl}
-                    onChange={(e) => setFooterSettings({ ...footerSettings, websiteUrl: e.target.value })}
+                    onChange={(e) =>
+                      setFooterSettings({
+                        ...footerSettings,
+                        websiteUrl: e.target.value,
+                      })
+                    }
                     placeholder={appSettings.homeUrl}
                     className="mt-1"
                   />
@@ -428,8 +536,13 @@ export function SettingsView() {
                 <Label>Mô tả</Label>
                 <Input
                   value={footerSettings.description}
-                  onChange={(e) => setFooterSettings({ ...footerSettings, description: e.target.value })}
-                  placeholder="Digital Music Distribution"
+                  onChange={(e) =>
+                    setFooterSettings({
+                      ...footerSettings,
+                      description: e.target.value,
+                    })
+                  }
+                  placeholder={process.env.COMPANY_NAME}
                   className="mt-1"
                 />
               </div>
@@ -471,16 +584,20 @@ export function SettingsView() {
                 <h4>2. Cấu hình hệ thống (Label Manager)</h4>
                 <ol>
                   <li>
-                    <strong>Cài đặt SMTP:</strong> Cấu hình email để gửi thông báo
+                    <strong>Cài đặt SMTP:</strong> Cấu hình email để gửi thông
+                    báo
                   </li>
                   <li>
-                    <strong>Cài đặt Database:</strong> Kết nối database để lưu trữ dữ liệu
+                    <strong>Cài đặt Database:</strong> Kết nối database để lưu
+                    trữ dữ liệu
                   </li>
                   <li>
-                    <strong>Cài đặt ứng dụng:</strong> Tùy chỉnh tên, logo, trang chủ
+                    <strong>Cài đặt ứng dụng:</strong> Tùy chỉnh tên, logo,
+                    trang chủ
                   </li>
                   <li>
-                    <strong>Cài đặt Background:</strong> Chọn gradient hoặc video YouTube
+                    <strong>Cài đặt Background:</strong> Chọn gradient hoặc
+                    video YouTube
                   </li>
                 </ol>
 
@@ -526,7 +643,9 @@ export function SettingsView() {
                       <li>Cấu hình SMTP với thông tin email thật</li>
                       <li>Kết nối database (MySQL/PostgreSQL)</li>
                       <li>Kiểm tra localStorage hoạt động</li>
-                      <li>Khi cả 3 hệ thống kết nối, logo BETA sẽ tự động ẩn</li>
+                      <li>
+                        Khi cả 3 hệ thống kết nối, logo BETA sẽ tự động ẩn
+                      </li>
                     </ol>
 
                     <h5>Cấu hình SMTP Gmail:</h5>
@@ -574,7 +693,10 @@ export function SettingsView() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-lg font-semibold">Chế độ hiện tại: {appMode === "production" ? "Production" : "Demo"}</Label>
+                    <Label className="text-lg font-semibold">
+                      Chế độ hiện tại:{" "}
+                      {appMode === "production" ? "Production" : "Demo"}
+                    </Label>
                     <div className="mt-2 p-4 bg-gray-700 rounded-lg">
                       <div className="flex items-center justify-between">
                         <span className="text-sm">Demo Mode</span>
@@ -583,9 +705,9 @@ export function SettingsView() {
                           onCheckedChange={(checked) => {
                             if (checked && appMode !== "demo") {
                               // Switch to demo
-                              localStorage.setItem("APP_MODE", "demo")
-                              setAppMode("demo")
-                              window.location.reload()
+                              localStorage.setItem("APP_MODE", "demo");
+                              setAppMode("demo");
+                              window.location.reload();
                             }
                           }}
                         />
@@ -605,9 +727,9 @@ export function SettingsView() {
                           onCheckedChange={(checked) => {
                             if (checked && appMode !== "production") {
                               // Switch to production
-                              localStorage.setItem("APP_MODE", "production")
-                              setAppMode("production")
-                              window.location.reload()
+                              localStorage.setItem("APP_MODE", "production");
+                              setAppMode("production");
+                              window.location.reload();
                             }
                           }}
                         />
@@ -621,9 +743,13 @@ export function SettingsView() {
 
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-lg font-semibold">Thông tin chế độ</Label>
+                    <Label className="text-lg font-semibold">
+                      Thông tin chế độ
+                    </Label>
                     <div className="mt-2 p-4 bg-blue-900/20 border border-blue-600 rounded-lg">
-                      <h4 className="font-semibold text-blue-400 mb-2">🔧 Production Mode</h4>
+                      <h4 className="font-semibold text-blue-400 mb-2">
+                        🔧 Production Mode
+                      </h4>
                       <ul className="text-sm space-y-1 text-gray-300">
                         <li>✅ Kết nối PostgreSQL Database thực</li>
                         <li>✅ Gửi email qua SMTP thực</li>
@@ -634,7 +760,9 @@ export function SettingsView() {
                     </div>
 
                     <div className="mt-4 p-4 bg-yellow-900/20 border border-yellow-600 rounded-lg">
-                      <h4 className="font-semibold text-yellow-400 mb-2">🎮 Demo Mode</h4>
+                      <h4 className="font-semibold text-yellow-400 mb-2">
+                        🎮 Demo Mode
+                      </h4>
                       <ul className="text-sm space-y-1 text-gray-300">
                         <li>🎯 Dữ liệu demo/mock</li>
                         <li>🎯 Authentication giả lập</li>
@@ -649,10 +777,13 @@ export function SettingsView() {
 
               <div className="border-t border-gray-600 pt-4">
                 <div className="bg-orange-900/20 border border-orange-600 rounded-lg p-4">
-                  <h4 className="font-semibold text-orange-400 mb-2">⚡ Lưu ý quan trọng</h4>
+                  <h4 className="font-semibold text-orange-400 mb-2">
+                    ⚡ Lưu ý quan trọng
+                  </h4>
                   <p className="text-sm text-gray-300">
-                    Thay đổi chế độ sẽ reload lại ứng dụng. Đảm bảo bạn đã cấu hình đúng
-                    Database URL và SMTP settings trong file .env.local trước khi chuyển sang Production Mode.
+                    Thay đổi chế độ sẽ reload lại ứng dụng. Đảm bảo bạn đã cấu
+                    hình đúng Database URL và SMTP settings trong file
+                    .env.local trước khi chuyển sang Production Mode.
                   </p>
                 </div>
               </div>
@@ -691,7 +822,9 @@ export function SettingsView() {
                       <span>Database</span>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                        <span className="text-sm text-yellow-600">Demo Mode</span>
+                        <span className="text-sm text-yellow-600">
+                          Demo Mode
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -706,7 +839,9 @@ export function SettingsView() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600">Cài đặt giao diện sẽ có trong bản cập nhật sau...</p>
+                  <p className="text-gray-600">
+                    Cài đặt giao diện sẽ có trong bản cập nhật sau...
+                  </p>
                 </CardContent>
               </Card>
 
@@ -719,7 +854,9 @@ export function SettingsView() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-600">Cài đặt SMTP có sẵn trong Bảng điều khiển Quản trị</p>
+                    <p className="text-gray-600">
+                      Cài đặt SMTP có sẵn trong Bảng điều khiển Quản trị
+                    </p>
                   </CardContent>
                 </Card>
               )}
@@ -728,5 +865,5 @@ export function SettingsView() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
