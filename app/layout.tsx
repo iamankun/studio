@@ -3,8 +3,8 @@ import { RootLayoutClient } from "@/components/root-layout-client"
 import "./globals.css"
 import "./additional-styles.css"
 
-// Using local font fallback instead of Google Fonts for build reliability
-const fontClass = "font-sans"
+// Sử dụng font Dosis làm mặc định cho toàn bộ giao diện
+const fontClass = "font-dosis"
 
 export const metadata: Metadata = {
   title: process.env.COMPANY_NAME,
@@ -19,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="vi" suppressHydrationWarning>
       <head>
-        <link rel="icon" href={process.env.COMPANY_LOGOICO} />
+        <link rel={process.env.COMPANY_LOGOICO} />
       </head>
       <RootLayoutClient className={fontClass}>
         {children}
