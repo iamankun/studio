@@ -1,4 +1,5 @@
-/* Local font fallback configuration - No external dependencies */
+/* Import Dosis font for fallback (in case the Next.js font loader fails) */
+@import url("https://fonts.googleapis.com/css2?family=Dosis:wght@300;400;500;600;700;800&display=swap");
 
 @tailwind base;
 @tailwind components;

@@ -1,6 +1,29 @@
-// Đơn giản hóa authentication - chỉ localStorage
-import type { User } from '@/types/user';
-import { authenticateUserWithDatabase } from './database-auth'
+export interface User {
+  id: string
+  username: string
+  role: string
+  fullName: string
+  email: string
+  avatar: string
+  bio: string
+  socialLinks: {
+    facebook: string
+    youtube: string
+    spotify: string
+    appleMusic: string
+    tiktok: string
+    instagram: string
+  }
+  createdAt: string
+  isrcCodePrefix?: string
+  backgroundSettings?: {
+    type: string
+    gradient: string
+    videoUrl: string
+    opacity: number
+    playlist: string
+  }
+}
 
 export function getStoredUser(): User | null {
   if (typeof window === 'undefined') return null
@@ -33,16 +56,19 @@ export function clearUser(): void {
   }
 }
 
+import type { User } from '@/types/user';
+import { authenticateUserWithDatabase } from './database-auth'
+
 export async function authenticateUser(username: string, password: string): Promise<User | null> {
   // Sử dụng credentials từ .env.local
   const adminUsername = process.env.ADMIN_USERNAME || "ankunstudio"
   const adminPassword = process.env.ADMIN_PASSWORD || "@iamAnKun"
-  
+
   if (username === adminUsername && password === adminPassword) {
     return {
       id: "1",
       username: adminUsername,
-      role: "Label Manager", 
+      role: "Label Manager",
       fullName: process.env.COMPANY_NAME || "An Kun Studio Digital Music Distribution",
       email: process.env.COMPANY_EMAIL || "admin@ankun.dev",
       avatar: process.env.COMPANY_AVATAR || "/face.png",

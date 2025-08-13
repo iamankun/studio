@@ -20,8 +20,8 @@ const config: Config = {
         },
         extend: {
             fontFamily: {
-                sans: ["Inter", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
-                dosis: ["Inter", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+                sans: ["var(--font-dosis)", ...defaultTheme.fontFamily.sans],
+                dosis: ["var(--font-dosis)", ...defaultTheme.fontFamily.sans],
             },
             colors: {
                 // Custom shadcn/ui colors
