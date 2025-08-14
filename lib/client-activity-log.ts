@@ -73,7 +73,7 @@ export async function logActivity(params: LogActivityParams): Promise<LogActivit
 export function logLogin(
     method: 'password' | 'sso' | 'token',
     status: 'success' | 'failed' | 'error',
-    details: { username: string; [key: string]: unknown }
+    details: { username: string;[key: string]: unknown }
 ): Promise<LogActivityResult> {
     return logActivity({
         action: 'login_attempt',
@@ -87,7 +87,7 @@ export function logLogin(
 export function logRegistration(
     method: 'email' | 'sso',
     status: 'success' | 'failed' | 'error',
-    details: { username: string; [key: string]: unknown }
+    details: { username: string;[key: string]: unknown }
 ): Promise<LogActivityResult> {
     return logActivity({
         action: 'registration_attempt',
@@ -125,5 +125,22 @@ export function logSubmissionActivity(
         status,
         description: `Submission '${submissionId}' activity: ${activity} ${status}.`,
         details,
+    });
+}
+
+export async function logBackgroundSettings(
+    settings: Record<string, unknown>,
+    userId?: string
+): Promise<LogActivityResult> {
+    return logActivity({
+        action: 'background_update',
+        entityType: 'background',
+        entityId: 'background',
+        status: 'success',
+        description: 'Cập nhật background settings',
+        details: {
+            ...settings,
+            updatedAt: new Date().toISOString(),
+        },
     });
 }

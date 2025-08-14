@@ -6,7 +6,7 @@ export interface LogEntry {
     timestamp: string
     level: LogLevel
     message: string
-    data?: any
+    data?: unknown
     userId?: string
     component?: string
     action?: string
@@ -16,7 +16,7 @@ class Logger {
     private logs: LogEntry[] = []
     private readonly maxLogs = 1000
 
-    private createEntry(level: LogLevel, message: string, data?: any, meta?: {
+    private createEntry(level: LogLevel, message: string, data?: unknown, meta?: {
         userId?: string
         component?: string
         action?: string
@@ -33,30 +33,46 @@ class Logger {
         }
     }
 
-    debug(message: string, data?: any, meta?: any) {
+    debug(
+        message: string,
+        data?: unknown,
+        meta?: { userId?: string; component?: string; action?: string }
+    ) {
         const entry = this.createEntry('debug', message, data, meta)
         this.addLog(entry)
-        if (process.env.NODE_ENV === 'development') {
-            console.debug(`[DEBUG] ${message}`, data)
+        if (process.env.NODE_ENV) {
+            console.debug(`[Gỡ lỗi] ${message}`, data)
         }
     }
 
-    info(message: string, data?: any, meta?: any) {
+    info(
+        message: string,
+        data?: unknown,
+        meta?: { userId?: string; component?: string; action?: string }
+    ) {
         const entry = this.createEntry('info', message, data, meta)
         this.addLog(entry)
-        console.info(`[INFO] ${message}`, data)
+        console.info(`[Thông tin] ${message}`, data)
     }
 
-    warn(message: string, data?: any, meta?: any) {
+    warn(
+        message: string,
+        data?: unknown,
+        meta?: { userId?: string; component?: string; action?: string }
+    ) {
         const entry = this.createEntry('warn', message, data, meta)
         this.addLog(entry)
-        console.warn(`[WARN] ${message}`, data)
+        console.warn(`[Cảnh báo] ${message}`, data)
     }
 
-    error(message: string, error?: any, meta?: any) {
+    error(
+        message: string,
+        error?: unknown,
+        meta?: { userId?: string; component?: string; action?: string }
+    ) {
         const entry = this.createEntry('error', message, error, meta)
         this.addLog(entry)
-        console.error(`[ERROR] ${message}`, error)
+        console.error(`[Lỗi] ${message}`, error)
     }
 
     private addLog(entry: LogEntry) {
@@ -65,7 +81,7 @@ class Logger {
             this.logs = this.logs.slice(0, this.maxLogs)
         }
 
-        // Store in localStorage for persistence (only in browser)
+        // Lưu vào localStorage để lưu lại lịch sử (chỉ dùng trên trình duyệt)
         if (typeof window !== 'undefined') {
             try {
                 const storedLogs = JSON.parse(localStorage.getItem('aks_logs') || '[]')
@@ -75,7 +91,7 @@ class Logger {
                 }
                 localStorage.setItem('aks_logs', JSON.stringify(storedLogs))
             } catch (e) {
-                console.error('Failed to store logs:', e)
+                console.error('Không thể lưu log vào bộ nhớ:', e)
             }
         }
     }
@@ -88,7 +104,7 @@ class Logger {
                     return JSON.parse(stored)
                 }
             } catch (e) {
-                console.error('Failed to load logs:', e)
+                console.error('Không thể tải log từ bộ nhớ:', e)
             }
         }
         return this.logs
@@ -119,7 +135,7 @@ class Logger {
     // Add a console helper method
     debugToConsole() {
         if (typeof window !== 'undefined') {
-            console.log('%c AKs Studio Logs', 'background: #7e57c2; color: white; padding: 2px 6px; border-radius: 2px;');
+            console.log('%c Studio Logs', 'background: #7e57c2; color: white; padding: 2px 6px; border-radius: 2px;');
             this.getLogs().forEach(log => {
                 const style = this.getConsoleStyle(log.level);
                 console.groupCollapsed(
@@ -127,15 +143,15 @@ class Logger {
                     style,
                     'color: inherit'
                 );
-                console.log('Component:', log.component || 'Not specified');
-                console.log('Action:', log.action || 'Not specified');
-                console.log('User ID:', log.userId || 'Not specified');
-                console.log('Data:', log.data ?? 'None');
+                console.log('Thành phần:', log.component ?? 'Chưa xác định');
+                console.log('Hành động:', log.action ?? 'Chưa xác định');
+                console.log('Mã người dùng:', log.userId ?? 'Chưa xác định');
+                console.log('Dữ liệu:', log.data ?? 'Không có');
                 console.groupEnd();
             });
-            return `Displayed ${this.getLogs().length} logs in console`;
+            return `Đã hiển thị ${this.getLogs().length} log trong bảng điều khiển của quản trị hệ thống`;
         }
-        return 'Console debugging only available in browser';
+        return 'Chức năng gỡ lỗi chỉ dùng được trên trình duyệt';
     }
 
     private getConsoleStyle(level: LogLevel): string {

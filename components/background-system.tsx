@@ -1,8 +1,9 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
+import styles from "./background-system.module.css";
 
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 
 const DEFAULT_VIDEOS = [
   "dQw4w9WgXcQ", // Rick Astley - Never Gonna Give You Up
@@ -15,7 +16,7 @@ const DEFAULT_VIDEOS = [
   "JGwWNGJdvx8", // Shape of You
   "RgKAFK5djSk", // Wiz Khalifa - See You Again
   "OPf0YbXqDm0", // Mark Ronson - Uptown Funk
-]
+];
 
 export function BackgroundSystem() {
   const [backgroundSettings, setBackgroundSettings] = useState({
@@ -26,201 +27,206 @@ export function BackgroundSystem() {
     opacity: 0.3,
     randomVideo: true,
     videoList: DEFAULT_VIDEOS,
-  })
+  });
 
-  const [currentVideo, setCurrentVideo] = useState("")
+  const [currentVideo, setCurrentVideo] = useState("");
   // Background customization states - Required for background customization panel
   // These states are used by background-settings-panel.tsx to manage the background settings
   /* These states are temporarily unused but kept for future background customization features
    * They are part of the background system's API and may be used by other components
    * like background-settings-panel.tsx */
+  // Removed unused showCustomPanel state as per compile error
+  // Removed unused youtubeUrl state as per compile error
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [showCustomPanel, setShowCustomPanel] = useState(false)
+  const [imageLink, setImageLink] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [youtubeUrl, setYoutubeUrl] = useState("")
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [imageLink, setImageLink] = useState("")
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [videoFile, setVideoFile] = useState<File | null>(null)
-  const [textStyleDialogOpen, setTextStyleDialogOpen] = useState(false)
-  const [currentTextInput, setCurrentTextInput] = useState<"title" | "subtitle" | null>(null)
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [textStyleDialogOpen, setTextStyleDialogOpen] = useState(false);
+  const [currentTextInput, setCurrentTextInput] = useState<
+    "title" | "subtitle" | null
+  >(null);
   const [titleStyle, setTitleStyle] = useState<{
-    gradient: string
-    animation: string
-    font: string
-  }>({ gradient: "", animation: "", font: "" })
+    gradient: string;
+    animation: string;
+    font: string;
+  }>({ gradient: "", animation: "", font: "" });
   const [subtitleStyle, setSubtitleStyle] = useState<{
-    gradient: string
-    animation: string
-    font: string
-  }>({ gradient: "", animation: "", font: "" })
+    gradient: string;
+    animation: string;
+    font: string;
+  }>({ gradient: "", animation: "", font: "" });
 
   useEffect(() => {
     // Load background settings
-    const saved = localStorage.getItem("backgroundSettings_v2")
+    const saved = localStorage.getItem("backgroundSettings_v2");
     if (saved) {
-      const settings = JSON.parse(saved)
-      setBackgroundSettings(settings)
+      const settings = JSON.parse(saved);
+      setBackgroundSettings(settings);
     }
 
     // Listen for background updates
     const handleBackgroundUpdate = (event: CustomEvent) => {
-      setBackgroundSettings(event.detail)
-    }
+      setBackgroundSettings(event.detail);
+    };
 
-    window.addEventListener("backgroundUpdate", handleBackgroundUpdate as EventListener)
+    window.addEventListener(
+      "backgroundUpdate",
+      handleBackgroundUpdate as EventListener
+    );
     return () => {
-      window.removeEventListener("backgroundUpdate", handleBackgroundUpdate as EventListener)
-    }
-  }, [])
+      window.removeEventListener(
+        "backgroundUpdate",
+        handleBackgroundUpdate as EventListener
+      );
+    };
+  }, []);
 
   useEffect(() => {
     if (backgroundSettings.type === "video" && backgroundSettings.randomVideo) {
-      const randomIndex = Math.floor(Math.random() * backgroundSettings.videoList.length)
-      setCurrentVideo(backgroundSettings.videoList[randomIndex])
-    } else if (backgroundSettings.type === "video" && backgroundSettings.videoUrl) {
-      const videoId = extractYoutubeId(backgroundSettings.videoUrl)
-      setCurrentVideo(videoId || "")
+      if (backgroundSettings.videoList.length === 1) {
+        // Nếu chỉ có 1 video thì phát luôn video đó
+        setCurrentVideo(backgroundSettings.videoList[0]);
+      } else if (backgroundSettings.videoList.length > 1) {
+        // Nếu có nhiều video thì random
+        const randomIndex = Math.floor(
+          Math.random() * backgroundSettings.videoList.length
+        );
+        setCurrentVideo(backgroundSettings.videoList[randomIndex]);
+      } else {
+        setCurrentVideo("");
+      }
+    } else if (
+      backgroundSettings.type === "video" &&
+      backgroundSettings.videoUrl
+    ) {
+      const videoId = extractYoutubeId(backgroundSettings.videoUrl);
+      setCurrentVideo(videoId || "");
     }
-  }, [backgroundSettings])
+  }, [backgroundSettings]);
 
   const extractYoutubeId = (url: string) => {
-    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/
-    const match = url.match(regExp)
-    return match && match[7].length === 11 ? match[7] : null
-  }
+    const regExp =
+      /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const match = regExp.exec(url);
+    return match && match[7].length === 11 ? match[7] : null;
+  };
 
   // These handlers are used by background-settings-panel.tsx for background customization
   // They are required for the background customization functionality to work properly
-  
-  // Handles YouTube URL input and updates background with video thumbnail
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleYoutubeUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value
-    setYoutubeUrl(url)
 
-    // Extract YouTube video ID and create thumbnail URL
-    const videoId = extractYoutubeId(url)
-    if (videoId) {
-      const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
-      // Dispatch custom event to update background
-      window.dispatchEvent(
-        new CustomEvent("backgroundUpdate", {
-          detail: {
-            ...backgroundSettings,
-            type: "image",
-            imageUrl: thumbnailUrl,
-          },
-        }),
-      )
-    }
-  }
+  // Handles YouTube URL input and updates background with video thumbnail
+  // (Removed unused handleYoutubeUrlChange function)
 
   // Handles image URL input and updates background image
   // Used when users want to set a custom background image
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleImageLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value
-    setImageLink(url)
+  // Removed unused handleImageLinkChange function
+
+  // Handles video file upload and processes video for background
+  // Used when users want to set a custom video background
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleVideoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setVideoFile(null);
+      return;
+    }
+
+    if (file.size > 100 * 1024 * 1024) {
+      alert("File video không được vượt quá 100MB");
+      e.target.value = "";
+      setVideoFile(null);
+      return;
+    }
+
+    setVideoFile(file);
+
+    // Create object URL for video preview
+    const videoUrl = URL.createObjectURL(file);
 
     // Dispatch custom event to update background
     window.dispatchEvent(
       new CustomEvent("backgroundUpdate", {
         detail: {
           ...backgroundSettings,
-          type: "image",
-          imageUrl: url,
-        },
-      }),
-    )
-  }
-
-  // Handles video file upload and processes video for background
-  // Used when users want to set a custom video background
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleVideoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) {
-      setVideoFile(null)
-      return
-    }
-
-    if (file.size > 100 * 1024 * 1024) {
-      alert("File video không được vượt quá 100MB")
-      e.target.value = ""
-      setVideoFile(null)
-      return
-    }
-
-    setVideoFile(file)
-
-    // Create object URL for video preview
-    const videoUrl = URL.createObjectURL(file)
-
-    // Dispatch custom event to update background
-    window.dispatchEvent(
-      new CustomEvent("backgroundUpdate", {
-        detail:
-        {
-          ...backgroundSettings,
           type: "video",
           videoUrl: videoUrl,
         },
-      }),
-    )
+      })
+    );
 
-    alert("Video đã được tải lên và sẽ được xử lý sau")
-  }
+    alert("Video đã được tải lên và sẽ được xử lý sau");
+  };
 
   // Opens the text style customization dialog
   // This function is used by background-settings-panel.tsx for text styling
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const openStyleDialog = (inputType: "title" | "subtitle") => {
-    setCurrentTextInput(inputType)
-    setTextStyleDialogOpen(true)
-  }
+    setCurrentTextInput(inputType);
+    setTextStyleDialogOpen(true);
+  };
 
   // Applies selected text style to title or subtitle elements
   // This is a core function for text customization functionality
-  const applyTextStyle = (style: { gradient: string; animation: string; font: string }) => {
+  const applyTextStyle = (style: {
+    gradient: string;
+    animation: string;
+    font: string;
+  }) => {
     if (currentTextInput === "title") {
-      setTitleStyle(style)
+      setTitleStyle(style);
       // Apply to title elements
-      const titleElements = document.querySelectorAll(".custom-title")
+      const titleElements = document.querySelectorAll(".custom-title");
       titleElements.forEach((el) => {
-        el.className = `custom-title ${style.gradient} ${style.animation} ${style.font}`
-      })
+        el.className = `custom-title ${style.gradient} ${style.animation} ${style.font}`;
+      });
     } else if (currentTextInput === "subtitle") {
-      setSubtitleStyle(style)
+      setSubtitleStyle(style);
       // Apply to subtitle elements
-      const subtitleElements = document.querySelectorAll(".custom-subtitle")
+      const subtitleElements = document.querySelectorAll(".custom-subtitle");
       subtitleElements.forEach((el) => {
-        el.className = `custom-subtitle ${style.gradient} ${style.animation} ${style.font}`
-      })
+        el.className = `custom-subtitle ${style.gradient} ${style.animation} ${style.font}`;
+      });
     }
-    setTextStyleDialogOpen(false)
-    setCurrentTextInput(null)
-  }
+    setTextStyleDialogOpen(false);
+    setCurrentTextInput(null);
+  };
 
   // Text style customization dialog component
   // Required for text styling functionality
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const TextStyleDialog = () => {
-    if (!textStyleDialogOpen) return null
+    if (!textStyleDialogOpen) return null;
 
     const gradientOptions = [
-      { name: "Purple", class: "bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent" },
-      { name: "Blue", class: "bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent" },
-      { name: "Green", class: "bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent" },
-      { name: "Gold", class: "bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent" },
-    ]
+      {
+        name: "Purple",
+        class:
+          "bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent",
+      },
+      {
+        name: "Blue",
+        class:
+          "bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent",
+      },
+      {
+        name: "Green",
+        class:
+          "bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent",
+      },
+      {
+        name: "Gold",
+        class:
+          "bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent",
+      },
+    ];
 
     const animationOptions = [
       { name: "None", class: "" },
       { name: "Pulse", class: "animate-pulse" },
       { name: "Bounce", class: "animate-bounce" },
       { name: "Ping", class: "animate-ping" },
-    ]
+    ];
 
     const fontOptions = [
       { name: "Normal", class: "font-dosis" },
@@ -228,7 +234,7 @@ export function BackgroundSystem() {
       { name: "Medium", class: "font-dosis-medium" },
       { name: "Bold", class: "font-dosis-bold" },
       { name: "Extra Bold", class: "font-dosis-extrabold" },
-    ]
+    ];
 
     return (
       <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-4">
@@ -237,14 +243,19 @@ export function BackgroundSystem() {
             <h3 className="text-lg font-semibold text-white">
               Tùy chỉnh {currentTextInput === "title" ? "Tiêu đề" : "Phụ đề"}
             </h3>
-            <button onClick={() => setTextStyleDialogOpen(false)} className="text-gray-400 hover:text-white">
+            <button
+              onClick={() => setTextStyleDialogOpen(false)}
+              className="text-gray-400 hover:text-white"
+            >
               ✕
             </button>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-gray-300 block mb-2">Gradient màu:</label>
+              <label className="text-sm font-medium text-gray-300 block mb-2">
+                Gradient màu:
+              </label>
               <div className="grid grid-cols-2 gap-2">
                 {gradientOptions.map((option) => (
                   <button
@@ -252,8 +263,14 @@ export function BackgroundSystem() {
                     onClick={() =>
                       applyTextStyle({
                         gradient: option.class,
-                        animation: currentTextInput === "title" ? titleStyle.animation : subtitleStyle.animation,
-                        font: currentTextInput === "title" ? titleStyle.font : subtitleStyle.font,
+                        animation:
+                          currentTextInput === "title"
+                            ? titleStyle.animation
+                            : subtitleStyle.animation,
+                        font:
+                          currentTextInput === "title"
+                            ? titleStyle.font
+                            : subtitleStyle.font,
                       })
                     }
                     className="p-2 border border-gray-600 rounded text-xs hover:bg-gray-700"
@@ -265,16 +282,24 @@ export function BackgroundSystem() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-300 block mb-2">Animation:</label>
+              <label className="text-sm font-medium text-gray-300 block mb-2">
+                Animation:
+              </label>
               <div className="grid grid-cols-2 gap-2">
                 {animationOptions.map((option) => (
                   <button
                     key={option.name}
                     onClick={() =>
                       applyTextStyle({
-                        gradient: currentTextInput === "title" ? titleStyle.gradient : subtitleStyle.gradient,
+                        gradient:
+                          currentTextInput === "title"
+                            ? titleStyle.gradient
+                            : subtitleStyle.gradient,
                         animation: option.class,
-                        font: currentTextInput === "title" ? titleStyle.font : subtitleStyle.font,
+                        font:
+                          currentTextInput === "title"
+                            ? titleStyle.font
+                            : subtitleStyle.font,
                       })
                     }
                     className="p-2 border border-gray-600 rounded text-xs hover:bg-gray-700 text-gray-200"
@@ -286,15 +311,23 @@ export function BackgroundSystem() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-300 block mb-2">Font weight:</label>
+              <label className="text-sm font-medium text-gray-300 block mb-2">
+                Font weight:
+              </label>
               <div className="grid grid-cols-2 gap-2">
                 {fontOptions.map((option) => (
                   <button
                     key={option.name}
                     onClick={() =>
                       applyTextStyle({
-                        gradient: currentTextInput === "title" ? titleStyle.gradient : subtitleStyle.gradient,
-                        animation: currentTextInput === "title" ? titleStyle.animation : subtitleStyle.animation,
+                        gradient:
+                          currentTextInput === "title"
+                            ? titleStyle.gradient
+                            : subtitleStyle.gradient,
+                        animation:
+                          currentTextInput === "title"
+                            ? titleStyle.animation
+                            : subtitleStyle.animation,
                         font: option.class,
                       })
                     }
@@ -308,8 +341,8 @@ export function BackgroundSystem() {
           </div>
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div className="fixed inset-0 -z-10">
@@ -317,17 +350,16 @@ export function BackgroundSystem() {
         <iframe
           src={`https://www.youtube.com/embed/${currentVideo}?autoplay=1&mute=1&controls=0&loop=1&playlist=${currentVideo}&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1&origin=${window.location.origin}`}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+          className={styles["background-video"]}
+          title={`Background YouTube video ${currentVideo}`}
           style={{ opacity: backgroundSettings.opacity }}
         />
       )}
       {backgroundSettings.type === "gradient" && (
         <div
-          className="absolute inset-0 transition-opacity duration-1000"
-          style={{
-            background: backgroundSettings.gradient,
-            opacity: backgroundSettings.opacity,
-          }}
+          className={`absolute inset-0 transition-opacity duration-1000 background-gradient`}
+          data-gradient={backgroundSettings.gradient}
+          style={{ opacity: backgroundSettings.opacity }}
         />
       )}
       {backgroundSettings.type === "image" && backgroundSettings.imageUrl && (
@@ -343,5 +375,5 @@ export function BackgroundSystem() {
       {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/40" />
     </div>
-  )
+  );
 }

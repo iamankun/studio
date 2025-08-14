@@ -2,7 +2,6 @@ import { type NextRequest, NextResponse } from "next/server"
 import { sendEmail } from "@/lib/email-service"
 
 // Tôi là An Kun
-// Hỗ trợ dự án, Copilot, Gemini
 // Tác giả kiêm xuất bản bởi An Kun Studio Digital Music
 
 export async function POST(request: NextRequest) {

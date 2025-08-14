@@ -128,7 +128,7 @@ model Track {
   duration      Int         // in seconds
   isrc          String?     @unique // Chỉ được gán thủ công khi hoàn thành release
   fileName      String?
-  artistFullName String?    // Tên đầy đủ nghệ sĩ từ Profile
+  fullName      String?    // Tên đầy đủ nghệ sĩ từ Profile
   fileSize      Int?
   format        String?     // Chỉ chấp nhận WAV, 2 kênh stereo, 16-24 bit, 44.1+ kHz, >2s
   bitrate       String?     // 16-bit hoặc 24-bit
