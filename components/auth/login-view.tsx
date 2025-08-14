@@ -376,8 +376,8 @@ export function LoginView({
                   hover:shadow-lg hover:shadow-primary/20"
               >
                 <span className="relative z-10 flex items-center gap-2">
-                  <i className="fas fa-user-plus text-xs"></i> Bạn không có tài
-                  khoản mới? <strong>Đăng ký ngay</strong>
+                  <i className="fas fa-user-plus text-xs"></i> Tạo tài khoản
+                  mới? <strong>Đăng ký ngay</strong>
                 </span>
                 <div
                   className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/10 to-primary/0 
