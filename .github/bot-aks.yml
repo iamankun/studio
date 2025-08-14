@@ -1,0 +1,11 @@
+# Để bắt đầu cập nhật phiên bản Dependabot, bạn cần chỉ định
+# Hệ sinh thái gói nào cần cập nhật và vị trí lưu trữ các bản kê khai gói
+# Vui lòng xem tài liệu hướng dẫn để biết tất cả các tùy chọn cấu hình
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  - package-ecosystem: "npm" # Xem tài liệu để biết các giá trị có thể
+    directory: "/" # Vị trí của bản kê khai gói hàng
+    schedule:
+      interval: "weekly"
