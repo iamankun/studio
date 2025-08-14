@@ -3,12 +3,12 @@
 // Service thống nhất cho tất cả database operations - SỬ DỤNG API ENDPOINTS
 
 import type { User } from "@/types/user"
-import type { 
-  Submission, 
-  SubmissionStatus, 
-  VideoInfo, 
-  ContributorInfo, 
-  FileInfo, 
+import type {
+  Submissions,
+  SubmissionStatus,
+  VideoInfo,
+  ContributorInfo,
+  FileInfo,
   FolderInfo,
   PrismaSubmission,
   PrismaTrack,
@@ -727,7 +727,7 @@ export class DatabaseApiService {
       const response = await fetch(`/api/videos${queryParams}`);
       const result = await response.json();
 
-      return result.success 
+      return result.success
         ? { success: true, data: result.data, source: 'API' }
         : { success: false, data: [], message: result.error ?? 'Failed to get videos' };
     } catch (error) {
@@ -745,7 +745,7 @@ export class DatabaseApiService {
       });
 
       const result = await response.json();
-      return result.success 
+      return result.success
         ? { success: true, data: result.data?.id, source: 'API' }
         : { success: false, message: result.error ?? 'Save video failed' };
     } catch (error) {
@@ -762,7 +762,7 @@ export class DatabaseApiService {
       const response = await fetch(`/api/files${queryParams}`);
       const result = await response.json();
 
-      return result.success 
+      return result.success
         ? { success: true, data: result.data, source: 'API' }
         : { success: false, data: [], message: result.error ?? 'Failed to get files' };
     } catch (error) {
@@ -777,7 +777,7 @@ export class DatabaseApiService {
       const response = await fetch(`/api/folders${queryParams}`);
       const result = await response.json();
 
-      return result.success 
+      return result.success
         ? { success: true, data: result.data, source: 'API' }
         : { success: false, data: [], message: result.error ?? 'Failed to get folders' };
     } catch (error) {
@@ -794,7 +794,7 @@ export class DatabaseApiService {
       const baseUrl = typeof window !== 'undefined' ? '' : 'http://localhost:3000';
       const response = await fetch(`${baseUrl}/api/database-status`);
       const result = await response.json();
-      
+
       return {
         api: this.apiAvailable,
         prisma: result.success,

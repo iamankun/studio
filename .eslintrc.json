@@ -1,7 +1,8 @@
 {
   "extends": [
     "next/core-web-vitals",
-    "next/typescript"
+    "next/typescript",
+    "next"
   ],
   "ignorePatterns": [
     "components/awesome/js/**/*",
@@ -28,8 +29,10 @@
     "@typescript-eslint/no-this-alias": "warn",
     "@typescript-eslint/ban-ts-comment": "warn",
     "@typescript-eslint/no-empty-object-type": "warn",
-    "react/no-unescaped-entities": "warn",
     "react-hooks/exhaustive-deps": "warn",
-    "@next/next/no-img-element": "warn"
+    "@next/next/no-img-element": "off",
+    "@next/next/no-html-link-for-pages": "off",
+    "react/no-unescaped-entities": "off",
+    "@next/next/no-page-custom-font": "off"
   }
 }

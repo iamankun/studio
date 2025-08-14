@@ -10,9 +10,8 @@ import { Loader2, User, Lock } from "lucide-react";
 import Image from "next/image";
 import { logLogin, logUIInteraction } from "@/lib/client-activity-log";
 import { useRouter } from "next/navigation";
-
 import "@/components/awesome/css/all.min.css";
-
+import { profile } from "console";
 interface LoginViewProps {
   readonly onLogin: (
     username: string,
@@ -38,6 +37,10 @@ export function LoginView({
   const [userRole, setUserRole] = useState("");
   const [usernameError, setUsernameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  // Giả lập profile, thực tế sẽ lấy từ API hoặc context
+  const [userProfile, setUserProfile] = useState<{ avatarUrl?: string } | null>(
+    null
+  );
 
   // Chuyển đổi memo của xin chào nhiều thứ tiếng
   const greetings = useMemo(
@@ -60,12 +63,12 @@ export function LoginView({
     []
   );
 
-  // User recognition based on ID pattern
+  // Nhận diện userRole trả về label tiếng Anh
   const recognizeUser = useCallback((username: string) => {
     if (username.length >= 3) {
       const pattern = username.substring(0, 3).toLowerCase();
-      if (pattern === "ank" || pattern === "kun") return "An Kun";
-      if (pattern === "adm") return "Người quản lý";
+      if (pattern === "ank" || pattern === "kun") return "Quản lý nhãn";
+      if (pattern === "adm") return "Quản trị cấp cao";
       if (pattern === "ngh" || pattern === "art") return "Nghệ sĩ";
       return "Nghệ sĩ mới";
     }
@@ -105,13 +108,13 @@ export function LoginView({
         // Log failed login
         logLogin("password", "failed", {
           username: username,
-          error: result.message || "Unknown error",
+          error: result.message ?? "Không đúng mật khẩu",
         });
       } else {
         // Log successful login
         logLogin("password", "success", {
           username: username,
-          role: userRole || "user",
+          role: userRole ?? "user",
         });
         // Chuyển hướng sau khi đăng nhập thành công
         if (router) {
@@ -158,14 +161,24 @@ export function LoginView({
   useEffect(() => {
     const role = recognizeUser(username);
     setUserRole(role);
+    // Giả lập lấy profile, thực tế sẽ lấy từ API
+    // Ví dụ: nếu username hợp lệ thì lấy avatarUrl
+    if (username && username.length >= 5) {
+      // TODO Replace with actual API call to fetch avatarUrl
+      setUserProfile({
+        avatarUrl: `/api/images/avatar?userId=${username}`,
+      });
+    } else {
+      setUserProfile({ avatarUrl: "/face.png" });
+    }
   }, [username, recognizeUser]);
 
   const validateUsername = (value: string): boolean => {
-    if (value.length < 3) {
-      setUsernameError("Username must be at least 3 characters");
+    if (value.length < 5) {
+      setUsernameError("Tên tối thiểu 5 chữ");
       return false;
     } else if (value.length > 20) {
-      setUsernameError("Username must be less than 20 characters");
+      setUsernameError("Tên tối đa 20 chữ");
       return false;
     } else {
       setUsernameError("");
@@ -175,7 +188,7 @@ export function LoginView({
 
   const validatePassword = (value: string): boolean => {
     if (value.length < 6) {
-      setPasswordError("Password must be at least 6 characters");
+      setPasswordError("Mật khẩu tối thiểu 6 chữ");
       return false;
     } else {
       setPasswordError("");
@@ -198,23 +211,27 @@ export function LoginView({
         <CardHeader className="text-center relative z-10">
           <div className="relative w-20 h-20 mx-auto mb-2">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-purple-600/20 rounded-full blur-lg"></div>
-            <Image
-              src={process.env.COMPANY_LOGO ?? "/logo.png"}
-              alt={process.env.COMPANY_NAME ?? "Company Logo"}
-              fill
-              className="object-cover rounded-full p-1 bg-background/10 backdrop-blur-xl border border-white/20 hover:border-white/40 transition-all duration-300 hover:scale-105"
-              priority
-            />
+            {userProfile?.avatarUrl && userProfile.avatarUrl !== "" && (
+              <Image
+                src={userProfile.avatarUrl}
+                fill
+                alt="User avatar"
+                className="object-cover rounded-full p-1 bg-background/10 backdrop-blur-xl border border-white/20 hover:border-white/40 transition-all duration-300 hover:scale-105"
+                priority
+              />
+            )}
           </div>
-          <p className="text-muted-foreground text-sm animate-fade-in">
-            {userRole || `Chào mừng bạn trở lại ${process.env.COMPANY_NAME}`}
-          </p>
           <h2
             className="text-2xl font-bold bg-clip-text text-transparent 
             bg-gradient-to-r from-indigo-500 to-pink-500 select-none"
           >
             {currentGreeting}
           </h2>
+          {userRole && (
+            <div className="mt-2 text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-pink-500 select-none animate-fade-in">
+              {userRole}
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

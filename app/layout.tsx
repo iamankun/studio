@@ -1,29 +1,32 @@
-import type { Metadata } from "next"
-import { RootLayoutClient } from "@/components/root-layout-client"
-import "./globals.css"
-import "./additional-styles.css"
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import "./globals.css";
+import "./additional-styles.css";
+import { RootLayoutClient } from "@/components/root-layout-client";
 
-// Sử dụng font Dosis làm mặc định cho toàn bộ giao diện
-const fontClass = "font-dosis"
-
+// Correct metadata definition
 export const metadata: Metadata = {
   title: process.env.COMPANY_NAME,
   description: process.env.COMPANY_DESCRIPTION,
-}
+  icons: {
+    icon: process.env.COMPANY_LOGOICO,
+    shortcut: process.env.COMPANY_LOGOICO,
+    apple: process.env.COMPANY_LOGO,
+  },
+};
 
 export default function RootLayout({
   children,
-}: {
-  readonly children: React.ReactNode
-}) {
+}: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="vi" suppressHydrationWarning>
-      <head>
-        <link rel={process.env.COMPANY_LOGOICO} />
-      </head>
-      <RootLayoutClient className={fontClass}>
-        {children}
-      </RootLayoutClient>
+      <body>
+        <RootLayoutClient>
+          <div className=""></div>
+          {children}
+        </RootLayoutClient>
+        {/* Thêm các script hoặc link khác nếu cần */}
+      </body>
     </html>
-  )
+  );
 }

@@ -27,7 +27,8 @@
         "name": "next"
       }
     ],
-    "target": "ES2021"
+    "target": "ES2021",
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "next-env.d.ts",
