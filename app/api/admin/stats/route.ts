@@ -35,8 +35,8 @@ export async function GET() {
             system: {
                 uptime: process.uptime(),
                 memory: process.memoryUsage(),
-                version: '2.0.0-beta',
-                environment: process.env.NODE_ENV ?? 'Production'
+                version: process.env.version,
+                environment: process.env.NODE_ENV
             }
         }
 
@@ -45,11 +45,11 @@ export async function GET() {
             data: systemStats
         })
     } catch (error) {
-        console.error('Error fetching system stats:', error)
+        console.error('Lỗi khi lấy thông tin thống kê hệ thống:', error)
         return NextResponse.json(
             {
                 success: false,
-                error: 'Failed to fetch system statistics'
+                error: 'Không thể lấy thông tin thống kê hệ thống'
             },
             { status: 500 }
         )

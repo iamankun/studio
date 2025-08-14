@@ -8,7 +8,7 @@ export async function GET() {
     try {
         const API_KEY = process.env.API_KEY || ""
         const AI_ENDPOINT = process.env.AI_ENDPOINT || "https://api.deepseek.com/v1/chat/completions"
-        const ENV = process.env.NODE_ENV || "development"
+        const ENV = process.env.NODE_ENV
 
         // Kiểm tra các điều kiện cần thiết
         if (!API_KEY) {
@@ -42,9 +42,9 @@ export async function GET() {
             usingDefaultEndpoint: AI_ENDPOINT === "https://api.deepseek.com/v1/chat/completions",
             aiEnvKeys,
             aiConfig: {
-                model: process.env.AI_MODEL || "default",
-                version: process.env.AI_VERSION || "latest",
-                temperature: process.env.AI_TEMPERATURE || "0.7"
+                model: process.env.AI_MODEL ?? "default",
+                version: process.env.AI_VERSION ?? "latest",
+                temperature: process.env.AI_TEMPERATURE ?? "0.7"
             }
         })
 

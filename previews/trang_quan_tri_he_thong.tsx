@@ -7,13 +7,14 @@ import Image from "next/image";
 const TABS = ["Thống kê", "Nghệ sĩ", "Bài hát", "Phát hành", "Tài khoản"];
 
 export default function TrangQuanTriHeThong() {
+  // Trang demo, không kiểm tra đăng nhập, ai cũng xem được
   const [tab, setTab] = useState("Thống kê");
   const [showModal, setShowModal] = useState(false);
   return (
     <MainContentLayout>
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-lg mx-auto mt-8">
         <h2 className="text-2xl font-bold mb-6 text-purple-700">
-          Trang Quản Trị Hệ Thống
+          Trang Quản Trị Hệ Thống (Demo - Xem trước, không dùng chính thức)
         </h2>
         {/* Tab chuyển đổi */}
         <div className="flex gap-2 mb-6">

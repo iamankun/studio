@@ -7,21 +7,21 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { action, details, entityType, entityId, description } = body
-    
+
     // Get current user session if available
     const session = await getSession()
     let userId = null
-    
+
     if (session?.user?.id) {
       userId = session.user.id
     }
-    
+
     // Try to create activity log entry in database with fallback
     let logEntry = null
     try {
       logEntry = await prisma.nhatKy.create({
         data: {
-          action: action || 'unknown_action',
+          action: action ?? 'Cần thêm hành động',
           details: {
             ...details,
             entityType,
@@ -34,19 +34,19 @@ export async function POST(request: NextRequest) {
           userId: userId
         }
       })
-      
-      logger.info("Activity logged to database", { 
+
+      logger.info("Activity logged to database", {
         logId: logEntry.id,
         action,
         userId,
         entityType,
         entityId
       }, { component: "ActivityLogAPI" })
-      
+
     } catch (dbError) {
       // Fallback: log to console/file if database is unavailable
       logger.error("Database unavailable, logging to console only", dbError, { component: "ActivityLogAPI" })
-      logger.info("Activity logged (fallback)", { 
+      logger.info("Activity logged (fallback)", {
         action,
         userId,
         entityType,
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
         details
       }, { component: "ActivityLogAPI" })
     }
-    
+
     return NextResponse.json({
       success: true,
       message: "Activity logged successfully",
@@ -81,12 +81,12 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50')
     const userId = searchParams.get('userId')
     const action = searchParams.get('action')
-    
+
     // Build where clause
     const where: { userId?: string; action?: string } = {}
     if (userId) where.userId = userId
     if (action) where.action = action
-    
+
     // Get logs from database
     const logs = await prisma.nhatKy.findMany({
       where,
@@ -102,7 +102,7 @@ export async function GET(request: NextRequest) {
         }
       }
     })
-    
+
     return NextResponse.json({
       success: true,
       logs,
