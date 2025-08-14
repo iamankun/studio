@@ -9,28 +9,26 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Loader2, User, Lock } from "lucide-react";
 import Image from "next/image";
 import { logLogin, logUIInteraction } from "@/lib/client-activity-log";
+import { useRouter } from "next/navigation";
 
 import "@/components/awesome/css/all.min.css";
 
 interface LoginViewProps {
-  onLogin: (
+  readonly onLogin: (
     username: string,
     password: string
   ) => Promise<{ success: boolean; message?: string }>;
-  onSwitchToRegister: () => void;
-  onSwitchToForgot: () => void;
+  readonly onSwitchToRegister: () => void;
+  readonly onSwitchToForgot: () => void;
 }
 
 export function LoginView({
   onLogin,
   onSwitchToRegister,
   onSwitchToForgot,
-}: Readonly<LoginViewProps>) {
+}: LoginViewProps): React.ReactElement {
   // Thêm hook router để chuyển hướng sau đăng nhập
-  const router =
-    typeof window !== "undefined"
-      ? require("next/navigation").useRouter()
-      : null;
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -40,10 +38,6 @@ export function LoginView({
   const [userRole, setUserRole] = useState("");
   const [usernameError, setUsernameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [appSettings] = useState({
-    appName: process.env.COMPANY_NAME,
-    logoUrl: process.env.COMPANY_LOGO,
-  });
 
   // Chuyển đổi memo của xin chào nhiều thứ tiếng
   const greetings = useMemo(
@@ -193,11 +187,9 @@ export function LoginView({
     "transition-all duration-300 bg-transparent border-gray-600 hover:border-gray-400 focus:border-primary focus:ring-primary/20";
   const buttonTransitionClasses =
     "transition-all duration-500 bg-gradient-to-r from-primary via-purple-600 to-primary hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/20 active:scale-[0.98]";
-  const linkTransitionClasses =
-    "transition-colors duration-300 text-gray-400 hover:text-primary hover:underline underline-offset-4";
 
   return (
-    <div className="flex min-h-[100dvh] flex-col items-center justify-center p-4 pt-24 relative overflow-hidden">
+    <div className="flex min-h-[100dvh] flex-col items-center justify-center p-4 pt-24 relative overflow-hidden font-dosis">
       <Card
         className="w-full max-w-md relative z-40 border border-white/10 shadow-2xl
         bg-background/5 backdrop-blur-2xl hover:bg-background/10 transition-all duration-500
@@ -334,7 +326,7 @@ export function LoginView({
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
                 <>
-                  <span className="relative z-10">Login</span>
+                  <span className="relative z-10">Đăng nhập</span>
                   {/* <span className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/20 to-primary/0
                     translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" /> */}
                 </>
@@ -358,8 +350,7 @@ export function LoginView({
                   backdrop-blur-sm group relative overflow-hidden"
               >
                 <span className="relative z-10 flex items-center gap-2">
-                  <i className="fas fa-key text-xs"></i>
-                  Forgot password?
+                  <i className="fas fa-key text-xs"></i> Quên mất rồi?
                 </span>
                 <div
                   className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 
@@ -385,8 +376,8 @@ export function LoginView({
                   hover:shadow-lg hover:shadow-primary/20"
               >
                 <span className="relative z-10 flex items-center gap-2">
-                  <i className="fas fa-user-plus text-xs"></i>
-                  Don&apos;t have an account? <strong>Register</strong>
+                  <i className="fas fa-user-plus text-xs"></i> Bạn không có tài
+                  khoản mới? <strong>Đăng ký ngay</strong>
                 </span>
                 <div
                   className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/10 to-primary/0 

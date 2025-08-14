@@ -9,11 +9,8 @@ type UploadResult = {
 };
 
 // Upload avatar vào cơ sở dữ liệu PostgreSQL
-export async function uploadAvatarToDatabase(file: File, userId: string, userRole: string): Promise<UploadResult> {
+export async function uploadAvatarToDatabase(file: File, userId: string): Promise<UploadResult> {
     try {
-        // Xác định bảng người dùng dựa vào role
-        const userTable = userRole === "Label Manager" ? "label_manager" : "artist";
-
         // Đọc và xử lý file
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
@@ -33,20 +30,20 @@ export async function uploadAvatarToDatabase(file: File, userId: string, userRol
                 .jpeg({ quality: 80 })
                 .toBuffer();
         } catch (resizeError) {
-            console.error("Resize failed, using original:", resizeError);
-            processedBuffer = buffer; // Sử dụng buffer gốc nếu resize thất bại
+            console.error("Điều chỉnh kích thước ảnh thất bại:", resizeError);
+            processedBuffer = buffer; // Sử dụng ảnh gốc nếu resize thất bại
         }
 
         // Tạo File object từ buffer để phù hợp với API
         const uint8Array = new Uint8Array(processedBuffer);
         const avatarFile = new File([uint8Array], `avatar-${userId}.jpg`, {
-            type: mimeType as string
+            type: mimeType
         });
 
-        // Lưu vào cơ sở dữ liệu
+        // Lưu avatar vào bảng Profile của user
         const result = await multiDB.updateUserAvatar(userId, {
             file: avatarFile,
-            artistName: userRole === "Label Manager" ? "Label Manager" : "Artist"
+            artistName: userId // hoặc truyền tên nghệ sĩ thực tế nếu có biến khác
         });
         return result;
     } catch (error) {

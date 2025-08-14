@@ -14,7 +14,7 @@ function addCorsHeaders(response: NextResponse): NextResponse {
     return response
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
         const result = await multiDB.getArtists()
 
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 /**
  * Xử lý các request CORS preflight.
  */
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS() {
     const response = new NextResponse(null, { status: 204 })
     return addCorsHeaders(response)
 }
