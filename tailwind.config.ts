@@ -20,7 +20,6 @@ const config: Config = {
         },
         extend: {
             fontFamily: {
-                sans: ["var(--font-dosis)", ...defaultTheme.fontFamily.sans],
                 dosis: ["var(--font-dosis)", ...defaultTheme.fontFamily.sans],
             },
             colors: {

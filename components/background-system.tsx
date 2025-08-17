@@ -2,7 +2,6 @@
 
 import type React from "react";
 import styles from "./background-system.module.css";
-
 import { useEffect, useState } from "react";
 
 const DEFAULT_VIDEOS = [
@@ -19,41 +18,52 @@ const DEFAULT_VIDEOS = [
 ];
 
 export function BackgroundSystem() {
+  // State lưu log từ bảng nhatKy
+  const [logs, setLogs] = useState<
+    Array<{ id: string; action: string; createdAt: string }>
+  >([]);
+
+  // State cho background
   const [backgroundSettings, setBackgroundSettings] = useState({
     type: "gradient",
     gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     videoUrl: "",
-    imageUrl: "", // Thêm thuộc tính imageUrl
+    imageUrl: "",
     opacity: 0.3,
     randomVideo: true,
     videoList: DEFAULT_VIDEOS,
   });
 
+  // Hàm fetch log từ API hoặc service (giả sử có endpoint /api/nhatky)
+  useEffect(() => {
+    async function fetchLogs() {
+      try {
+        const res = await fetch("/api/nhatky");
+        if (res.ok) {
+          const data = await res.json();
+          setLogs(data);
+        }
+      } catch (err) {
+        // Có thể log lỗi ra console nếu cần
+      }
+    }
+    fetchLogs();
+  }, []);
+
   const [currentVideo, setCurrentVideo] = useState("");
-  // Background customization states - Required for background customization panel
-  // These states are used by background-settings-panel.tsx to manage the background settings
-  /* These states are temporarily unused but kept for future background customization features
-   * They are part of the background system's API and may be used by other components
-   * like background-settings-panel.tsx */
-  // Removed unused showCustomPanel state as per compile error
-  // Removed unused youtubeUrl state as per compile error
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [imageLink, setImageLink] = useState("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [videoFile, setVideoFile] = useState<File | null>(null);
   const [textStyleDialogOpen, setTextStyleDialogOpen] = useState(false);
   const [currentTextInput, setCurrentTextInput] = useState<
-    "title" | "subtitle" | null
+    "Tiêu đề" | "Phụ đề" | null
   >(null);
   const [titleStyle, setTitleStyle] = useState<{
     gradient: string;
     animation: string;
-    font: string;
+    font: string | undefined;
   }>({ gradient: "", animation: "", font: "" });
   const [subtitleStyle, setSubtitleStyle] = useState<{
     gradient: string;
     animation: string;
-    font: string;
+    font: string | undefined;
   }>({ gradient: "", animation: "", font: "" });
 
   useEffect(() => {
@@ -100,7 +110,7 @@ export function BackgroundSystem() {
       backgroundSettings.videoUrl
     ) {
       const videoId = extractYoutubeId(backgroundSettings.videoUrl);
-      setCurrentVideo(videoId || "");
+      setCurrentVideo(videoId ?? "");
     }
   }, [backgroundSettings]);
 
@@ -111,239 +121,6 @@ export function BackgroundSystem() {
     return match && match[7].length === 11 ? match[7] : null;
   };
 
-  // These handlers are used by background-settings-panel.tsx for background customization
-  // They are required for the background customization functionality to work properly
-
-  // Handles YouTube URL input and updates background with video thumbnail
-  // (Removed unused handleYoutubeUrlChange function)
-
-  // Handles image URL input and updates background image
-  // Used when users want to set a custom background image
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // Removed unused handleImageLinkChange function
-
-  // Handles video file upload and processes video for background
-  // Used when users want to set a custom video background
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleVideoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      setVideoFile(null);
-      return;
-    }
-
-    if (file.size > 100 * 1024 * 1024) {
-      alert("File video không được vượt quá 100MB");
-      e.target.value = "";
-      setVideoFile(null);
-      return;
-    }
-
-    setVideoFile(file);
-
-    // Create object URL for video preview
-    const videoUrl = URL.createObjectURL(file);
-
-    // Dispatch custom event to update background
-    window.dispatchEvent(
-      new CustomEvent("backgroundUpdate", {
-        detail: {
-          ...backgroundSettings,
-          type: "video",
-          videoUrl: videoUrl,
-        },
-      })
-    );
-
-    alert("Video đã được tải lên và sẽ được xử lý sau");
-  };
-
-  // Opens the text style customization dialog
-  // This function is used by background-settings-panel.tsx for text styling
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const openStyleDialog = (inputType: "title" | "subtitle") => {
-    setCurrentTextInput(inputType);
-    setTextStyleDialogOpen(true);
-  };
-
-  // Applies selected text style to title or subtitle elements
-  // This is a core function for text customization functionality
-  const applyTextStyle = (style: {
-    gradient: string;
-    animation: string;
-    font: string;
-  }) => {
-    if (currentTextInput === "title") {
-      setTitleStyle(style);
-      // Apply to title elements
-      const titleElements = document.querySelectorAll(".custom-title");
-      titleElements.forEach((el) => {
-        el.className = `custom-title ${style.gradient} ${style.animation} ${style.font}`;
-      });
-    } else if (currentTextInput === "subtitle") {
-      setSubtitleStyle(style);
-      // Apply to subtitle elements
-      const subtitleElements = document.querySelectorAll(".custom-subtitle");
-      subtitleElements.forEach((el) => {
-        el.className = `custom-subtitle ${style.gradient} ${style.animation} ${style.font}`;
-      });
-    }
-    setTextStyleDialogOpen(false);
-    setCurrentTextInput(null);
-  };
-
-  // Text style customization dialog component
-  // Required for text styling functionality
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const TextStyleDialog = () => {
-    if (!textStyleDialogOpen) return null;
-
-    const gradientOptions = [
-      {
-        name: "Purple",
-        class:
-          "bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent",
-      },
-      {
-        name: "Blue",
-        class:
-          "bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent",
-      },
-      {
-        name: "Green",
-        class:
-          "bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent",
-      },
-      {
-        name: "Gold",
-        class:
-          "bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent",
-      },
-    ];
-
-    const animationOptions = [
-      { name: "None", class: "" },
-      { name: "Pulse", class: "animate-pulse" },
-      { name: "Bounce", class: "animate-bounce" },
-      { name: "Ping", class: "animate-ping" },
-    ];
-
-    const fontOptions = [
-      { name: "Normal", class: "font-dosis" },
-      { name: "Light", class: "font-dosis-light" },
-      { name: "Medium", class: "font-dosis-medium" },
-      { name: "Bold", class: "font-dosis-bold" },
-      { name: "Extra Bold", class: "font-dosis-extrabold" },
-    ];
-
-    return (
-      <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-4">
-        <div className="bg-gray-800 border border-gray-700 rounded-lg max-w-md w-full p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-white">
-              Tùy chỉnh {currentTextInput === "title" ? "Tiêu đề" : "Phụ đề"}
-            </h3>
-            <button
-              onClick={() => setTextStyleDialogOpen(false)}
-              className="text-gray-400 hover:text-white"
-            >
-              ✕
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-gray-300 block mb-2">
-                Gradient màu:
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {gradientOptions.map((option) => (
-                  <button
-                    key={option.name}
-                    onClick={() =>
-                      applyTextStyle({
-                        gradient: option.class,
-                        animation:
-                          currentTextInput === "title"
-                            ? titleStyle.animation
-                            : subtitleStyle.animation,
-                        font:
-                          currentTextInput === "title"
-                            ? titleStyle.font
-                            : subtitleStyle.font,
-                      })
-                    }
-                    className="p-2 border border-gray-600 rounded text-xs hover:bg-gray-700"
-                  >
-                    <span className={option.class}>{option.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-300 block mb-2">
-                Animation:
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {animationOptions.map((option) => (
-                  <button
-                    key={option.name}
-                    onClick={() =>
-                      applyTextStyle({
-                        gradient:
-                          currentTextInput === "title"
-                            ? titleStyle.gradient
-                            : subtitleStyle.gradient,
-                        animation: option.class,
-                        font:
-                          currentTextInput === "title"
-                            ? titleStyle.font
-                            : subtitleStyle.font,
-                      })
-                    }
-                    className="p-2 border border-gray-600 rounded text-xs hover:bg-gray-700 text-gray-200"
-                  >
-                    {option.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-300 block mb-2">
-                Font weight:
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {fontOptions.map((option) => (
-                  <button
-                    key={option.name}
-                    onClick={() =>
-                      applyTextStyle({
-                        gradient:
-                          currentTextInput === "title"
-                            ? titleStyle.gradient
-                            : subtitleStyle.gradient,
-                        animation:
-                          currentTextInput === "title"
-                            ? titleStyle.animation
-                            : subtitleStyle.animation,
-                        font: option.class,
-                      })
-                    }
-                    className="p-2 border border-gray-600 rounded text-xs hover:bg-gray-700 text-gray-200"
-                  >
-                    <span className={option.class}>{option.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="fixed inset-0 -z-10">
       {backgroundSettings.type === "video" && currentVideo && (
@@ -352,28 +129,238 @@ export function BackgroundSystem() {
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           className={styles["background-video"]}
           title={`Background YouTube video ${currentVideo}`}
-          style={{ opacity: backgroundSettings.opacity }}
+          style={
+            {
+              // Sử dụng biến CSS cho opacity
+              "--bg-opacity": backgroundSettings.opacity,
+            } as React.CSSProperties
+          }
         />
       )}
       {backgroundSettings.type === "gradient" && (
         <div
-          className={`absolute inset-0 transition-opacity duration-1000 background-gradient`}
+          className={`absolute inset-0 transition-opacity duration-1000 background-gradient ${styles["background-gradient"]}`}
           data-gradient={backgroundSettings.gradient}
-          style={{ opacity: backgroundSettings.opacity }}
+          style={
+            {
+              "--bg-opacity": backgroundSettings.opacity,
+            } as React.CSSProperties
+          }
         />
       )}
       {backgroundSettings.type === "image" && backgroundSettings.imageUrl && (
         <div
-          className="absolute inset-0 bg-center bg-cover transition-opacity duration-1000"
-          style={{
-            backgroundImage: `url(${backgroundSettings.imageUrl})`,
-            opacity: backgroundSettings.opacity,
-          }}
+          className={`absolute inset-0 bg-center bg-cover transition-opacity duration-1000 ${styles["background-image"]}`}
+          data-bg={backgroundSettings.imageUrl}
+          style={
+            {
+              backgroundImage: `url(${backgroundSettings.imageUrl})`,
+              "--bg-opacity": backgroundSettings.opacity,
+            } as React.CSSProperties
+          }
         />
       )}
 
       {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/40" />
+      {/* Hiển thị log từ bảng nhatKy */}
+      {logs.length > 0 && (
+        <div className="absolute bottom-0 left-0 w-full bg-black/60 text-white text-xs p-2 z-50 max-h-40 overflow-y-auto">
+          <div className="font-bold mb-1">Lịch sử hoạt động nền:</div>
+          <ul>
+            {logs.map((log) => (
+              <li key={log.id} className="mb-1">
+                <span className="text-yellow-300">{log.action}</span>{" "}
+                <span className="text-gray-400">
+                  ({new Date(log.createdAt).toLocaleString()})
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Move TextStyleDialog outside and pass props
+type TextStyleDialogProps = {
+  open: boolean;
+  currentTextInput: "title" | "subtitle" | null;
+  titleStyle: { gradient: string; animation: string; font: string };
+  subtitleStyle: { gradient: string; animation: string; font: string };
+  onClose: () => void;
+};
+
+export function TextStyleDialog({
+  open,
+  currentTextInput,
+  titleStyle,
+  subtitleStyle,
+  onClose,
+}: TextStyleDialogProps) {
+  if (!open) return null;
+
+  const gradientOptions = [
+    {
+      name: "Tím",
+      class:
+        "bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent",
+    },
+    {
+      name: "Xanh dương",
+      class:
+        "bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent",
+    },
+    {
+      name: "Xanh lá",
+      class:
+        "bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent",
+    },
+    {
+      name: "Vàng",
+      class:
+        "bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent",
+    },
+  ];
+
+  const animationOptions = [
+    { name: "Không", class: "" },
+    { name: "Nhảy", class: "animate-pulse" },
+    { name: "Nảy", class: "animate-bounce" },
+    { name: "Vút", class: "animate-ping" },
+  ];
+
+  const fontOptions = [
+    { name: "Bình thường", class: "font-dosis" },
+    { name: "Nhẹ", class: "font-dosis-light" },
+    { name: "Vừa", class: "font-dosis-medium" },
+    { name: "Đậm", class: "font-dosis-bold" },
+    { name: "Rất đậm", class: "font-dosis-extrabold" },
+  ];
+
+  return (
+    <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-4">
+      <div className="bg-gray-800 border border-gray-700 rounded-lg max-w-md w-full p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-white">
+            Tùy chỉnh{" "}
+            {currentTextInput === "title"
+              ? "Tiêu đề"
+              : currentTextInput === "subtitle"
+                ? "Phụ đề"
+                : ""}
+          </h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-gray-400 hover:text-white"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label
+              htmlFor="gradient-select"
+              className="text-sm font-medium text-gray-300 block mb-2"
+            >
+              Gradient màu:
+            </label>
+            <div id="gradient-select" className="grid grid-cols-2 gap-2">
+              {gradientOptions.map((option) => (
+                <button
+                  type="button"
+                  key={option.name}
+                  onClick={() =>
+                    applyTextStyle({
+                      gradient: option.class,
+                      animation:
+                        currentTextInput === "title"
+                          ? titleStyle.animation
+                          : subtitleStyle.animation,
+                      font:
+                        currentTextInput === "title"
+                          ? titleStyle.font
+                          : subtitleStyle.font,
+                    })
+                  }
+                  className="p-2 border border-gray-600 rounded text-xs hover:bg-gray-700"
+                >
+                  <span className={option.class}>{option.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label
+              htmlFor="animation-select"
+              className="text-sm font-medium text-gray-300 block mb-2"
+            >
+              Animation:
+            </label>
+            <div id="animation-select" className="grid grid-cols-2 gap-2">
+              {animationOptions.map((option) => (
+                <button
+                  type="button"
+                  key={option.name}
+                  onClick={() =>
+                    applyTextStyle({
+                      gradient:
+                        currentTextInput === "title"
+                          ? titleStyle.gradient
+                          : subtitleStyle.gradient,
+                      animation: option.class,
+                      font:
+                        currentTextInput === "title"
+                          ? titleStyle.font
+                          : subtitleStyle.font,
+                    })
+                  }
+                  className="p-2 border border-gray-600 rounded text-xs hover:bg-gray-700 text-gray-200"
+                >
+                  {option.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label
+              htmlFor="font-select"
+              className="text-sm font-medium text-gray-300 block mb-2"
+            >
+              Font weight:
+            </label>
+            <div id="font-select" className="grid grid-cols-2 gap-2">
+              {fontOptions.map((option) => (
+                <button
+                  type="button"
+                  key={option.name}
+                  onClick={() =>
+                    applyTextStyle({
+                      gradient:
+                        currentTextInput === "title"
+                          ? titleStyle.gradient
+                          : subtitleStyle.gradient,
+                      animation:
+                        currentTextInput === "title"
+                          ? titleStyle.animation
+                          : subtitleStyle.animation,
+                      font: option.class,
+                    })
+                  }
+                  className="p-2 border border-gray-600 rounded text-xs hover:bg-gray-700 text-gray-200"
+                >
+                  <span className={option.class}>{option.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

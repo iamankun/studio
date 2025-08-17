@@ -1,66 +1,66 @@
 // @ts-check
 /**
- * Script kiểm tra tài khoản Admin
- * Chạy: node scripts/check-admin-auth.js
+ * Script kiểm tra tài khoản quản trị
+ * Chạy: node scripts/kiem-tra-xac-thuc-label
  */
 import {
-    connectToDatabase,
-    checkTableExists
-} from './utils/db-helper.js';
-import { loadEnvVariables, logToFile } from './utils/env-loader.js';
+    databaseAPIservice,
+    tableName
+} from './utils/cap-cuu-du-lieu.js';
+import { loadEnvVariables, logToFile } from './utils/env.js';
 
-// Load environment variables
+// Tải biến môi trường
 loadEnvVariables();
 
 /**
- * Kiểm tra tài khoản Admin trong database
+ * Kiểm tra tài khoản quản trị trong dữ liệu
  */
 async function checkAdminAuth() {
-    console.log('🔍 Kiểm tra tài khoản Admin...');
+    console.log('🔍 Kiểm tra tài khoản của chủ nhiệm nhãn...');
     console.log('='.repeat(50));
 
     try {
         // 1. Kiểm tra biến môi trường
-        console.log('=== 1. Kiểm tra Admin Environment ===');
-        const adminUsername = process.env.ADMIN_USERNAME;
+        console.log('=== 1. Kiểm tra tài khoản của chủ nhiệm nhãn ===');
+        const userRole = [UserRole.ADMIN, UserRole.LABEL_MANAGER];
 
-        if (!adminUsername) {
-            throw new Error('ADMIN_USERNAME không tồn tại trong .env.local');
+        if (!userRole) {
+            throw new Error('Tài khoản không tồn tại trong kho dữ liệu');
         }
 
-        await logToFile(`Tìm thấy ADMIN_USERNAME: ${adminUsername}`, 'admin-check.log');
-        console.log('✅ Tìm thấy cấu hình Admin trong .env.local');
+        await logToFile(`Tìm thấy tài khoản: ${userName}`, 'taikhoan.log');
+        console.log('✅ Tìm thấy cấu hình tài khoản quản trị trong biến');
 
-        // 2. Kết nối database
-        console.log('\n=== 2. Kiểm tra trong Database ===');
-        const sql = await connectToDatabase();
+        // 2. Kết nối dữ liệu
+        console.log('\n=== 2. Kiểm tra trong dữ liệu ===');
+        const sql = await databaseAPIservice();
 
-        // 3. Kiểm tra user trong database
+        // 3. Kiểm tra người dùng trong dữ liệu
         const result = await sql`
-            SELECT id, username, email, role, created_at, last_login
-            FROM users 
-            WHERE username = ${adminUsername}
-            AND role IN ('Admin', 'Label Manager')
+            SELECT id, userName, email, role, createdAt, lastLogin
+            FROM userUID
+            WHERE userName = ${userName}
+            AND role IN ('ADMIN', 'LABEL_MANAGER')
         `;
 
         if (result.length === 0) {
-            console.log('❌ Không tìm thấy tài khoản Admin trong database!');
-            await logToFile('Lỗi: Không tìm thấy Admin user trong database', 'admin-check.log');
+            console.log('❌ Không tìm thấy tài khoản quản trị trong dữ liệu!');
+            await logToFile('Lỗi: Không tìm thấy quản trị viên trong dữ liệu', 'taikhoan.log');
             return;
         }
-        
+
         const admin = result[0];
-        console.log('✅ Tìm thấy tài khoản Admin:');
+        console.log('✅ Tìm thấy tài khoản quản trị và nhãn quản trị:');
         console.log({
-            id: admin.id,
-            username: admin.username,
-            email: admin.email,
-            role: admin.role,
-            createdAt: admin.created_at,
-            lastLogin: admin.last_login
+            UID: user.UID,
+            role: userRole,
+            userName: userName,
+            email: useremail,
+            createdAt: user.createdAt,
+            lastLogin: user.lastLogin
         });
 
-        await logToFile(`Admin user "${admin.username}" tồn tại với role ${admin.role}`, 'admin-check.log');
+        await logToFile(`Tài khoản người dùng  "${userName}" tồn tại với role ${userRole}`, 'taikhoan.log');
 
         // 4. Kiểm tra permissions
         await checkUserPermissions(sql, admin);
@@ -90,7 +90,7 @@ async function checkUserPermissions(sql, admin) {
         await logToFile('Cảnh báo: Admin chưa có permissions', 'admin-check.log');
         return;
     }
-    
+
     console.log('✅ Permissions của Admin:');
     permissions.forEach(p => console.log(`- ${p.permission_name}`));
     await logToFile(`Admin có ${permissions.length} permissions`, 'admin-check.log');
@@ -113,7 +113,7 @@ async function checkRecentActivity(sql, admin) {
         console.log('ℹ️ Chưa có log hoạt động nào');
         return;
     }
-    
+
     console.log('✅ Hoạt động gần đây của Admin:');
     recentActivity.forEach(activity => {
         console.log(`- ${activity.action_type} (${activity.created_at})`);

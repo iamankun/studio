@@ -17,7 +17,20 @@ export async function POST(request: NextRequest) {
         }
 
         // Determine which table to update based on role
-        const userTable = role === "Label Manager" ? "label_manager" : "artist";
+        let userTable = "";
+        if (role === "Admin" || role === "Label Manager") {
+            userTable = "label_manager";
+        } else if (role === "Artist") {
+            userTable = "artist";
+        } else {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Invalid role provided"
+                },
+                { status: 400 }
+            );
+        }
 
         // Initialize neonSql if not already done
         await multiDB.initialize();

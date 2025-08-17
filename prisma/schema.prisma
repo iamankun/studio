@@ -12,7 +12,7 @@ datasource db {
 // --- BẢNG QUẢN LÝ NGƯỜI DÙNG & HỒ SƠ ---
 model User {
   UID            String       @id @default(cuid())
-  username       String
+  userName       String
   email         String       @unique
   name          String?      @unique
   password      String
@@ -48,8 +48,8 @@ model Profile {
   artist        String? // Tên nghệ sĩ
   name          String? // Tên đầy đủ theo giấy tờ
   verified      Boolean @default(false) // Trạng thái xác minh khi đầy đủ các thông tin
-  username        String @unique
-  user            User   @relation(fields: [username], references: [name], onDelete: Cascade)
+  userName        String @unique
+  user            User   @relation(fields: [userName], references: [name], onDelete: Cascade)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   socialLinks   String[] // Liên kết đến các mạng xã hội
@@ -58,8 +58,15 @@ model Profile {
 
 model SocialLink {
   id        String   @id @default(cuid())
-  social    String?// e.g., "facebook", "instagram", "youtube", etc.
+  social    String?   // e.g., "facebook", "instagram", "youtube", etc.
   url       Json?
+  homeUrl   String?
+  facebookUrl String?
+  instagramUrl String?
+  youtubeUrl String?
+  spotifyUrl String?
+  soundcloudUrl String?
+  applenusicUrl String?
 }
 
 model Label {
@@ -352,13 +359,13 @@ enum UserRole {
 }
 
 enum SubmissionStatus {
-  PENDING                    // "Đã gửi, bạn có thể sửa hoặc hủy nếu như chưa chuyển sang đã duyệt"
-  APPROVED                   // "Đã duyệt, đang chờ phát hành!"
-  REJECTED                   // "Từ chối phát hành, cần chỉnh sửa"
-  PROCESSING                 // "Đã phát hành, đang chờ ra mắt"
-  PUBLISHED                  // "Hoàn thành phát hành!"
-  CANCELLED                  // "Đã hủy phát hành, do bạn yêu cầu hoặc vì bạn đã vi phạm chính sách của chúng tôi"
-  DRAFT                      // "Bản nháp, bạn cần sớm hoàn thành"
+  PENDING
+  APPROVED
+  REJECTED
+  PROCESSING
+  PUBLISHED
+  CANCELLED
+  DRAFT
 }
 
 enum ReleaseType {

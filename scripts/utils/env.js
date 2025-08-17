@@ -1,7 +1,7 @@
 // @ts-check
 /**
  * Utility để load biến môi trường và hỗ trợ các script trong thư mục scripts/
- * File: scripts/utils/env-loader.js
+ * File: scripts/utils/env.js
  */
 import dotenv from 'dotenv';
 import { existsSync, readFileSync } from 'fs';
@@ -50,15 +50,15 @@ export function findProjectRoot(startDir) {
 }
 
 /**
- * Load environment variables from multiple potential locations
- * @returns {boolean} - Trả về true nếu tìm thấy file .env hoặc DATABASE_URL
+* Tải thông tin biến môi trường từ nhiều vị trí tiềm năng
+* @returns {boolean} - Trả về có nếu tìm thấy tệp biến môi trường hoặc dữ liệu
  */
 export function loadEnvVariables() {
     // Định nghĩa các vị trí tìm kiếm
     const rootDir = process.cwd();
     const scriptDir = path.dirname(process.argv[1]);
 
-    // Tìm thư mục gốc dự án bằng cách tìm các file đặc trưng
+    // Tìm thư mục gốc dự án bằng cách tìm các tệp đặc trưng
     const projectRoot = findProjectRoot(scriptDir);
 
     const locations = [
@@ -76,59 +76,59 @@ export function loadEnvVariables() {
         path.resolve(scriptDir, '..', '.env'),
     ];
 
-    console.log('🔍 Tìm kiếm file .env...');
+    console.log('🔍 Tìm kiếm tệp biến...');
     console.log(`   Thư mục hiện tại: ${rootDir}`);
-    console.log(`   Thư mục script: ${scriptDir}`);
+    console.log(`   Thư mục mã chạy js: ${scriptDir}`);
     console.log(`   Thư mục gốc dự án: ${projectRoot}`);
 
     // Kiểm tra các vị trí
     for (const loc of locations) {
         try {
             if (existsSync(loc)) {
-                console.log(`✅ Đã tìm thấy file: ${loc}`);
+                console.log(`✅ Đã tìm thấy tệp: ${loc}`);
                 dotenv.config({ path: loc });
                 return true;
             }
         } catch (error) {
-            // Bỏ qua lỗi nhưng ghi log
+            // Bỏ qua lỗi nhưng ghi nhật ký
             console.log(`   ⚠️ Lỗi khi kiểm tra ${loc}: ${error.message}`);
         }
     }
 
-    // Thử load mặc định
+    // Thử tải tệp mặc định
     dotenv.config();
 
     // Kiểm tra xem có DATABASE_URL trong process.env không
     if (process.env.DATABASE_URL) {
-        console.log('✅ Đã tìm thấy DATABASE_URL trong biến môi trường');
+        console.log('✅ Đã tìm thấy liên kết trong biến môi trường');
         return true;
     }
 
-    // Thử đọc trực tiếp từ file .env.local nếu tồn tại
+    // Thử đọc trực tiếp từ tệp .env.local nếu tồn tại
     const envLocalPath = path.join(projectRoot, '.env.local');
     if (existsSync(envLocalPath)) {
         try {
-            console.log('📄 Đọc trực tiếp từ file .env.local...');
+            console.log('📄 Đọc trực tiếp từ tệp biến...');
             const envContent = readFileSync(envLocalPath, 'utf8');
             const dbUrlMatch = envContent.match(/DATABASE_URL\s*=\s*["'](.+?)["']/);
             if (dbUrlMatch && dbUrlMatch[1]) {
-                console.log('✅ Đã tìm thấy DATABASE_URL từ file .env.local');
+                console.log('✅ Đã tìm thấy liên kết từ tệp .env.local');
                 process.env.DATABASE_URL = dbUrlMatch[1];
                 return true;
             }
         } catch (error) {
-            console.error(`❌ Lỗi khi đọc file .env.local: ${error.message}`);
+            console.error(`❌ Lỗi khi đọc tệp biến môi trường: ${error.message}`);
         }
     }
 
-    console.log('❌ Không tìm thấy file .env hoặc DATABASE_URL trong biến môi trường');
+    console.log('❌ Không tìm thấy tệp biến môi trường hoặc biến môi trường');
     return false;
 }
 
 /**
- * Ghi log vào file
- * @param {string} message - Nội dung log
- * @param {string} [logFileName='script-log.log'] - Tên file log
+ * Ghi nhật ký vào tệp
+ * @param {string} message - Nội dung nhật ký
+ * @param {string} [logFileName='script-log.log'] - Tên tệp nhật ký
  */
 export async function logToFile(message, logFileName = 'script-log.log') {
     const timestamp = new Date().toISOString();
@@ -144,12 +144,8 @@ export async function logToFile(message, logFileName = 'script-log.log') {
  */
 export function getDatabaseUrl() {
     let DATABASE_URL = process.env.DATABASE_URL;
-
     if (!DATABASE_URL) {
-        // Fallback URL - chỉ dùng khi không tìm thấy trong env
-        DATABASE_URL = "postgresql://aksstudio_owner:npg_HzPUo8Xn1wfD@ep-mute-rice-a17ojtca-pooler.ap-southeast-1.aws.neon.tech/aksstudio?sslmode=require";
-        console.log('⚠️ Sử dụng DATABASE_URL fallback');
+        throw new Error('Dữ liệu không có trong biến môi trường, cần kiểm tra lại tệp biến');
     }
-
     return DATABASE_URL;
 }

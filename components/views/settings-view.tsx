@@ -32,15 +32,15 @@ import Image from "next/image";
 
 export function SettingsView() {
   const { user: currentUser } = useAuth();
-  const { status, checkAllSystems } = useSystemStatus();
+  const { status } = useSystemStatus();
 
   // Email settings removed - managed through environment variables
 
   const [appSettings, setAppSettings] = useState({
-    appName: "AKs Studio",
-    logoUrl: "/face.png",
-    homeUrl: "/",
-    version: "1.0.0",
+    appName: process.env.COMPANY_NAME ?? "Studio",
+    logoUrl: process.env.COMPANY_LOGO ?? "/logo.svg",
+    homeUrl: process.env.COMPANY_WEBSITE ?? "domain.com",
+    version: process.env.COMPANY_VERSION ?? "Chưa có thông tin phiên bản",
   });
 
   const [appMode, setAppMode] = useState("demo"); // demo or production
@@ -121,6 +121,7 @@ export function SettingsView() {
       setFooterSettings(JSON.parse(savedFooter));
     } else {
       // Cập nhật footerSettings nếu appSettings đã được tải, hoặc dùng giá trị mặc định
+      const savedApp = localStorage.getItem("appSettings_v2");
       if (savedApp) {
         const parsedApp = JSON.parse(savedApp);
         setFooterSettings((prev) => ({
@@ -449,6 +450,8 @@ export function SettingsView() {
                     })
                   }
                   className="w-full mt-1"
+                  title="Điều chỉnh độ mờ background"
+                  placeholder="Chọn độ mờ từ 0.1 đến 1"
                 />
               </div>
 
@@ -613,7 +616,7 @@ export function SettingsView() {
                 <p>Cả Label Manager và Nghệ sĩ đều có thể:</p>
                 <ul>
                   <li>Upload file nhạc (WAV, 24bit+)</li>
-                  <li>Upload ảnh bìa (JPG, 4000x4000px)</li>
+                  <li>Upload ảnh bìa (jpg, 4000x4000px)</li>
                   <li>Điền thông tin metadata</li>
                   <li>Chọn ngày phát hành</li>
                 </ul>
@@ -635,7 +638,7 @@ export function SettingsView() {
                   <li>Tránh trùng lặp khi phát hành</li>
                 </ul>
 
-                {currentUser.role === "Label Manager" && (
+                {currentUser.roles?.includes("Label Manager") && (
                   <div className="mt-8 p-4 bg-blue-900/30 border border-blue-500/50 rounded-lg">
                     <h4>📋 Hướng dẫn Setup cho Label Manager</h4>
                     <p>Để chuyển từ chế độ Demo sang Production:</p>
@@ -845,7 +848,7 @@ export function SettingsView() {
                 </CardContent>
               </Card>
 
-              {currentUser.role === "Label Manager" && (
+              {currentUser.roles?.includes("Label Manager") && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center">

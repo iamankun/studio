@@ -1,6 +1,4 @@
 /* Import Dosis font for fallback (in case the Next.js font loader fails) */
-@import url("https://fonts.googleapis.com/css2?family=Dosis:wght@300;400;500;600;700;800&display=swap");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -70,13 +68,13 @@
 @layer base {
   * {
     border-color: hsl(var(--border));
-    font-family: var(--font-dosis), "Dosis", system-ui, sans-serif;
+    font-family: url(./font/Dosis-VariableFont_wght.ttf), "Dosis", system-ui, sans-serif;
   }
 
   body {
     background: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: var(--font-dosis), "Dosis", system-ui, sans-serif;
+    font-family: url(./font/Dosis-VariableFont_wght.ttf), "Dosis", system-ui, sans-serif;
     overflow-x: hidden;
     overflow-y: auto;
     height: 100%;
@@ -91,7 +89,7 @@
 
 /* Dosis font classes */
 .font-dosis {
-  font-family: var(--font-dosis), system-ui, sans-serif;
+  font-family: url(./font/Dosis-VariableFont_wght.ttf), system-ui, sans-serif;
   letter-spacing: 0.025em;
 }
 

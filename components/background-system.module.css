@@ -13,6 +13,7 @@
     border: none;
     display: block;
     pointer-events: none;
+    opacity: var(--bg-opacity, 0.3);
 }
 
 .background-gradient {
@@ -23,4 +24,23 @@
     height: 100vh;
     z-index: -1;
     pointer-events: none;
+    opacity: var(--bg-opacity, 0.3);
+}
+
+.background-image {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+    background-position: center;
+    background-size: cover;
+    opacity: var(--bg-opacity, 0.3);
+}
+
+:root {
+    --bg-opacity: 0.3;
+    /* Tiện ích đặt độ mờ nền qua biến CSS */
 }

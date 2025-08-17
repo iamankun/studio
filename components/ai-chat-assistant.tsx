@@ -43,6 +43,53 @@ interface AiChatAssistantProps {
     readonly onClose: () => void
 }
 
+interface MessageBubbleProps {
+    readonly message: Message
+    readonly index: number
+}
+
+function MessageBubble({ message, index }: MessageBubbleProps) {
+    const isUser = message.role === "user"
+
+    return (
+        <motion.div
+            className={`flex ${isUser ? "justify-end" : "justify-start"} mb-4`}
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                transition: {
+                    delay: index * 0.1,
+                    duration: 0.4,
+                    ease: [0.4, 0, 0.2, 1]
+                }
+            }}
+        >
+            <div
+                className={`flex items-start gap-2 max-w-[80%] ${isUser ? "flex-row-reverse" : ""}`}
+            >
+                <motion.div
+                    className={`p-4 rounded-2xl backdrop-blur-lg border
+                        ${isUser
+                            ? "bg-gradient-to-br from-purple-600/90 to-purple-700/90 border-purple-500/30 text-white shadow-[0_4px_20px_rgba(168,85,247,0.2)]"
+                            : "bg-gradient-to-br from-white/15 to-white/5 border-white/20 text-white/90 shadow-[0_4px_20px_rgba(255,255,255,0.1)]"
+                        } 
+                        hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-0.5 transition-all duration-300
+                    `}
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                >
+                    <p className="text-sm leading-relaxed">{message.content}</p>
+                    <div className={`text-xs mt-2 ${isUser ? "text-purple-200/80" : "text-white/60"}`}>
+                        {formatMessageTime(message.timestamp)}
+                    </div>
+                </motion.div>
+            </div>
+        </motion.div>
+    )
+}
+
 export function AiChatAssistant({ isOpen, onClose }: AiChatAssistantProps) {
     const [messages, setMessages] = useState<Message[]>([
         {
@@ -237,53 +284,6 @@ export function AiChatAssistant({ isOpen, onClose }: AiChatAssistantProps) {
             }
         }
     } as const
-
-    interface MessageBubbleProps {
-        readonly message: Message
-        readonly index: number
-    }
-
-    function MessageBubble({ message, index }: MessageBubbleProps) {
-        const isUser = message.role === "user"
-
-        return (
-            <motion.div
-                className={`flex ${isUser ? "justify-end" : "justify-start"} mb-4`}
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    transition: {
-                        delay: index * 0.1,
-                        duration: 0.4,
-                        ease: [0.4, 0, 0.2, 1]
-                    }
-                }}
-            >
-                <div
-                    className={`flex items-start gap-2 max-w-[80%] ${isUser ? "flex-row-reverse" : ""}`}
-                >
-                    <motion.div
-                        className={`p-4 rounded-2xl backdrop-blur-lg border
-                            ${isUser
-                                ? "bg-gradient-to-br from-purple-600/90 to-purple-700/90 border-purple-500/30 text-white shadow-[0_4px_20px_rgba(168,85,247,0.2)]"
-                                : "bg-gradient-to-br from-white/15 to-white/5 border-white/20 text-white/90 shadow-[0_4px_20px_rgba(255,255,255,0.1)]"
-                            } 
-                            hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-0.5 transition-all duration-300
-                        `}
-                        whileHover={{ scale: 1.02, y: -2 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                    >
-                        <p className="text-sm leading-relaxed">{message.content}</p>
-                        <div className={`text-xs mt-2 ${isUser ? "text-purple-200/80" : "text-white/60"}`}>
-                            {formatMessageTime(message.timestamp)}
-                        </div>
-                    </motion.div>
-                </div>
-            </motion.div>
-        )
-    }
 
     if (!isOpen) return null
 

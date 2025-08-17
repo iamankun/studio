@@ -12,8 +12,8 @@ const __dirname = path.dirname(new URL(import.meta.url).pathname);
 const projectRoot = path.resolve(__dirname, '/studio');
 
 console.log('Giàn nhạc đã sẳn sàng, cùng nhau cất tiếng vang');
-console.log(`Xin chào ${process.env.COMPANY_NAME} - ${process.env.COMPANY_DESCRIPTION}`);
-console.log('♩ ♪ ♫ ♬ ♭ ♩ ♪ ♫ ♬ ♭ ♩ ♪ ♫ ♬ ♭ ♩ ♪ ♫ ♬ ♭ ♩ ♪ ♫ ♬ ♭');
+console.log(`Xin chào đã đến với quy trình kiểm tra`);
+console.log('♩ ♪ ♫ ♬  ♭ ♩ ♪ ♫ ♬  ♭ ♩ ♪ ♫ ♬  ♭ ♩ ♪ ♫ ♬  ♭ ♩ ♪ ♫ ♬');
 
 // Kiểm tra sự tồn tại của Prisma client
 const prismaClientPath = path.join(projectRoot, 'node_modules', '@prisma', 'client');

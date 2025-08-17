@@ -30,7 +30,7 @@ Utility để làm việc với database.
 
 ```javascript
 import { 
-    connectToDatabase, 
+    databaseAPIservice, 
     testDatabaseConnection,
     checkTableExists,
     getTableStructure,

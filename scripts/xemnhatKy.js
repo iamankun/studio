@@ -4,40 +4,40 @@
  * Dùng để truy vấn, tìm kiếm và xuất báo cáo từ bảng log
  */
 
-import { neon } from "@neondatabase/serverless";
 import fs from 'fs/promises';
 import path from 'path';
 import dotenv from 'dotenv';
+import { UserRole } from '@prisma/client';
 
-// Load environment variables
+// Tải biến môi trường
 dotenv.config({ path: '.env.local' });
 
 async function logToFile(message) {
     try {
-        const logDir = path.join(process.cwd(), "logs");
+        const logDir = path.join(process.cwd(), "Nhật ký");
         await fs.mkdir(logDir, { recursive: true });
-        const logFile = path.join(logDir, "xem-nhat-ky.log");
+        const logFile = path.join(logDir, "xemnhatKy.log");
         const timestamp = new Date().toISOString();
         await fs.appendFile(logFile, `[${timestamp}] ${message}\n`);
     } catch (e) {
-        console.error("Failed to write to log file:", e);
+        console.error("Lỗi khi viết vào tệp nhật ký:", e);
     }
 }
 
-async function connectToDatabase() {
+async function databaseAPIservice() {
     const DATABASE_URL = process.env.DATABASE_URL;
     if (!DATABASE_URL) {
-        throw new Error('DATABASE_URL không tìm thấy trong .env.local');
+        throw new Error('Biến không tìm thấy trong biến môi trường');
     }
-    return neon(DATABASE_URL);
+    return (DATABASE_URL);
 }
 
 /**
  * Truy vấn logs theo các tiêu chí
  * @param {Object} options - Các tùy chọn truy vấn
  * @param {number} [options.limit=50] - Số lượng kết quả tối đa
- * @param {string} [options.username] - Lọc theo username
- * @param {string} [options.userId] - Lọc theo user_id
+ * @param {string} [options.userUID] - Lọc theo userUID
+ * @param {string} [options.userName] - Lọc theo userName
  * @param {string} [options.action] - Lọc theo action
  * @param {string} [options.category] - Lọc theo category
  * @param {string} [options.status] - Lọc theo status
@@ -51,31 +51,32 @@ async function connectToDatabase() {
 async function queryLogs(options = {}) {
     const {
         limit = 50,
-        username,
-        userId,
+        userUID,
+        userName,
         action,
         category,
         status,
         componentName,
         startDate,
         endDate,
-        sortBy = 'created_at',
+        sortBy = 'Tạo bởi',
         sortOrder = 'DESC'
     } = options;
 
     try {
-        const sql = await connectToDatabase();
+        const sql = await databaseAPIservice();
 
         // Bắt đầu câu truy vấn
-        let query = sql`SELECT * FROM nhat_ky_studio WHERE 1=1`;
+        let query = sql`SELECT * FROM nhatKy WHERE 1=1`;
 
         // Thêm các điều kiện lọc
-        if (username) {
-            query = sql`${query} AND username = ${username}`;
+
+        if (userUID) {
+            query = sql`${query} AND userUID = ${userUID}`;
         }
 
-        if (userId) {
-            query = sql`${query} AND user_id = ${userId}`;
+        if (userName) {
+            query = sql`${query} AND userName = ${userName}`;
         }
 
         if (action) {
@@ -112,43 +113,43 @@ async function queryLogs(options = {}) {
         // Thực hiện truy vấn
         return await query;
     } catch (error) {
-        console.error('Lỗi khi truy vấn logs:', error);
+        console.error('Lỗi khi truy vấn nhật ký:', error);
         throw error;
     }
 }
 
 /**
- * Lấy thống kê từ logs
+ * Lấy thống kê từ nhật ký
  * @returns {Promise<Object>} - Các thống kê
  */
 async function getLogStats() {
     try {
-        const sql = await connectToDatabase();
+        const sql = await databaseAPIservice();
 
-        // Tổng số logs
-        const totalLogs = await sql`SELECT COUNT(*) as count FROM nhat_ky_studio`;
+        // Tổng số nhật ký
+        const totalLogs = await sql`SELECT COUNT(*) as count FROM nhatKy`;
 
-        // Thống kê theo action
+        // Thống kê theo hành động
         const actionStats = await sql`
             SELECT action, COUNT(*) as count
-            FROM nhat_ky_studio
+            FROM nhatKy
             GROUP BY action
             ORDER BY count DESC
         `;
 
-        // Thống kê theo username
+        // Thống kê theo tài khoản
         const userStats = await sql`
             SELECT username, COUNT(*) as count
-            FROM nhat_ky_studio
+            FROM nhatKy
             GROUP BY username
             ORDER BY count DESC
             LIMIT 10
         `;
 
-        // Thống kê theo category
+        // Thống kê theo nhóm
         const categoryStats = await sql`
             SELECT category, COUNT(*) as count
-            FROM nhat_ky_studio
+            FROM nhatKy
             GROUP BY category
             ORDER BY count DESC
         `;
@@ -156,24 +157,24 @@ async function getLogStats() {
         // Thống kê theo ngày (7 ngày gần nhất)
         const dateStats = await sql`
             SELECT DATE_TRUNC('day', created_at) as date, COUNT(*) as count
-            FROM nhat_ky_studio
+            FROM nhatKy
             WHERE created_at >= NOW() - INTERVAL '7 days'
             GROUP BY date
             ORDER BY date DESC
         `;
 
-        // Thống kê theo status
+        // Thống kê theo trạng thái
         const statusStats = await sql`
             SELECT status, COUNT(*) as count
-            FROM nhat_ky_studio
+            FROM nhatKy
             GROUP BY status
             ORDER BY count DESC
         `;
 
-        // Thống kê theo component
+        // Thống kê theo gói
         const componentStats = await sql`
             SELECT component_name, COUNT(*) as count
-            FROM nhat_ky_studio
+            FROM nhatKy
             GROUP BY component_name
             ORDER BY count DESC
             LIMIT 10
@@ -189,7 +190,7 @@ async function getLogStats() {
             byComponent: componentStats
         };
     } catch (error) {
-        console.error('Lỗi khi lấy thống kê logs:', error);
+        console.error('Lỗi khi lấy thống kê nhật ký:', error);
         throw error;
     }
 }
@@ -203,17 +204,17 @@ async function getLogStats() {
 async function exportLogsToCSV(logs, filename) {
     try {
         // Tạo thư mục exports nếu chưa tồn tại
-        const exportDir = path.join(process.cwd(), "exports");
+        const exportDir = path.join(process.cwd(), "nhatky");
         await fs.mkdir(exportDir, { recursive: true });
 
         // Tạo tên file
-        const defaultFilename = `nhat-ky-studio-export-${new Date().toISOString().replace(/:/g, '-')}.csv`;
-        const csvFilePath = path.join(exportDir, filename || defaultFilename);
+        const defaultFilename = `nhatky-${new Date().toISOString().replace(/:/g, '-')}.csv`;
+        const csvFilePath = path.join(exportDir, filename ?? defaultFilename);
 
         // Tạo header CSV
         const headers = [
-            'ID', 'User ID', 'Username', 'Action', 'Category',
-            'IP Address', 'User Agent', 'Status', 'Created At',
+            'ID', 'UserUID', 'username', 'Action', 'Category',
+            'IP', 'User Agent', 'Status', 'CreatedAt',
             'Component Name', 'Session ID', 'Related IDs', 'Details'
         ];
 
@@ -223,7 +224,7 @@ async function exportLogsToCSV(logs, filename) {
         for (const log of logs) {
             const row = [
                 log.id,
-                `"${(log.user_id || '').replace(/"/g, '""')}"`,
+                `"${(log.userUID || '').replace(/"/g, '""')}"`,
                 `"${(log.username || '').replace(/"/g, '""')}"`,
                 `"${(log.action || '').replace(/"/g, '""')}"`,
                 `"${(log.category || '').replace(/"/g, '""')}"`,
@@ -257,18 +258,18 @@ async function exportLogsToCSV(logs, filename) {
  */
 async function deleteOldLogs(days) {
     try {
-        const sql = await connectToDatabase();
+        const sql = await databaseAPIservice();
 
-        // Xóa logs cũ
+        // Xóa nhật ký cũ
         const result = await sql`
-            DELETE FROM nhat_ky_studio
-            WHERE created_at < NOW() - INTERVAL '${days} days'
+            DELETE FROM nhatKy
+            WHERE createdAt < NOW() - INTERVAL '${days} ngày'
             RETURNING id
         `;
 
         return result.length;
     } catch (error) {
-        console.error('Lỗi khi xóa logs cũ:', error);
+        console.error('Lỗi khi xóa nhật ký cũ:', error);
         throw error;
     }
 }
@@ -281,42 +282,42 @@ async function main() {
         const command = args[0];
 
         // Kết nối đến database
-        await connectToDatabase();
+        await databaseAPIservice();
 
-        if (!command || command === 'help') {
+        if (!command ?? command === 'cứu') {
             console.log('=== QUẢN LÝ NHẬT KÝ STUDIO ===');
-            console.log('Sử dụng: node xem-nhat-ky.js [lệnh] [tham số]');
+            console.log('Sử dụng: node xemnhatKy.js [lệnh] [tham số]');
             console.log('\nCác lệnh:');
-            console.log('  list [limit] [--user=X] [--userid=X] [--action=X] [--category=X] [--status=X] [--component=X] - Liệt kê logs');
-            console.log('  stats                                                         - Hiển thị thống kê');
-            console.log('  export [filename] [--limit=X]                                 - Xuất ra file CSV');
-            console.log('  clean [days]                                                  - Xóa logs cũ');
-            console.log('  help                                                          - Hiển thị trợ giúp');
+            console.log('  danh sach [limit] [--user=X] [--userUID=X] [--action=X] [--category=X] [--status=X] [--component=X] - Liệt kê nhật ký');
+            console.log('  thong ke                                                     - Hiển thị thống kê');
+            console.log('  xuat [filename] [--limit=X]                                 - Xuất ra tệp CSV');
+            console.log('  xoa [days]                                                  - Xóa nhật ký cũ');
+            console.log('  cuu                                                          - Hiển thị trợ giúp');
             return;
         }
 
         // Xử lý các lệnh
         switch (command) {
-            case 'list': {
-                // Parse tham số
+            case 'danh sach': {
+                // Khớp tham số
                 let limit = 50;
-                let username;
-                let userId;
+                let userUID;
+                let userName;
                 let action;
                 let category;
                 let status;
                 let componentName;
 
                 if (args[1] && !args[1].startsWith('--')) {
-                    limit = parseInt(args[1], 10) || 50;
+                    limit = parseInt(args[1], 10) ?? 50;
                 }
 
                 // Parse tham số dạng --key=value
                 for (const arg of args) {
-                    if (arg.startsWith('--user=')) {
-                        username = arg.substring(7);
-                    } else if (arg.startsWith('--userid=')) {
-                        userId = arg.substring(9);
+                    if (arg.startsWith('--userUID=')) {
+                        userUID = arg.substring(9);
+                    } else if (arg.startsWith('--username=')) {
+                        userName = arg.substring(11);
                     } else if (arg.startsWith('--action=')) {
                         action = arg.substring(9);
                     } else if (arg.startsWith('--category=')) {
@@ -329,33 +330,33 @@ async function main() {
                 }
 
                 console.log(`=== DANH SÁCH LOG (tối đa ${limit}) ===`);
-                if (username) console.log(`Lọc theo username: ${username}`);
-                if (userId) console.log(`Lọc theo user_id: ${userId}`);
-                if (action) console.log(`Lọc theo action: ${action}`);
-                if (category) console.log(`Lọc theo category: ${category}`);
-                if (status) console.log(`Lọc theo status: ${status}`);
-                if (componentName) console.log(`Lọc theo component: ${componentName}`);
+                if (userUID) console.log(`Lọc theo UID: ${userUID}`);
+                if (userName) console.log(`Lọc theo tài khoản: ${userName}`);
+                if (action) console.log(`Lọc theo hành động: ${action}`);
+                if (category) console.log(`Lọc theo hạng mục: ${category}`);
+                if (status) console.log(`Lọc theo trạng thái: ${status}`);
+                if (componentName) console.log(`Lọc theo gói: ${componentName}`);
 
                 const logs = await queryLogs({
                     limit,
-                    username,
-                    userId,
+                    userUID,
+                    userName,
                     action,
                     category,
                     status,
                     componentName
                 });
 
-                console.log(`\nĐã tìm thấy ${logs.length} log:`);
+                console.log(`\nĐã tìm thấy ${logs.length} nhật ký:`);
 
                 for (const log of logs) {
                     console.log('-'.repeat(80));
                     console.log(`ID: ${log.id} | Thời gian: ${log.created_at}`);
-                    console.log(`User: ${log.username || 'N/A'} (ID: ${log.user_id || 'N/A'})`);
-                    console.log(`Action: ${log.action} | Category: ${log.category} | Status: ${log.status || 'N/A'}`);
-                    console.log(`Component: ${log.component_name || 'N/A'} | Session: ${log.session_id || 'N/A'}`);
-                    console.log(`IP: ${log.ip_address || 'N/A'}`);
-                    console.log(`Details: ${JSON.stringify(log.details || {})}`);
+                    console.log(`User: ${log.userUID ?? 'N/A'} (UID: ${log.userUID ?? 'N/A'})`);
+                    console.log(`Action: ${log.action ?? 'N/A'} | Category: ${log.category ?? 'N/A'} | Status: ${log.status ?? 'N/A'}`);
+                    console.log(`Component: ${log.component_name ?? 'N/A'} | Session: ${log.session_id ?? 'N/A'}`);
+                    console.log(`IP: ${log.ip_address ?? 'N/A'}`);
+                    console.log(`Details: ${JSON.stringify(log.details ?? {})}`);
                     if (log.related_ids) {
                         console.log(`Related IDs: ${JSON.stringify(log.related_ids)}`);
                     }
@@ -364,31 +365,31 @@ async function main() {
                 break;
             }
 
-            case 'stats': {
+            case 'thongke': {
                 console.log('=== THỐNG KÊ NHẬT KÝ STUDIO ===');
 
                 const stats = await getLogStats();
 
-                console.log(`\nTổng số log: ${stats.total}`);
+                console.log(`\nTổng số nhật ký: ${stats.total}`);
 
                 console.log('\n=== THỐNG KÊ THEO LOẠI HÀNH ĐỘNG ===');
                 for (const item of stats.byAction) {
-                    console.log(`- ${item.action}: ${item.count} log`);
+                    console.log(`- ${item.action}: ${item.count} nhật ký`);
                 }
 
                 console.log('\n=== THỐNG KÊ THEO DANH MỤC ===');
                 for (const item of stats.byCategory) {
-                    console.log(`- ${item.category}: ${item.count} log`);
+                    console.log(`- ${item.category}: ${item.count} nhật ký`);
                 }
 
                 console.log('\n=== THỐNG KÊ THEO NGƯỜI DÙNG ===');
                 for (const item of stats.byUser) {
-                    console.log(`- ${item.username || 'Không xác định'}: ${item.count} log`);
+                    console.log(`- ${item.username || 'Không xác định'}: ${item.count} nhật ký`);
                 }
 
                 console.log('\n=== THỐNG KÊ THEO COMPONENT ===');
                 for (const item of stats.byComponent) {
-                    console.log(`- ${item.component_name || 'Không xác định'}: ${item.count} log`);
+                    console.log(`- ${item.component_name || 'Không xác định'}: ${item.count} nhật ký`);
                 }
 
                 console.log('\n=== THỐNG KÊ THEO NGÀY (7 NGÀY GẦN NHẤT) ===');
@@ -399,13 +400,13 @@ async function main() {
 
                 console.log('\n=== THỐNG KÊ THEO TRẠNG THÁI ===');
                 for (const item of stats.byStatus) {
-                    console.log(`- ${item.status || 'N/A'}: ${item.count} log`);
+                    console.log(`- ${item.status ?? 'N/A'}: ${item.count} nhật ký`);
                 }
 
                 break;
             }
 
-            case 'export': {
+            case 'xuat': {
                 // Parse tham số
                 let filename = args[1];
                 let limit = 1000;
@@ -417,36 +418,36 @@ async function main() {
                     }
                 }
 
-                console.log(`=== XUẤT LOG (tối đa ${limit}) ===`);
+                console.log(`=== XUẤT NHẬT KÝ (tối đa ${limit}) ===`);
 
                 const logs = await queryLogs({ limit });
                 const csvPath = await exportLogsToCSV(logs, filename);
 
-                console.log(`\nĐã xuất ${logs.length} log ra file:`);
+                console.log(`\nĐã xuất ${logs.length} nhật ký ra tệp:`);
                 console.log(csvPath);
 
                 break;
             }
 
-            case 'clean': {
-                // Parse tham số
-                const days = parseInt(args[1], 10) || 30;
+            case 'xoa': {
+                // Khớp tham số
+                const days = parseInt(args[1], 10) ?? 30;
 
                 // Xác nhận trước khi xóa
-                console.log(`=== XÓA LOG CŨ (> ${days} ngày) ===`);
+                console.log(`=== XÓA NHẬT KÝ CŨ (> ${days} ngày) ===`);
                 console.log('\nCảnh báo: Hành động này không thể hoàn tác!');
-                console.log('Hệ thống sẽ xóa log cũ hơn ' + days + ' ngày.');
+                console.log('Hệ thống sẽ xóa nhật ký cũ hơn ' + days + ' ngày.');
 
-                // Xóa log cũ
+                // Xóa nhật ký cũ
                 const deletedCount = await deleteOldLogs(days);
-                console.log(`\nĐã xóa ${deletedCount} log cũ.`);
+                console.log(`\nĐã xóa ${deletedCount} nhật ký cũ.`);
 
                 break;
             }
 
             default:
                 console.log(`Lệnh không hợp lệ: ${command}`);
-                console.log('Sử dụng "node xem-nhat-ky.js help" để xem trợ giúp.');
+                console.log('Sử dụng "node xemnhatKy cuu" để xem trợ giúp.');
         }
     } catch (error) {
         console.error('Lỗi:', error.message);
@@ -454,7 +455,7 @@ async function main() {
 }
 
 // Chạy chương trình
-// In ES modules, we use import.meta.url to check if this file is being run directly
+// Trong ES modules, chúng ta sử dụng import.meta.url để kiểm tra xem tệp này có đang được chạy trực tiếp hay không
 if (import.meta.url === `file://${process.argv[1]}`) {
     main().catch(console.error);
 }
@@ -464,4 +465,5 @@ export {
     getLogStats,
     exportLogsToCSV,
     deleteOldLogs
+};
 };

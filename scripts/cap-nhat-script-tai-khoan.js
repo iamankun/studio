@@ -6,7 +6,7 @@
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 import chalk from 'chalk';
-import { loadEnvVariables, logToFile } from './utils/env-loader.js';
+import { loadEnvVariables, logToFile } from './utils/env.js';
 
 // Load environment variables
 loadEnvVariables();
@@ -29,19 +29,19 @@ async function updateScriptAccounts() {
             { from: /username.*:.*['"]admin['"]/, to: "username: 'ankunstudio'" },
             { from: /WHERE username = ['"]admin['"]/, to: "WHERE username = 'ankunstudio'" },
             { from: /username.*=.*['"]testadmin['"]/, to: "username = 'ankunstudio'" },
-            
+
             // Thay thế email admin cũ
             { from: /email.*=.*['"]admin@ankun\.dev['"]/, to: "email = 'ankunstudio@ankun.dev'" },
             { from: /email.*:.*['"]admin@ankun\.dev['"]/, to: "email: 'ankunstudio@ankun.dev'" },
-            
+
             // Thay thế role
             { from: /role.*=.*['"]Admin['"]/, to: "role = 'Label Manager & Artist'" },
             { from: /role.*:.*['"]Admin['"]/, to: "role: 'Label Manager & Artist'" },
-            
+
             // Thay thế trong comment
             { from: /\/\/ Real users.*admin \(Label Manager\)/, to: "// Real users: ankunstudio (Label Manager & Artist)" },
             { from: /admin \(Label Manager\)/, to: "ankunstudio (Label Manager & Artist)" },
-            
+
             // Thay thế trong object definitions
             { from: /labelManager:\s*{\s*username:\s*['"]admin['"]/, to: "labelManager: {\n        username: 'ankunstudio'" },
             { from: /username:\s*['"]admin['"],\s*email:\s*['"]admin@ankun\.dev['"]/, to: "username: 'ankunstudio',\n        email: 'ankunstudio@ankun.dev'" },
@@ -113,7 +113,7 @@ async function processFile(filePath, replacements, updates) {
                 file: filePath.replace('f:\\Dev\\DMG\\scripts\\', ''),
                 changes: changeCount
             });
-            
+
             console.log(chalk.yellow(`📝 Cập nhật: ${filePath.replace('f:\\Dev\\DMG\\scripts\\', '')}`));
         }
 
@@ -127,7 +127,7 @@ async function processFile(filePath, replacements, updates) {
  */
 async function updateSqlFiles() {
     console.log(chalk.yellow('\n=== Cập nhật SQL Files ==='));
-    
+
     const sqlFiles = [
         'f:\\Dev\\DMG\\scripts\\001_create_initial_tables.sql',
         'f:\\Dev\\DMG\\scripts\\002_insert_demo_data.sql',
@@ -152,7 +152,7 @@ async function updateSqlFiles() {
  */
 async function createBasicSqlContent(filePath) {
     const fileName = filePath.split('\\').pop();
-    
+
     if (fileName === '001_create_initial_tables.sql') {
         const sqlContent = `-- Active: 1751325959747@@ep-mute-rice-a17ojtca-pooler.ap-southeast-1.aws.neon.tech@5432@aksstudio
 -- Script tạo các bảng cơ bản cho hệ thống AKS Studio
@@ -172,7 +172,7 @@ async function createBasicSqlContent(filePath) {
         writeFileSync(filePath, sqlContent, 'utf8');
         console.log(chalk.green(`✅ Đã cập nhật ${fileName}`));
     }
-    
+
     if (fileName === '002_insert_demo_data.sql') {
         const sqlContent = `-- Active: 1751325959747@@ep-mute-rice-a17ojtca-pooler.ap-southeast-1.aws.neon.tech@5432@aksstudio
 -- Script chèn dữ liệu demo cho hệ thống AKS Studio
@@ -195,7 +195,7 @@ async function createBasicSqlContent(filePath) {
  */
 async function fixImportantScripts() {
     console.log(chalk.yellow('\n=== Sửa Scripts Quan Trọng ==='));
-    
+
     const importantScripts = [
         'check-admin-auth.js',
         'test-real-users.js',
@@ -213,7 +213,7 @@ async function fixImportantScripts() {
  */
 async function ensureScriptUsesCorrectAccount(scriptName) {
     const filePath = `f:\\Dev\\DMG\\scripts\\${scriptName}`;
-    
+
     try {
         let content = readFileSync(filePath, 'utf8');
         let changed = false;

@@ -11,7 +11,7 @@ import Image from "next/image";
 import { logLogin, logUIInteraction } from "@/lib/client-activity-log";
 import { useRouter } from "next/navigation";
 import "@/components/awesome/css/all.min.css";
-import { profile } from "console";
+
 interface LoginViewProps {
   readonly onLogin: (
     username: string,

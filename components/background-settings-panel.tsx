@@ -2,9 +2,8 @@
 
 import type React from "react";
 import Image from "next/image";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import styles from "./background-settings-panel.module.css";
 import {
   type BackgroundSettings,
   BACKGROUND_SETTINGS_KEY,
@@ -536,4 +535,5 @@ export function BackgroundSettingsPanel() {
       </div>
     </div>
   );
+}
 }
