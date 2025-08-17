@@ -41,13 +41,13 @@ export async function registerUser(newUser: User): Promise<boolean> {
 }
 
 // Hàm đảm bảo người dùng admin mặc định tồn tại
-export async function ensureDefaultAdminUser(): Promise<void> {
-    const adminUsername = "admin"
-    const adminRole = "Label Manager"
+export async function User (): Promise<UID> {
+    const userName = "ankunstudio"
+    const userRole = "Label Manager"
     
     const dbUrl = process.env.DATABASE_URL
     if (!dbUrl) {
-        console.error("Database URL not configured. Skipping default admin user check.")
+        console.error("DATABASE_URL KHÔNG CÓ. HÃY KIỂM TRA LẠI")
         return
     }
 

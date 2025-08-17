@@ -1,15 +1,16 @@
+/// <reference types="node" />
+
 import { type NextRequest, NextResponse } from "next/server"
-import { multiDB } from "@/lib/database-api-service"
-import { AuthorizationService } from "@/lib/authorization-service"
+import { prisma } from "@/lib/prisma"
 import { authenticateUser } from "@/lib/auth-service"
 import type { User } from "@/types/user"
 import type { PrismaSubmission, PrismaTrack } from "@/types/submission"
 import { logger } from "@/lib/logger"
 
-// Helper function để lấy user từ request (sử dụng session, token, etc.)
+// Helper function to get user from request (using session, token, etc.)
 async function getUserFromRequest(request: NextRequest): Promise<User | null> {
   try {
-    // Trong sản xuất, bạn sẽ gán JWT token
+    // In production, you will parse JWT token
     const authHeader = request.headers.get('authorization')
     if (!authHeader) return null
 
@@ -33,7 +34,6 @@ export async function POST(request: NextRequest) {
       trackCount: tracks?.length 
     });
 
-    // Lấy user hiện tại từ request
     const currentUser = await getUserFromRequest(request)
 
     if (!currentUser) {
@@ -41,7 +41,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: "Authentication required" }, { status: 401 });
     }
 
-    // Validate input data
     if (!submission || !tracks || !Array.isArray(tracks)) {
       return NextResponse.json(
         {
@@ -51,45 +50,40 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       )
     }
+    
+    const result = await prisma.$transaction(async (tx) => {
+      const newSubmission = await tx.submission.create({
+        data: {
+          ...submission,
+          userId: currentUser.id,
+        }
+      });
+      
+      const createdTracks = [];
+      for(const track of tracks) {
+        const newTrack = await tx.track.create({
+          data: {
+            ...track,
+            submissionId: newSubmission.id,
+          }
+        });
+        createdTracks.push(newTrack);
+      }
+      
+      return { submission: newSubmission, tracks: createdTracks };
+    });
 
-    // Ensure submission belongs to current user
-    const submissionData: Omit<PrismaSubmission, 'id' | 'createdAt' | 'updatedAt'> = {
-      ...submission,
-      userId: currentUser.id,
-      labelId: submission.labelId || ''
-    };
 
-    // Validate tracks data
-    const tracksData: Omit<PrismaTrack, 'id' | 'createdAt' | 'updatedAt' | 'submissionId'>[] = tracks.map((track: any) => ({
-      title: track.title || '',
-      artist: track.artist || submission.artist,
-      filePath: track.filePath || '',
-      duration: track.duration || 0,
-      isrc: track.isrc || null,
-      fileName: track.fileName || null,
-      artistFullName: track.artistFullName || null,
-      fileSize: track.fileSize || null,
-      format: track.format || null,
-      bitrate: track.bitrate || null,
-      sampleRate: track.sampleRate || null,
-      mainCategory: track.mainCategory || null,
-      subCategory: track.subCategory || null,
-      lyrics: track.lyrics || null
-    }));
-
-    // Create submission with tracks using the database service
-    const result = await multiDB.createSubmissionWithTracks(submissionData, tracksData);
-
-    if (result.success) {
+    if (result) {
       logger.info('API Submission with tracks POST - success', { 
-        id: result.data?.submission.id,
-        trackCount: result.data?.tracks.length 
+        id: result.submission.id,
+        trackCount: result.tracks.length 
       });
 
       const response = NextResponse.json({
         success: true,
         message: "Submission with tracks created successfully",
-        data: result.data,
+        data: result,
         userRole: currentUser.role
       })
 
@@ -100,11 +94,11 @@ export async function POST(request: NextRequest) {
 
       return response
     } else {
-      logger.error('API Submission with tracks POST - DB error', result.error);
+      logger.error('API Submission with tracks POST - DB error', "Transaction failed");
       return NextResponse.json(
         {
           success: false,
-          message: result.message || "Failed to create submission with tracks",
+          message: "Failed to create submission with tracks",
         },
         { status: 500 },
       )
@@ -115,13 +109,14 @@ export async function POST(request: NextRequest) {
       {
         success: false,
         message: "Failed to create submission with tracks",
+        error: error instanceof Error ? error.message : "Unknown error"
       },
       { status: 500 },
     )
   }
 }
 
-// OPTIONS method cho CORS
+// OPTIONS method for CORS
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,

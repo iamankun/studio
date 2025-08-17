@@ -8,7 +8,7 @@ interface UserHook {
   user?: User;
   isLoggedIn: boolean;
   isLoading: boolean;
-  error: any;
+  error: unknown;
   logout: () => Promise<void>;
   mutate: () => Promise<any>;
 }
@@ -22,7 +22,7 @@ export function useUser(): UserHook {
   const logout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
     await mutate({ isLoggedIn: false, user: undefined }, false); // Optimistic update
-    router.push('/'); // Redirect to home or login page
+    router.push('https://ankun.dev'); // Redirect to home or login page
   };
 
   return {

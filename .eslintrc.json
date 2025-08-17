@@ -5,21 +5,20 @@
     "next"
   ],
   "ignorePatterns": [
-    "components/awesome/js/**/*",
-    "components/dist/**/*",
-    "lib/dist/**/*",
     "node_modules/**/*",
     ".next/**/*",
     "out/**/*",
+    "dist/**/*",
     "**/dist/**",
-    "app/**/dist/**",
-    "components/**/dist/**",
     "**/*.dev.js",
     "**/*.test.jsx",
+    "lib/nhat-ky-studio.js",
+    "lib/upload-helper.js",
     "**/*.js",
-    "!next.config.js",
-    "!tailwind.config.js",
-    "!postcss.config.js"
+    "!next.config.mjs",
+    "!next.config.ts",
+    "!postcss.config.js",
+    "!tailwind.config.ts"
   ],
   "rules": {
     "@typescript-eslint/no-unused-vars": "warn",

@@ -1,33 +1,14 @@
+// This file is auto-generated based on usage in other files.
 export interface User {
-  id: string
-  email: string
-  name?: string
-  password?: string
-  roles: UserRole[]
-  fullName?: string
-  createdAt: string
-  avatar?: string
-  bio?: string
-  socialLinks?: {
-    facebook?: string
-    youtube?: string
-    spotify?: string
-    appleMusic?: string
-    tiktok?: string
-    instagram?: string
-  }
-  verified?: boolean // Trạng thái xác minh từ profile
-  isrcCodePrefix?: string
+  UID: string;
+  userName: string;
+  password?: string;
+  email: string;
+  userRole?: "Administrator" | "Label Manager" | "Artist" | "Producer" | "Lyricist" | "Composer" | "Singer-Songwriter" | "Vocalist" | "Performer" | "Rapper";
+  roles?: string[];
+  Name?: string;
+  bio?: string;
+  socialLinks?: string;
+  verified?: boolean;
+  createdAt: string;
 }
-
-// Enum UserRole đúng chuẩn schema
-export type UserRole =
-  | "ARTIST"
-  | "COMPOSER"
-  | "PRODUCER"
-  | "PERFORMER"
-  | "LABEL_MANAGER"
-  | "ADMINISTRATOR";
-
-// Legacy compatibility - these interfaces are deprecated
-// ...existing code...

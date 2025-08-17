@@ -13,7 +13,7 @@ dotenv.config({ path: '.env.local' });
 
 async function logToFile(message) {
     try {
-        const logDir = path.join(process.cwd(), "logs");
+        const logDir = path.join((/** @type {any} */ (process)).cwd(), "logs");
         await fs.mkdir(logDir, { recursive: true });
         const logFile = path.join(logDir, "kiem-tra-log-dang-nhap.log");
         const timestamp = new Date().toISOString();
@@ -146,7 +146,7 @@ async function main() {
 }
 
 // Chạy chương trình
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === `file://${(/** @type {any} */ (process)).argv[1]}`) {
     main().catch(console.error);
 }
 

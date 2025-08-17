@@ -14,7 +14,7 @@ import path from 'path';
 
 // Lấy đường dẫn gốc của dự án, chuẩn hóa tuyệt đối cho Windows
 let __filename = new URL(import.meta.url).pathname;
-if (process.platform === 'win32' && __filename.startsWith('/')) {
+if ((/** @type {any} */ (process)).platform === 'win32' && __filename.startsWith('/')) {
     __filename = __filename.slice(1);
 }
 const rootDir = path.resolve(path.dirname(__filename), '..');

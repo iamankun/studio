@@ -11,9 +11,10 @@ datasource db {
 
 // --- BẢNG QUẢN LÝ NGƯỜI DÙNG & HỒ SƠ ---
 model User {
-  id            String       @id @default(cuid())
+  UID            String       @id @default(cuid())
+  username       String
   email         String       @unique
-  name          String?
+  name          String?      @unique
   password      String
   roles         UserRole[]   @default([]) // Hạn chế tính năng vì chưa được quyền truy cập vào hệ thống
   createdAt     DateTime     @default(now())
@@ -34,7 +35,7 @@ model User {
   comments                SubmissionComment[]
   approvals               SubmissionApproval[]
   
-  // Export & Document Relations
+  // XUất thông tin liên quan
   exportTemplatesCreated  ExportTemplate[] @relation("ExportTemplateCreator")
   exportsCreated          Export[] @relation("ExportCreator")
 }
@@ -44,25 +45,21 @@ model Profile {
   bio           String?
   avatarUrl     String?
   phone         String? @unique
-  artistName    String? // Tên nghệ sĩ
-  fullName      String? // Tên đầy đủ theo giấy tờ
-  verified      Boolean? // Trạng thái xác minh khi đầy đủ các thông tin
-  // Social Links (bắt buộc)
-  facebookUrl   String? // Link đến trang Facebook của nghệ sĩ, thêm logic chuyển đổi nếu họ chỉ nhập ID, @
-  instagramUrl  String? // Link đến trang Instagram của nghệ sĩ, thêm logic chuyển đổi nếu họ chỉ nhập ID, @
-  youtubeUrl    String? // Link đến trang YouTube của nghệ sĩ, thêm logic chuyển đổi nếu họ chỉ nhập ID, @
-
-  // Streaming Platforms (tùy chọn)
-  spotifyUrl    String? // Link đến trang Spotify của nghệ sĩ, thêm logic chuyển đổi nếu họ chỉ nhập ID, @
-  appleMusicUrl String? // Link đến trang Apple Music của nghệ sĩ, thêm logic chuyển đổi nếu họ chỉ nhập ID, @
-  soundcloudUrl String? // Link đến trang SoundCloud của nghệ sĩ, thêm logic chuyển đổi nếu họ chỉ nhập ID, @
-
-  userId        String @unique
-  user          User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  socialLinks   Json?   // Backup cho các links khác, thêm logic chuyển đổi nếu họ chỉ nhập ID, @
-
+  artist        String? // Tên nghệ sĩ
+  name          String? // Tên đầy đủ theo giấy tờ
+  verified      Boolean @default(false) // Trạng thái xác minh khi đầy đủ các thông tin
+  username        String @unique
+  user            User   @relation(fields: [username], references: [name], onDelete: Cascade)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  socialLinks   String[] // Liên kết đến các mạng xã hội
+
+}
+
+model SocialLink {
+  id        String   @id @default(cuid())
+  social    String?// e.g., "facebook", "instagram", "youtube", etc.
+  url       Json?
 }
 
 model Label {
@@ -101,12 +98,12 @@ model Submission {
   notes           String?     // Ghi chú chung cho submission
   
   // Thông tin ký xác nhận
-  signedDocumentPath String?  // Đường dẫn đến file PDF đã ký
-  signedAt         DateTime? // Thời gian ký xác nhận
-  signerFullName   String?   // Tên người ký (phải khớp với fullName)
+  daKyPath      String?  // Đường dẫn đến file PDF đã ký
+  daKy         DateTime? // Thời gian ký xác nhận
+  name          String?   // Tên người ký (phải khớp với name)
+  nameSign         Image[]  @relation("SubmissionSignatures")
   isDocumentSigned Boolean   @default(false) // Trạng thái đã ký
-  userId          String
-  user            User      @relation("SubmissionCreator", fields: [userId], references: [id])
+  username        String @unique
   labelId         String
   label           Label     @relation(fields: [labelId], references: [id])
   tracks          Track[]
@@ -115,10 +112,21 @@ model Submission {
   comments        SubmissionComment[]
   approvals       SubmissionApproval[]
   signatureDocument SignatureDocument? @relation("SubmissionSignature")
+  creatorName    String
+  creator        User   @relation("SubmissionCreator", fields: [creatorName], references: [name])
   
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 }
+model Image {
+  id          String      @id @default(cuid())
+  url         String
+  submissionId String?
+  submission  Submission? @relation("SubmissionSignatures", fields: [submissionId], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
 
 model Track {
   id            String      @id @default(cuid())
@@ -126,9 +134,12 @@ model Track {
   artist        String
   filePath      String
   duration      Int         // in seconds
-  isrc          String?     @unique // Chỉ được gán thủ công khi hoàn thành release
+  ISRC          String     @unique // Cho phép gán thủ công và được cấp tự động khi hoàn thành gửi phát hành
+  IPI           String?     // Là mã số quốc tế cho người tham gia
+  ISWC          String?     // Là mã số quốc tế cho tác phẩm đang làm
+
   fileName      String?
-  fullName      String?    // Tên đầy đủ nghệ sĩ từ Profile
+  name          String?    // Tên đầy đủ nghệ sĩ từ Profile
   fileSize      Int?
   format        String?     // Chỉ chấp nhận WAV, 2 kênh stereo, 16-24 bit, 44.1+ kHz, >2s
   bitrate       String?     // 16-bit hoặc 24-bit
@@ -161,8 +172,8 @@ model Video {
   language         String?  // Ngôn ngữ
   contentIdEnabled Boolean @default(false)
   contentIdStatus  String? // Mặc định đã có on nếu video đó đã duyệt
-  userId        String
-  user          User        @relation("VideoCreator", fields: [userId], references: [id])
+  username        String
+  user          User        @relation("VideoCreator", fields: [username], references: [name])
   labelId       String
   label         Label       @relation(fields: [labelId], references: [id])
   submissionId  String?
@@ -183,8 +194,8 @@ model FileFolder {
   files         File[]
   
   // Permissions
-  ownerId       String?
-  owner         User?       @relation(fields: [ownerId], references: [id])
+  ownerUID       String?
+  owner         User?       @relation(fields: [ownerUID], references: [UID])
   isPublic      Boolean     @default(false)
   
   createdAt     DateTime    @default(now())
@@ -197,8 +208,8 @@ model SubmissionContributor {
   id            String @id @default(cuid())
   role          String
   percentage    Float? // Phần trăm đóng góp
-  userId        String
-  user          User   @relation(fields: [userId], references: [id])
+  userName      String
+  user          User   @relation(fields: [userName], references: [name])
   submissionId  String
   submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
@@ -208,8 +219,8 @@ model TrackContributor {
   id            String @id @default(cuid())
   role          ContributorRole
   percentage    Float?
-  userId        String
-  user          User   @relation(fields: [userId], references: [id])
+  username      String
+  user          User   @relation(fields: [username], references: [name])
   trackId       String
   track         Track  @relation(fields: [trackId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
@@ -219,8 +230,8 @@ model VideoContributor {
   id            String @id @default(cuid())
   role          String // Director, Editor, etc.
   percentage    Float?
-  userId        String
-  user          User   @relation(fields: [userId], references: [id])
+  username      String
+  user          User   @relation(fields: [username], references: [name])
   videoId       String
   video         Video  @relation(fields: [videoId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
@@ -234,15 +245,15 @@ model SubmissionApproval {
   submissionId    String
   submission      Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   approverId      String
-  approver        User @relation(fields: [approverId], references: [id])
+  approver        User @relation(fields: [approverId], references: [name])
   createdAt       DateTime @default(now())
 }
 
 model SubmissionComment {
   id            String @id @default(cuid())
   content       String
-  userId        String
-  user          User   @relation(fields: [userId], references: [id])
+  username      String
+  user          User   @relation(fields: [username], references: [name])
   submissionId  String
   submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
@@ -261,8 +272,8 @@ model File {
   // Folder relationship
   folderId  String?
   folder    FileFolder? @relation(fields: [folderId], references: [id])
-  userId    String?
-  user      User?       @relation(fields: [userId], references: [id])
+  username  String?
+  user      User?       @relation(fields: [username], references: [name])
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 }
@@ -271,8 +282,8 @@ model nhatKy {
   id        String      @id @default(cuid())
   action    String
   details   Json?
-  userId    String?
-  user      User?       @relation(fields: [userId], references: [id])
+  username  String?
+  user      User?       @relation(fields: [username], references: [name])
   createdAt DateTime    @default(now())
 }
 
@@ -285,7 +296,7 @@ model ExportTemplate {
   format      String // CSV, XLSX, TXT, PDF
   isActive    Boolean @default(true)
   createdBy   String
-  creator     User   @relation("ExportTemplateCreator", fields: [createdBy], references: [id])
+  creator     User     @relation("ExportTemplateCreator", fields: [createdBy], references: [name])
   exports     Export[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -300,7 +311,7 @@ model Export {
   format     String
   recordCount Int
   exportedBy String
-  exporter   User   @relation("ExportCreator", fields: [exportedBy], references: [id])
+  exporter   User   @relation("ExportCreator", fields: [exportedBy], references: [name])
   createdAt  DateTime @default(now())
 }
 
@@ -381,4 +392,3 @@ enum FileCategory {
   DOCUMENT // Tài liệu
   OTHER // Khác
 }
-

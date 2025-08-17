@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { multiDB } from '@/lib/database-api-service'
+import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
+import { User } from '@/types/user'
 
 /**
  * Hàm helper để thêm các header CORS tiêu chuẩn vào response.
@@ -16,23 +17,40 @@ function addCorsHeaders(response: NextResponse): NextResponse {
 
 export async function GET() {
     try {
-        const result = await multiDB.getArtists()
+        const artists = await prisma.user.findMany({
+            where: {
+                roles: {
+                    has: 'Artist'
+                }
+            },
+            include: {
+                profile: true
+            }
+        });
 
-        if (result.success) {
-            const response = NextResponse.json({
-                success: true,
-                count: result.data?.length ?? 0,
-                artists: result.data ?? []
-            })
-            return addCorsHeaders(response)
-        } else {
-            logger.warn('Failed to fetch artists from multiDB', { error: result.message, component: 'ArtistsApi' })
-            const errorResponse = NextResponse.json({
-                success: false,
-                message: result.message || 'Failed to fetch artists from the database.'
-            }, { status: 500 })
-            return addCorsHeaders(errorResponse)
-        }
+        const resultData: User[] = artists.map(artist => ({
+            id: artist.id,
+            username: artist.name ?? artist.email,
+            email: artist.email,
+            name: artist.name ?? undefined,
+            role: 'Artist',
+            roles: artist.roles,
+            fullName: artist.profile?.fullName ?? artist.name ?? undefined,
+            createdAt: artist.createdAt.toISOString(),
+            avatar: artist.profile?.avatarUrl ?? undefined,
+            bio: artist.profile?.bio ?? undefined,
+            socialLinks: (artist.profile?.socialLinks as Record<string, string>) ?? undefined,
+            verified: artist.profile?.verified ?? false,
+        }));
+        
+        const response = NextResponse.json({
+            success: true,
+            count: resultData.length,
+            data: resultData,
+            artists: resultData
+        })
+        return addCorsHeaders(response)
+        
     } catch (error) {
         logger.error('Error in GET /api/artists', error, { component: 'ArtistsApi' })
         const errorResponse = NextResponse.json({

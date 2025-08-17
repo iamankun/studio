@@ -14,7 +14,7 @@ dotenv.config({ path: '.env.local' });
 
 async function logToFile(message) {
     try {
-        const logDir = path.join(process.cwd(), "logs");
+        const logDir = path.join((/** @type {any} */ (process)).cwd(), "logs");
         await fs.mkdir(logDir, { recursive: true });
         const logFile = path.join(logDir, "kiem-tra-chi-tiet-nhat-ky.log");
         const timestamp = new Date().toISOString();

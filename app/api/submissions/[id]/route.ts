@@ -143,7 +143,7 @@ export async function DELETE(
         return NextResponse.json(
             {
                 success: false,
-                message: multiDBResult?.error || "Failed to delete submission",
+                message: multiDBResult.error || "Failed to delete submission",
             },
             { status: 500 }
         )

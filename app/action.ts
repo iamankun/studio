@@ -1,6 +1,6 @@
 // Tôi là An Kun
 "use server";
-// Using Prisma instead of direct neon queries
+// Dùng Prisma.schema
 import { ensureDefaultAdminUser } from "@/lib/server-actions";
 
 // Định nghĩa một interface cho dữ liệu đầu vào của postData
@@ -16,7 +16,7 @@ export async function getData() {
   // Tôi là An Kun
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
-    throw new Error("DATABASE_URL environment variable is not set");
+    throw new Error("DATABASE_URL không được trống, kiểm tra URL .env");
   }
   
   // Use API endpoints instead of direct database queries

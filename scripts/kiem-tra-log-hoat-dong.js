@@ -114,6 +114,6 @@ async function checkActivityLogs() {
 export { checkActivityLogs };
 
 // Auto-run if this is the main module
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === `file://${(/** @type {any} */ (process)).argv[1]}`) {
     checkActivityLogs().catch(console.error);
 }
