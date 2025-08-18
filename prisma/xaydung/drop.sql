@@ -1,0 +1,27 @@
+-- Temporary file for dropping tables
+DROP TABLE IF EXISTS "User" CASCADE;
+DROP TABLE IF EXISTS "Profile" CASCADE;
+DROP TABLE IF EXISTS "Label" CASCADE;
+DROP TABLE IF EXISTS "Submission" CASCADE;
+DROP TABLE IF EXISTS "Track" CASCADE;
+DROP TABLE IF EXISTS "Video" CASCADE;
+DROP TABLE IF EXISTS "FileFolder" CASCADE;
+DROP TABLE IF EXISTS "SubmissionContributor" CASCADE;
+DROP TABLE IF EXISTS "TrackContributor" CASCADE;
+DROP TABLE IF EXISTS "VideoContributor" CASCADE;
+DROP TABLE IF EXISTS "SubmissionApproval" CASCADE;
+DROP TABLE IF EXISTS "SubmissionComment" CASCADE;
+DROP TABLE IF EXISTS "File" CASCADE;
+DROP TABLE IF EXISTS "nhatKy" CASCADE;
+DROP TABLE IF EXISTS "ExportTemplate" CASCADE;
+DROP TABLE IF EXISTS "Export" CASCADE;
+DROP TABLE IF EXISTS "SignatureDocument" CASCADE;
+DROP TABLE IF EXISTS "DistributionPlatform" CASCADE;
+
+-- Drop enums
+DROP TYPE IF EXISTS "public"."UserRole";
+DROP TYPE IF EXISTS "public"."SubmissionStatus";
+DROP TYPE IF EXISTS "public"."ReleaseType";
+DROP TYPE IF EXISTS "public"."ContributorRole";
+DROP TYPE IF EXISTS "public"."ApprovalType";
+DROP TYPE IF EXISTS "public"."FileCategory";
