@@ -4,16 +4,12 @@
 
 import type { User } from "@/types/user"
 import type {
-  Submissions,
-  SubmissionStatus,
   VideoInfo,
-  ContributorInfo,
   FileInfo,
   FolderInfo,
   PrismaSubmission,
   PrismaTrack,
-  PrismaSubmissionStatus,
-  convertPrismaSubmissionToLegacy
+  Submission // <-- Add this import
 } from "@/types/submission"
 import { convertLegacySubmissionToPrisma } from "@/types/submission"
 import { logger } from "@/lib/logger"
@@ -27,7 +23,7 @@ export interface DatabaseResult<T = unknown> {
 }
 
 export class DatabaseApiService {
-  private apiAvailable = true;
+  private readonly apiAvailable = true;
 
   constructor() {
     console.log('DatabaseApiService: Initialized (Production Only - API Based)')
@@ -128,9 +124,9 @@ export class DatabaseApiService {
   }
 
   public async createUser(userData: Partial<User>): Promise<DatabaseResult<User>> {
-    const { username, email, password, fullName } = userData;
+    const { userName, email, password, displayName } = userData;
 
-    if (!username || !email || !password || !fullName) {
+    if (!userName || !email || !password || !displayName) {
       return { success: false, message: "Missing required fields for user creation." };
     }
 
@@ -138,7 +134,7 @@ export class DatabaseApiService {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password, fullName })
+        body: JSON.stringify({ username: userName, email, password, name: displayName })
       });
 
       const result = await response.json();
@@ -348,8 +344,8 @@ export class DatabaseApiService {
   public async saveSubmission(submission: Omit<Submission, 'id'>): Promise<DatabaseResult<string>> {
     // Alias for createSubmission for backward compatibility
     const result = await this.createSubmission(submission);
-    if (result.success && result.data) {
-      return { success: true, data: result.data.id, source: result.source };
+    if (result.success && result.data && typeof result.data === 'object' && 'id' in result.data) {
+      return { success: true, data: (result.data as { id: string }).id, source: result.source };
     }
     return { success: false, error: result.message };
   }
@@ -397,7 +393,7 @@ export class DatabaseApiService {
     }
   }
 
-  public async updateSubmissionStatus(id: string, status: SubmissionStatus): Promise<DatabaseResult<boolean>> {
+  public async updateSubmissionStatus(id: string, status: string): Promise<DatabaseResult<boolean>> {
     logger.info('DatabaseApiService: Updating submission status', {
       component: 'DatabaseApiService',
       action: 'updateSubmissionStatus',
@@ -707,7 +703,11 @@ export class DatabaseApiService {
   public async createSubmissionFromLegacy(legacySubmission: Omit<Submission, 'id'>): Promise<DatabaseResult<{ submission: PrismaSubmission; tracks: PrismaTrack[] }>> {
     try {
       const { submission, tracks } = convertLegacySubmissionToPrisma(legacySubmission as Submission);
-      return await this.createSubmissionWithTracks(submission, tracks);
+      // Fix: cast tracks to the correct type
+      return await this.createSubmissionWithTracks(
+        submission,
+        tracks as Omit<PrismaTrack, 'id' | 'createdAt' | 'updatedAt' | 'submissionId'>[]
+      );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       logger.error('DatabaseApiService: Create submission from legacy error', {

@@ -1,13 +1,33 @@
-"use client"
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, Send, Inbox, CheckCircle, RotateCw, FileText, Plus, Edit, Trash2, Copy, TestTube, Settings, Download } from "lucide-react";
+import {
+  Mail,
+  Send,
+  Inbox,
+  CheckCircle,
+  RotateCw,
+  FileText,
+  Plus,
+  Edit,
+  Trash2,
+  Copy,
+  TestTube,
+  Settings,
+  Download,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { RichTextEditor } from "@/components/rich-text-editor";
 
 // Define types if not imported from elsewhere
@@ -51,22 +71,34 @@ type SmtpSettings = {
 };
 
 // Dummy sendEmail function for demonstration; replace with actual implementation
-async function sendEmail(_details: EmailDetails): Promise<{ success: boolean; message: string }> {
+async function sendEmail(
+  _details: EmailDetails
+): Promise<{ success: boolean; message: string }> {
   // Simulate sending email
-  return new Promise((resolve) => setTimeout(() => resolve({ success: true, message: "Email sent successfully." }), 1000));
+  return new Promise((resolve) =>
+    setTimeout(
+      () => resolve({ success: true, message: "Email sent successfully." }),
+      1000
+    )
+  );
 }
 
 interface EmailCenterViewProps {
-  showModal: (title: string, messages: string[], type?: "error" | "success") => void;
+  readonly showModal: (
+    title: string,
+    messages: string[],
+    type?: "error" | "success"
+  ) => void;
 }
 
 export function EmailCenterView({ showModal }: EmailCenterViewProps) {
-  const [templates, setTemplates] = useState<EmailTemplate[]>([])
-  const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null)
-  const [isEditing, setIsEditing] = useState(false)
-  const [emailMessages, setEmailMessages] = useState<EmailMessage[]>([])
-  const [syncStatus, setSyncStatus] = useState("Connected")
-  const [lastSync, setLastSync] = useState(new Date().toLocaleString("vi-VN"))
+  const [templates, setTemplates] = useState<EmailTemplate[]>([]);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<EmailTemplate | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [emailMessages, setEmailMessages] = useState<EmailMessage[]>([]);
+  const [syncStatus, setSyncStatus] = useState("Connected");
+  const [lastSync, setLastSync] = useState(new Date().toLocaleString("vi-VN"));
   const [emailForm, setEmailForm] = useState({
     from: "",
     to: "",
@@ -76,7 +108,7 @@ export function EmailCenterView({ showModal }: EmailCenterViewProps) {
     content: "",
     htmlContent: "",
     type: "text" as "html" | "text",
-  })
+  });
 
   // Key for SMTP settings in localStorage, consistent with lib/email.ts and SettingsView.tsx
   const SMTP_LOCALSTORAGE_KEY = "emailSettings_v2";
@@ -90,8 +122,8 @@ export function EmailCenterView({ showModal }: EmailCenterViewProps) {
   });
 
   useEffect(() => {
-    loadTemplates()
-    loadEmailMessages()
+    loadTemplates();
+    loadEmailMessages();
 
     // Load SMTP settings from localStorage
     const savedSmtpSettings = localStorage.getItem(SMTP_LOCALSTORAGE_KEY);
@@ -99,19 +131,22 @@ export function EmailCenterView({ showModal }: EmailCenterViewProps) {
       try {
         setSmtpSettings(JSON.parse(savedSmtpSettings) as SmtpSettings);
       } catch (error) {
-        console.error("EmailCenterView: Failed to parse SMTP settings from localStorage", error);
+        console.error(
+          "EmailCenterView: Failed to parse SMTP settings from localStorage",
+          error
+        );
       }
     }
 
     // Auto-sync emails every 30 seconds
-    const interval = setInterval(syncEmails, 30000)
-    return () => clearInterval(interval)
-  }, [])
+    const interval = setInterval(syncEmails, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const loadTemplates = () => {
-    const saved = localStorage.getItem("emailTemplates_v2")
+    const saved = localStorage.getItem("emailTemplates_v2");
     if (saved) {
-      setTemplates(JSON.parse(saved))
+      setTemplates(JSON.parse(saved));
     } else {
       // Default templates
       const defaultTemplates: EmailTemplate[] = [
@@ -134,7 +169,16 @@ Trân trọng,
 [email]`,
           htmlContent: "",
           type: "text",
-          variables: ["tennghesi", "tenbaihat", "id", "trangthai", "ngaygui", "ngayphathanh", "tenmanager", "email"],
+          variables: [
+            "tennghesi",
+            "tenbaihat",
+            "id",
+            "trangthai",
+            "ngaygui",
+            "ngayphathanh",
+            "tenmanager",
+            "email",
+          ],
         },
         {
           id: "welcome",
@@ -153,41 +197,48 @@ Trân trọng,
 <p>Trân trọng,<br>[tenmanager]</p>`,
           htmlContent: "",
           type: "html",
-          variables: ["tennghesi", "tenlabel", "username", "email", "vaitro", "tenmanager"],
+          variables: [
+            "tennghesi",
+            "tenlabel",
+            "username",
+            "email",
+            "vaitro",
+            "tenmanager",
+          ],
         },
-      ]
-      setTemplates(defaultTemplates)
-      saveTemplates(defaultTemplates)
+      ];
+      setTemplates(defaultTemplates);
+      saveTemplates(defaultTemplates);
     }
-  }
+  };
 
   const loadEmailMessages = () => {
-    const saved = localStorage.getItem("emailMessages_v2")
+    const saved = localStorage.getItem("emailMessages_v2");
     if (saved) {
-      setEmailMessages(JSON.parse(saved))
+      setEmailMessages(JSON.parse(saved));
     } else {
       // Start with empty messages - no sample data
-      setEmailMessages([])
-      localStorage.setItem("emailMessages_v2", JSON.stringify([]))
+      setEmailMessages([]);
+      localStorage.setItem("emailMessages_v2", JSON.stringify([]));
     }
-  }
+  };
 
   const saveTemplates = (templatesData: EmailTemplate[]) => {
-    localStorage.setItem("emailTemplates_v2", JSON.stringify(templatesData))
-  }
+    localStorage.setItem("emailTemplates_v2", JSON.stringify(templatesData));
+  };
 
   const syncEmails = () => {
-    setSyncStatus("Syncing...")
+    setSyncStatus("Syncing...");
 
     // Simulate email sync
     setTimeout(() => {
-      setSyncStatus("Connected")
-      setLastSync(new Date().toLocaleString("vi-VN"))
+      setSyncStatus("Connected");
+      setLastSync(new Date().toLocaleString("vi-VN"));
 
       // Note: Remove fake email generation for production use
       // Email sync will be handled by real SMTP service
-    }, 2000)
-  }
+    }, 2000);
+  };
 
   const handleCreateTemplate = () => {
     const newTemplate: EmailTemplate = {
@@ -198,36 +249,42 @@ Trân trọng,
       htmlContent: "",
       type: "text",
       variables: [],
-    }
-    setSelectedTemplate(newTemplate)
-    setIsEditing(true)
-  }
+    };
+    setSelectedTemplate(newTemplate);
+    setIsEditing(true);
+  };
 
   const handleSaveTemplate = () => {
-    if (!selectedTemplate) return
+    if (!selectedTemplate) return;
 
-    const updatedTemplates = templates.filter((t) => t.id !== selectedTemplate.id)
-    updatedTemplates.push(selectedTemplate)
-    setTemplates(updatedTemplates)
-    saveTemplates(updatedTemplates)
-    setIsEditing(false)
-    showModal("Lưu thành công", [`Đã lưu mẫu email "${selectedTemplate.name}"`], "success")
-  }
+    const updatedTemplates = templates.filter(
+      (t) => t.id !== selectedTemplate.id
+    );
+    updatedTemplates.push(selectedTemplate);
+    setTemplates(updatedTemplates);
+    saveTemplates(updatedTemplates);
+    setIsEditing(false);
+    showModal(
+      "Lưu thành công",
+      [`Đã lưu mẫu email "${selectedTemplate.name}"`],
+      "success"
+    );
+  };
 
   const handleDeleteTemplate = (templateId: string) => {
     if (confirm("Bạn có chắc muốn xóa mẫu email này?")) {
-      const updatedTemplates = templates.filter((t) => t.id !== templateId)
-      setTemplates(updatedTemplates)
-      saveTemplates(updatedTemplates)
+      const updatedTemplates = templates.filter((t) => t.id !== templateId);
+      setTemplates(updatedTemplates);
+      saveTemplates(updatedTemplates);
       if (selectedTemplate?.id === templateId) {
-        setSelectedTemplate(null)
+        setSelectedTemplate(null);
       }
-      showModal("Xóa thành công", ["Đã xóa mẫu email"], "success")
+      showModal("Xóa thành công", ["Đã xóa mẫu email"], "success");
     }
-  }
+  };
 
   const handleTestEmail = () => {
-    if (!selectedTemplate) return
+    if (!selectedTemplate) return;
 
     const testData = {
       tennghesi: "Nguyễn Văn A",
@@ -235,26 +292,28 @@ Trân trọng,
       id: "MH123456",
       trangthai: "Đã duyệt, đang chờ phát hành!",
       ngaygui: new Date().toLocaleDateString("vi-VN"),
-      ngayphathanh: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString("vi-VN"),
+      ngayphathanh: new Date(
+        Date.now() + 7 * 24 * 60 * 60 * 1000
+      ).toLocaleDateString("vi-VN"),
       tenmanager: "An Kun Studio",
       email: "manager@yourdomain.com",
       tenlabel: "An Kun Studio",
       username: "test_user",
       vaitro: "Nghệ sĩ",
-    }
+    };
 
-    let testContent = selectedTemplate.content
+    let testContent = selectedTemplate.content;
     Object.entries(testData).forEach(([key, value]) => {
-      testContent = testContent.replace(new RegExp(`\\[${key}\\]`, "g"), value)
-    })
+      testContent = testContent.replace(new RegExp(`\\[${key}\\]`, "g"), value);
+    });
 
-    showModal("Test email", [testContent], "success")
-  }
+    showModal("Test email", [testContent], "success");
+  };
 
   const handleSendEmail = async () => {
     if (!emailForm.to || !emailForm.subject || !emailForm.content) {
-      showModal("Lỗi gửi email", ["Vui lòng điền đầy đủ thông tin"], "error")
-      return
+      showModal("Lỗi gửi email", ["Vui lòng điền đầy đủ thông tin"], "error");
+      return;
     }
 
     const emailDetails: EmailDetails = {
@@ -263,11 +322,14 @@ Trân trọng,
       cc: emailForm.cc,
       bcc: emailForm.bcc,
       subject: emailForm.subject,
-      textBody: emailForm.type === "text" ? emailForm.content : "Vui lòng xem nội dung HTML.", // Cần cơ chế convert HTML to text
+      textBody:
+        emailForm.type === "text"
+          ? emailForm.content
+          : "Vui lòng xem nội dung HTML.", // Cần cơ chế convert HTML to text
       htmlBody: emailForm.type === "html" ? emailForm.htmlContent : undefined,
-    }
+    };
 
-    const result = await sendEmail(emailDetails)
+    const result = await sendEmail(emailDetails);
 
     if (result.success) {
       const newMessage: EmailMessage = {
@@ -277,37 +339,52 @@ Trân trọng,
         date: new Date().toLocaleString("vi-VN"),
         read: true,
         type: "sent",
-      }
-      const updatedMessages = [newMessage, ...emailMessages]
-      setEmailMessages(updatedMessages)
-      localStorage.setItem("emailMessages_v2", JSON.stringify(updatedMessages))
-      showModal("Gửi email thành công", [result.message], "success")
-      setEmailForm({ from: "", to: "", cc: "", bcc: "", subject: "", content: "", htmlContent: "", type: "text" })
+      };
+      const updatedMessages = [newMessage, ...emailMessages];
+      setEmailMessages(updatedMessages);
+      localStorage.setItem("emailMessages_v2", JSON.stringify(updatedMessages));
+      showModal("Gửi email thành công", [result.message], "success");
+      setEmailForm({
+        from: "",
+        to: "",
+        cc: "",
+        bcc: "",
+        subject: "",
+        content: "",
+        htmlContent: "",
+        type: "text",
+      });
     } else {
-      showModal("Lỗi gửi email", [result.message], "error")
+      showModal("Lỗi gửi email", [result.message], "error");
     }
-  }
+  };
 
   const copyTemplateVariables = (template: EmailTemplate) => {
-    const variables = template.variables.map((v) => `[${v}]`).join(", ")
-    navigator.clipboard.writeText(variables)
-    showModal("Copy thành công", [`Đã copy các biến: ${variables}`], "success")
-  }
+    const variables = template.variables.map((v) => `[${v}]`).join(", ");
+    navigator.clipboard.writeText(variables);
+    showModal("Copy thành công", [`Đã copy các biến: ${variables}`], "success");
+  };
 
   const markAsRead = (messageId: string) => {
-    const updatedMessages = emailMessages.map((msg) => (msg.id === messageId ? { ...msg, read: true } : msg))
-    setEmailMessages(updatedMessages)
-    localStorage.setItem("emailMessages_v2", JSON.stringify(updatedMessages))
-  }
+    const updatedMessages = emailMessages.map((msg) =>
+      msg.id === messageId ? { ...msg, read: true } : msg
+    );
+    setEmailMessages(updatedMessages);
+    localStorage.setItem("emailMessages_v2", JSON.stringify(updatedMessages));
+  };
 
-  const unreadCount = emailMessages.filter((msg) => !msg.read && msg.type === "received").length
+  const unreadCount = emailMessages.filter(
+    (msg) => !msg.read && msg.type === "received"
+  ).length;
 
   return (
     <div className="p-6 font-sans">
       <h2 className="text-3xl font-bold text-white mb-6 flex items-center">
         <Mail className="mr-3 text-purple-400" />
         Trung tâm email
-        {syncStatus === "Connected" && <CheckCircle className="ml-2 h-5 w-5 text-green-400" />}
+        {syncStatus === "Connected" && (
+          <CheckCircle className="ml-2 h-5 w-5 text-green-400" />
+        )}
       </h2>
 
       <Tabs defaultValue="inbox" className="space-y-6">
@@ -320,18 +397,10 @@ Trân trọng,
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="compose">
-            Soạn email
-          </TabsTrigger>
-          <TabsTrigger value="templates">
-            Mẫu email
-          </TabsTrigger>
-          <TabsTrigger value="settings">
-            Cài đặt SMTP
-          </TabsTrigger>
-          <TabsTrigger value="sync">
-            Đồng bộ
-          </TabsTrigger>
+          <TabsTrigger value="compose">Soạn email</TabsTrigger>
+          <TabsTrigger value="templates">Mẫu email</TabsTrigger>
+          <TabsTrigger value="settings">Cài đặt SMTP</TabsTrigger>
+          <TabsTrigger value="sync">Đồng bộ</TabsTrigger>
         </TabsList>
 
         {/* Inbox */}
@@ -359,8 +428,9 @@ Trân trọng,
                 {emailMessages.map((message) => (
                   <Card
                     key={message.id}
-                    className={`cursor-pointer transition-colors ${message.read ? "bg-gray-700" : "bg-blue-900/30"
-                      } border-gray-600 hover:bg-gray-600`}
+                    className={`cursor-pointer transition-colors ${
+                      message.read ? "bg-gray-700" : "bg-blue-900/30"
+                    } border-gray-600 hover:bg-gray-600`}
                     onClick={() => markAsRead(message.id)}
                   >
                     <CardContent className="p-4">
@@ -368,8 +438,11 @@ Trân trọng,
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-1">
                             <span
-                              className={`px-2 py-1 rounded text-xs font-dosis-medium ${message.type === "sent" ? "bg-green-600" : "bg-blue-600"
-                                }`} // Changed font-dosis-medium to font-medium
+                              className={`px-2 py-1 rounded text-xs font-dosis-medium ${
+                                message.type === "sent"
+                                  ? "bg-green-600"
+                                  : "bg-blue-600"
+                              }`} // Changed font-dosis-medium to font-medium
                             >
                               {message.type === "sent" ? "Đã gửi" : "Nhận"}
                             </span>
@@ -377,14 +450,22 @@ Trân trọng,
                               <span className="w-2 h-2 bg-red-500 rounded-full"></span>
                             )}
                           </div>
-                          <h4 className="font-semibold text-white">{message.subject}</h4>
+                          <h4 className="font-semibold text-white">
+                            {message.subject}
+                          </h4>
                           <p className="text-gray-400 text-sm font-sans">
-                            {message.type === "sent" ? `Đến: ${message.to}` : `Từ: ${message.from}`}
+                            {message.type === "sent"
+                              ? `Đến: ${message.to}`
+                              : `Từ: ${message.from}`}
                           </p>
-                          <p className="text-gray-500 text-sm mt-1 line-clamp-2 font-sans">{message.content}</p>
+                          <p className="text-gray-500 text-sm mt-1 line-clamp-2 font-sans">
+                            {message.content}
+                          </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-xs text-gray-500 font-sans">{message.date}</p>
+                          <p className="text-xs text-gray-500 font-sans">
+                            {message.date}
+                          </p>
                         </div>
                       </div>
                     </CardContent>
@@ -392,7 +473,9 @@ Trân trọng,
                 ))}
               </div>
 
-              <div className="mt-4 text-center text-gray-500 text-sm font-sans">Lần đồng bộ cuối: {lastSync}</div>
+              <div className="mt-4 text-center text-gray-500 text-sm font-sans">
+                Lần đồng bộ cuối: {lastSync}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -400,7 +483,9 @@ Trân trọng,
         {/* Compose Email */}
         <TabsContent value="compose" className="space-y-6">
           <Card className="bg-gray-800 border-gray-700 font-sans">
-            <CardHeader> {/* Removed font-dosis-semibold */}
+            <CardHeader>
+              {" "}
+              {/* Removed font-dosis-semibold */}
               <CardTitle className="flex items-center font-semibold">
                 <Send className="mr-2" />
                 Soạn email mới
@@ -412,7 +497,9 @@ Trân trọng,
                   <Label className="font-medium">Từ (From)</Label>
                   <Input
                     value={emailForm.from}
-                    onChange={(e) => setEmailForm({ ...emailForm, from: e.target.value })}
+                    onChange={(e) =>
+                      setEmailForm({ ...emailForm, from: e.target.value })
+                    }
                     placeholder="your-email@example.com"
                     className="font-sans"
                   />
@@ -421,7 +508,9 @@ Trân trọng,
                   <Label className="font-medium">Đến (To) *</Label>
                   <Input
                     value={emailForm.to}
-                    onChange={(e) => setEmailForm({ ...emailForm, to: e.target.value })}
+                    onChange={(e) =>
+                      setEmailForm({ ...emailForm, to: e.target.value })
+                    }
                     placeholder="recipient@example.com"
                     className="font-sans"
                   />
@@ -430,7 +519,9 @@ Trân trọng,
                   <Label className="font-medium">CC</Label>
                   <Input
                     value={emailForm.cc}
-                    onChange={(e) => setEmailForm({ ...emailForm, cc: e.target.value })}
+                    onChange={(e) =>
+                      setEmailForm({ ...emailForm, cc: e.target.value })
+                    }
                     placeholder="cc@domain.com"
                     className="font-sans"
                   />
@@ -439,7 +530,9 @@ Trân trọng,
                   <Label className="font-medium">BCC</Label>
                   <Input
                     value={emailForm.bcc}
-                    onChange={(e) => setEmailForm({ ...emailForm, bcc: e.target.value })}
+                    onChange={(e) =>
+                      setEmailForm({ ...emailForm, bcc: e.target.value })
+                    }
                     placeholder="bcc@domain.com"
                     className="font-sans"
                   />
@@ -450,7 +543,9 @@ Trân trọng,
                 <Label className="font-medium">Chủ đề (Subject) *</Label>
                 <Input
                   value={emailForm.subject}
-                  onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
+                  onChange={(e) =>
+                    setEmailForm({ ...emailForm, subject: e.target.value })
+                  }
                   placeholder="Chủ đề email..."
                   className="font-sans"
                 />
@@ -460,7 +555,12 @@ Trân trọng,
                 <Label className="font-medium">Phân loại nội dung</Label>
                 <Select
                   value={emailForm.type}
-                  onValueChange={(value) => setEmailForm({ ...emailForm, type: value as "html" | "text" })}
+                  onValueChange={(value) =>
+                    setEmailForm({
+                      ...emailForm,
+                      type: value as "html" | "text",
+                    })
+                  }
                 >
                   <SelectTrigger className="w-48 font-sans">
                     <SelectValue />
@@ -493,7 +593,10 @@ Trân trọng,
               </div>
 
               <div className="flex space-x-2">
-                <Button onClick={handleSendEmail} className="bg-blue-600 hover:bg-blue-700 font-medium">
+                <Button
+                  onClick={handleSendEmail}
+                  className="bg-blue-600 hover:bg-blue-700 font-medium"
+                >
                   <Send className="mr-2 h-4 w-4" />
                   Gửi
                 </Button>
@@ -542,70 +645,74 @@ Trân trọng,
               </CardHeader>
               <CardContent className="space-y-2">
                 {templates.map((template) => (
-                  <div
+                  <button
                     key={template.id}
-                    role="button"
-                    tabIndex={0}
+                    type="button"
+                    className={`p-3 rounded-lg cursor-pointer transition-colors email-template-card text-left w-full ${
+                      selectedTemplate?.id === template.id
+                        ? "bg-purple-600"
+                        : "bg-gray-700 hover:bg-gray-600"
+                    }`}
                     aria-pressed={selectedTemplate?.id === template.id}
-                    className={`p-3 rounded-lg cursor-pointer transition-colors email-template-card text-left w-full ${selectedTemplate?.id === template.id ? "bg-purple-600" : "bg-gray-700 hover:bg-gray-600"
-                      }`}
                     onClick={() => setSelectedTemplate(template)}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        setSelectedTemplate(template)
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelectedTemplate(template);
                       }
                     }}
                   >
                     <div className="flex items-center justify-between font-sans">
                       <div>
-                        <h4 className="font-semibold text-white">{template.name}</h4>
-                        <p className="text-xs text-gray-400">{template.type.toUpperCase()}</p>
+                        <h4 className="font-semibold text-white">
+                          {template.name}
+                        </h4>
+                        <p className="text-xs text-gray-400">
+                          {template.type.toUpperCase()}
+                        </p>
                       </div>
                       <div className="flex space-x-1">
-                        <div
-                          role="button"
-                          tabIndex={0}
+                        <button
+                          type="button"
                           aria-label="Edit template"
                           className="h-8 w-8 p-0 font-sans inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground cursor-pointer"
                           onClick={(e) => {
-                            e.stopPropagation()
-                            setSelectedTemplate(template)
-                            setIsEditing(true)
+                            e.stopPropagation();
+                            setSelectedTemplate(template);
+                            setIsEditing(true);
                           }}
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault()
-                              e.stopPropagation()
-                              setSelectedTemplate(template)
-                              setIsEditing(true)
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setSelectedTemplate(template);
+                              setIsEditing(true);
                             }
                           }}
                         >
                           <Edit className="h-4 w-4" />
-                        </div>
-                        <div
-                          role="button"
-                          tabIndex={0}
+                        </button>
+                        <button
+                          type="button"
                           aria-label="Delete template"
                           className="h-8 w-8 p-0 text-red-400 hover:text-red-300 font-sans inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground cursor-pointer"
                           onClick={(e) => {
-                            e.stopPropagation()
-                            handleDeleteTemplate(template.id)
+                            e.stopPropagation();
+                            handleDeleteTemplate(template.id);
                           }}
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault()
-                              e.stopPropagation()
-                              handleDeleteTemplate(template.id)
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleDeleteTemplate(template.id);
                             }
                           }}
                         >
                           <Trash2 className="h-4 w-4" />
-                        </div>
+                        </button>
                       </div>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </CardContent>
             </Card>
@@ -613,13 +720,17 @@ Trân trọng,
             {/* Template Editor */}
             <div className="lg:col-span-2">
               {selectedTemplate ? (
-                <Card className="bg-gray-800 border-gray-700 font-sans"> {/* Removed font-dosis-semibold */}
+                <Card className="bg-gray-800 border-gray-700 font-sans">
+                  {" "}
+                  {/* Removed font-dosis-semibold */}
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between font-semibold">
                       <span>{isEditing ? "Chỉnh sửa" : "Xem"} mẫu email</span>
                       <div className="flex space-x-2">
                         <Button
-                          onClick={() => copyTemplateVariables(selectedTemplate)}
+                          onClick={() =>
+                            copyTemplateVariables(selectedTemplate)
+                          }
                           variant="outline" // Removed font-dosis-medium
                           size="sm"
                           className="font-medium"
@@ -627,7 +738,12 @@ Trân trọng,
                           <Copy className="mr-2 h-4 w-4" />
                           Copy biến
                         </Button>
-                        <Button onClick={handleTestEmail} variant="outline" size="sm" className="font-medium">
+                        <Button
+                          onClick={handleTestEmail}
+                          variant="outline"
+                          size="sm"
+                          className="font-medium"
+                        >
                           <TestTube className="mr-2 h-4 w-4" />
                           Test
                         </Button>
@@ -639,12 +755,21 @@ Trân trọng,
                             >
                               Lưu
                             </Button>
-                            <Button variant="outline" onClick={() => setIsEditing(false)} className="font-medium">
+                            <Button
+                              variant="outline"
+                              onClick={() => setIsEditing(false)}
+                              className="font-medium"
+                            >
                               Hủy
                             </Button>
                           </>
-                        ) : ( // Removed font-dosis-medium
-                          <Button variant="outline" onClick={() => setIsEditing(true)} className="font-medium">
+                        ) : (
+                          // Removed font-dosis-medium
+                          <Button
+                            variant="outline"
+                            onClick={() => setIsEditing(true)}
+                            className="font-medium"
+                          >
                             <Edit className="mr-2 h-4 w-4" />
                             Sửa
                           </Button>
@@ -657,7 +782,12 @@ Trân trọng,
                       <Label className="font-medium">Tên mẫu</Label>
                       <Input
                         value={selectedTemplate.name}
-                        onChange={(e) => setSelectedTemplate({ ...selectedTemplate, name: e.target.value })}
+                        onChange={(e) =>
+                          setSelectedTemplate({
+                            ...selectedTemplate,
+                            name: e.target.value,
+                          })
+                        }
                         disabled={!isEditing}
                         className="font-sans"
                       />
@@ -667,7 +797,12 @@ Trân trọng,
                       <Label className="font-medium">Chủ đề email</Label>
                       <Input
                         value={selectedTemplate.subject}
-                        onChange={(e) => setSelectedTemplate({ ...selectedTemplate, subject: e.target.value })}
+                        onChange={(e) =>
+                          setSelectedTemplate({
+                            ...selectedTemplate,
+                            subject: e.target.value,
+                          })
+                        }
                         disabled={!isEditing}
                         placeholder="Chủ đề email..."
                         className="font-sans"
@@ -679,7 +814,10 @@ Trân trọng,
                       <Select
                         value={selectedTemplate.type}
                         onValueChange={(value) =>
-                          setSelectedTemplate({ ...selectedTemplate, type: value as "html" | "text" })
+                          setSelectedTemplate({
+                            ...selectedTemplate,
+                            type: value as "html" | "text",
+                          })
                         }
                         disabled={!isEditing}
                       >
@@ -715,15 +853,23 @@ Trân trọng,
                       ) : (
                         <div className="border border-gray-600 rounded-lg p-4 min-h-[200px] bg-gray-700">
                           {selectedTemplate.type === "html" ? (
-                            <div dangerouslySetInnerHTML={{ __html: selectedTemplate.content }} />
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html: selectedTemplate.content,
+                              }}
+                            />
                           ) : (
-                            <pre className="whitespace-pre-wrap text-sm font-sans">{selectedTemplate.content}</pre>
+                            <pre className="whitespace-pre-wrap text-sm font-sans">
+                              {selectedTemplate.content}
+                            </pre>
                           )}
                         </div>
                       )}
                     </div>
 
-                    <div> {/* Removed font-dosis-medium */}
+                    <div>
+                      {" "}
+                      {/* Removed font-dosis-medium */}
                       <Label className="font-medium">Biến sẵn có</Label>
                       <div className="flex flex-wrap gap-2 mt-2">
                         {[
@@ -745,15 +891,26 @@ Trân trọng,
                             className="px-2 py-1 bg-purple-600 text-white text-xs rounded cursor-pointer hover:bg-purple-700"
                             onClick={() => {
                               if (isEditing) {
-                                const newContent = selectedTemplate.content + `[${variable}]`
-                                setSelectedTemplate({ ...selectedTemplate, content: newContent })
+                                const newContent =
+                                  selectedTemplate.content + `[${variable}]`;
+                                setSelectedTemplate({
+                                  ...selectedTemplate,
+                                  content: newContent,
+                                });
                               }
                             }}
                             onKeyDown={(e) => {
-                              if ((e.key === "Enter" || e.key === " ") && isEditing) {
+                              if (
+                                (e.key === "Enter" || e.key === " ") &&
+                                isEditing
+                              ) {
                                 e.preventDefault();
-                                const newContent = selectedTemplate.content + `[${variable}]`
-                                setSelectedTemplate({ ...selectedTemplate, content: newContent })
+                                const newContent =
+                                  selectedTemplate.content + `[${variable}]`;
+                                setSelectedTemplate({
+                                  ...selectedTemplate,
+                                  content: newContent,
+                                });
                               }
                             }}
                             tabIndex={0}
@@ -770,7 +927,9 @@ Trân trọng,
                 <Card className="bg-gray-800 border-gray-700">
                   <CardContent className="p-8 text-center">
                     <FileText className="mx-auto h-12 w-12 text-gray-500 mb-4 font-sans" />
-                    <p className="text-gray-400 font-sans">Chọn một mẫu email để xem hoặc chỉnh sửa</p>
+                    <p className="text-gray-400 font-sans">
+                      Chọn một mẫu email để xem hoặc chỉnh sửa
+                    </p>
                   </CardContent>
                 </Card>
               )}
@@ -781,7 +940,9 @@ Trân trọng,
         {/* SMTP Settings */}
         <TabsContent value="settings" className="space-y-6">
           <Card className="bg-gray-800 border-gray-700 font-sans">
-            <CardHeader> {/* Removed font-dosis-semibold */}
+            <CardHeader>
+              {" "}
+              {/* Removed font-dosis-semibold */}
               <CardTitle className="flex items-center font-semibold">
                 <Settings className="mr-2" />
                 Cài đặt SMTP
@@ -793,7 +954,12 @@ Trân trọng,
                   <Label className="font-dosis-medium">SMTP Server</Label>
                   <Input
                     value={smtpSettings.smtpServer}
-                    onChange={(e) => setSmtpSettings({ ...smtpSettings, smtpServer: e.target.value })}
+                    onChange={(e) =>
+                      setSmtpSettings({
+                        ...smtpSettings,
+                        smtpServer: e.target.value,
+                      })
+                    }
                     placeholder="smtp.mail.me.com"
                     className="font-dosis"
                   />
@@ -802,7 +968,12 @@ Trân trọng,
                   <Label className="font-dosis-medium">Port</Label>
                   <Input
                     value={smtpSettings.smtpPort}
-                    onChange={(e) => setSmtpSettings({ ...smtpSettings, smtpPort: e.target.value })}
+                    onChange={(e) =>
+                      setSmtpSettings({
+                        ...smtpSettings,
+                        smtpPort: e.target.value,
+                      })
+                    }
                     placeholder="587"
                     className="font-dosis"
                   />
@@ -811,7 +982,12 @@ Trân trọng,
                   <Label className="font-dosis-medium">Username</Label>
                   <Input
                     value={smtpSettings.smtpUsername}
-                    onChange={(e) => setSmtpSettings({ ...smtpSettings, smtpUsername: e.target.value })}
+                    onChange={(e) =>
+                      setSmtpSettings({
+                        ...smtpSettings,
+                        smtpUsername: e.target.value,
+                      })
+                    }
                     placeholder="your-email@example.com"
                     className="font-dosis"
                   />
@@ -821,7 +997,12 @@ Trân trọng,
                   <Input
                     type="password"
                     value={smtpSettings.smtpPassword || ""} // Handle undefined password
-                    onChange={(e) => setSmtpSettings({ ...smtpSettings, smtpPassword: e.target.value })}
+                    onChange={(e) =>
+                      setSmtpSettings({
+                        ...smtpSettings,
+                        smtpPassword: e.target.value,
+                      })
+                    }
                     placeholder="grsa-aaxz-midn-pjta"
                     className="font-dosis"
                   />
@@ -832,18 +1013,29 @@ Trân trọng,
                 {smtpSettings.connected ? (
                   <>
                     <CheckCircle className="h-5 w-5 text-green-400" />
-                    <span className="text-green-400 font-dosis">Đã kết nối (theo cài đặt đã lưu)</span>
+                    <span className="text-green-400 font-dosis">
+                      Đã kết nối (theo cài đặt đã lưu)
+                    </span>
                   </>
                 ) : (
-                  <span className="text-yellow-400 font-dosis">Chưa kết nối hoặc chưa lưu cài đặt.</span>
+                  <span className="text-yellow-400 font-dosis">
+                    Chưa kết nối hoặc chưa lưu cài đặt.
+                  </span>
                 )}
               </div>
 
               <div className="flex space-x-2">
                 <Button
                   onClick={() => {
-                    localStorage.setItem(SMTP_LOCALSTORAGE_KEY, JSON.stringify({ ...smtpSettings, connected: false })) // Reset connected status on save, require re-test
-                    showModal("Lưu thành công", ["Đã lưu cài đặt SMTP. Vui lòng test lại kết nối."], "success")
+                    localStorage.setItem(
+                      SMTP_LOCALSTORAGE_KEY,
+                      JSON.stringify({ ...smtpSettings, connected: false })
+                    ); // Reset connected status on save, require re-test
+                    showModal(
+                      "Lưu thành công",
+                      ["Đã lưu cài đặt SMTP. Vui lòng test lại kết nối."],
+                      "success"
+                    );
                   }}
                   className="bg-green-600 hover:bg-green-700 font-dosis-medium"
                 >
@@ -854,7 +1046,11 @@ Trân trọng,
                   variant="outline"
                   onClick={async () => {
                     if (!smtpSettings.smtpUsername) {
-                      showModal("Lỗi Test SMTP", ["Vui lòng nhập Username SMTP."], "error");
+                      showModal(
+                        "Lỗi Test SMTP",
+                        ["Vui lòng nhập Username SMTP."],
+                        "error"
+                      );
                       return;
                     }
                     // Sử dụng hàm sendEmail để test, gửi email test đến chính nó
@@ -865,8 +1061,17 @@ Trân trọng,
                       textBody: `Đây là email test từ Trung tâm Email.\nCấu hình SMTP của bạn hoạt động bình thường!`,
                     };
                     const result = await sendEmail(testEmailDetails);
-                    setSmtpSettings({ ...smtpSettings, connected: result.success }); // Cập nhật trạng thái connected
-                    showModal(result.success ? "Test SMTP Thành Công" : "Test SMTP Thất Bại", [result.message], result.success ? "success" : "error");
+                    setSmtpSettings({
+                      ...smtpSettings,
+                      connected: result.success,
+                    }); // Cập nhật trạng thái connected
+                    showModal(
+                      result.success
+                        ? "Test SMTP Thành Công"
+                        : "Test SMTP Thất Bại",
+                      [result.message],
+                      result.success ? "success" : "error"
+                    );
                   }}
                   className="font-dosis-medium"
                 >
@@ -901,8 +1106,11 @@ Trân trọng,
                     <div className="flex justify-between items-center p-3 bg-gray-700 rounded">
                       <span className="font-dosis">Email Sync</span>
                       <span
-                        className={`px-2 py-1 rounded text-sm font-dosis-medium ${syncStatus === "Connected" ? "bg-green-600 text-white" : "bg-yellow-600 text-white"
-                          }`}
+                        className={`px-2 py-1 rounded text-sm font-dosis-medium ${
+                          syncStatus === "Connected"
+                            ? "bg-green-600 text-white"
+                            : "bg-yellow-600 text-white"
+                        }`}
                       >
                         {syncStatus}
                       </span>
@@ -925,17 +1133,31 @@ Trân trọng,
                       disabled={syncStatus === "Syncing..."}
                     >
                       <RotateCw className="h-4 w-4 mr-2" />
-                      {syncStatus === "Syncing..." ? "Đang đồng bộ..." : "Đồng bộ ngay"}
+                      {syncStatus === "Syncing..."
+                        ? "Đang đồng bộ..."
+                        : "Đồng bộ ngay"}
                     </Button>
                     <Button
-                      onClick={() => showModal("Backup thành công", ["Đã backup toàn bộ email"], "success")}
+                      onClick={() =>
+                        showModal(
+                          "Backup thành công",
+                          ["Đã backup toàn bộ email"],
+                          "success"
+                        )
+                      }
                       className="w-full bg-green-600 hover:bg-green-700 font-dosis-medium"
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Backup email
                     </Button>
                     <Button
-                      onClick={() => showModal("Cài đặt đã lưu", ["Đã bật tự động đồng bộ mỗi 30 giây"], "success")}
+                      onClick={() =>
+                        showModal(
+                          "Cài đặt đã lưu",
+                          ["Đã bật tự động đồng bộ mỗi 30 giây"],
+                          "success"
+                        )
+                      }
                       className="w-full bg-purple-600 hover:bg-purple-700 font-dosis-medium"
                     >
                       <Settings className="h-4 w-4 mr-2" />
@@ -949,8 +1171,14 @@ Trân trọng,
                 <h4 className="font-dosis-semibold mb-2">Lịch sử đồng bộ:</h4>
                 <div className="text-sm text-gray-400 space-y-1 font-dosis">
                   <p>• {lastSync} - Email sync completed</p>
-                  <p>• {new Date(Date.now() - 1800000).toLocaleString("vi-VN")} - SMTP connection verified</p>
-                  <p>• {new Date(Date.now() - 3600000).toLocaleString("vi-VN")} - Auto-sync enabled</p>
+                  <p>
+                    • {new Date(Date.now() - 1800000).toLocaleString("vi-VN")} -
+                    SMTP connection verified
+                  </p>
+                  <p>
+                    • {new Date(Date.now() - 3600000).toLocaleString("vi-VN")} -
+                    Auto-sync enabled
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -958,8 +1186,13 @@ Trân trọng,
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
 
 // Default export for compatibility
-export default EmailCenterView
+export default EmailCenterView;
+export default EmailCenterView;
+export default EmailCenterView;
+export default EmailCenterView;
+export default EmailCenterView;
+export default EmailCenterView;

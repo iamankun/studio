@@ -3,12 +3,14 @@
  * These functions send data to the `/api/activity-log` endpoint.
  */
 
+type ActivityStatus = 'success' | 'failed' | 'error';
+
 interface LogActivityParams {
     action: string;
     description?: string;
     entityType?: string;
     entityId?: string | number;
-    status?: 'success' | 'error' | 'pending' | 'info' | 'failed';
+    status?: ActivityStatus | 'pending' | 'info';
     result?: string;
     details?: Record<string, unknown>;
 }
@@ -72,7 +74,7 @@ export async function logActivity(params: LogActivityParams): Promise<LogActivit
 
 export function logLogin(
     method: 'password' | 'sso' | 'token',
-    status: 'success' | 'failed' | 'error',
+    status: ActivityStatus,
     details: { username: string;[key: string]: unknown }
 ): Promise<LogActivityResult> {
     return logActivity({
@@ -86,7 +88,7 @@ export function logLogin(
 
 export function logRegistration(
     method: 'email' | 'sso',
-    status: 'success' | 'failed' | 'error',
+    status: ActivityStatus,
     details: { username: string;[key: string]: unknown }
 ): Promise<LogActivityResult> {
     return logActivity({
@@ -115,7 +117,7 @@ export function logUIInteraction(
 export function logSubmissionActivity(
     submissionId: string,
     activity: 'create' | 'update' | 'delete' | 'view',
-    status: 'success' | 'failed' | 'error',
+    status: ActivityStatus,
     details?: Record<string, unknown>
 ): Promise<LogActivityResult> {
     return logActivity({

@@ -1,8 +1,45 @@
-import type { Submission } from "@/types/submission";
+import React, { useState, useEffect } from "react";
 import type { User } from "@/types/user";
 
 export interface UploadFormViewProps {
   readonly currentUser: User;
+}
+
+function SuccessAnimation({
+  artistName,
+  songTitle,
+  onClose,
+}: Readonly<{
+  artistName: string;
+  songTitle: string;
+  onClose: () => void;
+}>) {
+  // Keyboard handler for accessibility
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      onClose();
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 shadow-lg text-center">
+        <h2 className="text-2xl font-bold text-green-600 mb-2">Thành công!</h2>
+        <p>
+          Đã gửi bài hát <strong>{songTitle}</strong> của nghệ sĩ{" "}
+          <strong>{artistName}</strong>.
+        </p>
+        <button
+          className="mt-4 px-4 py-2 bg-purple-600 text-white rounded"
+          onClick={onClose}
+          onKeyDown={handleKeyDown}
+          autoFocus
+        >
+          Đóng
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export function UploadFormView({ currentUser }: Readonly<UploadFormViewProps>) {
@@ -58,6 +95,10 @@ export function UploadFormView({ currentUser }: Readonly<UploadFormViewProps>) {
           songTitle={previewData.songTitle}
           onClose={handleCloseSuccess}
         />
+      )}
+    </div>
+  );
+}
       )}
     </div>
   );

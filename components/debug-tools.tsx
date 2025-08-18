@@ -45,7 +45,7 @@ export function DebugTools() {
       localStorage.clear();
       logger.info("Đã xóa tất cả dữ liệu dữ liệu tại gốc", {
         component: "Công cụ gỡ lỗi",
-        action: "clearAllData",
+        action: "Xóa tất cả dữ liệu",
       });
       setResult("Đã xóa tất cả dữ liệu tại gốc");
     }
