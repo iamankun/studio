@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "public"."UserRole" AS ENUM ('ARTIST', 'COMPOSER', 'PRODUCER', 'PERFORMER', 'LABEL_MANAGER', 'ADMINISTRATOR');
+CREATE TYPE "public"."UserRole" AS ENUM ('ADMINISTRATOR', 'LABEL_MANAGER', 'ARTIST', 'COMPOSER', 'PRODUCER', 'PERFORMER');
 
 -- CreateEnum
 CREATE TYPE "public"."SubmissionStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'PROCESSING', 'PUBLISHED', 'CANCELLED', 'DRAFT');
@@ -11,7 +11,7 @@ CREATE TYPE "public"."ReleaseType" AS ENUM ('SINGLE', 'EP', 'ALBUM', 'COMPILATIO
 CREATE TYPE "public"."ContributorRole" AS ENUM ('COMPOSER', 'LYRICIST', 'SINGERSONGWRITER', 'PRODUCER', 'PERFORMER', 'VOCALIST', 'RAPPER');
 
 -- CreateEnum
-CREATE TYPE "public"."ApprovalType" AS ENUM ('DSP', 'CONTENT_ID', 'ACR_CLOUD', 'LABEL_REVIEW');
+CREATE TYPE "public"."ApprovalType" AS ENUM ('DSP', 'CONTENT_ID', 'ACR_CLOUD', 'LABEL_MANAGER');
 
 -- CreateEnum
 CREATE TYPE "public"."FileCategory" AS ENUM ('AUDIO', 'VIDEO', 'IMAGE', 'DOCUMENT', 'OTHER');
@@ -27,7 +27,7 @@ CREATE TABLE "public"."User" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "labelId" TEXT,
 
-    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "User_key" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -50,7 +50,7 @@ CREATE TABLE "public"."Profile" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Profile_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Profile_key" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -61,7 +61,7 @@ CREATE TABLE "public"."Label" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Label_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Label_key" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -94,7 +94,7 @@ CREATE TABLE "public"."Submission" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Submission_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Submission_key" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -118,7 +118,7 @@ CREATE TABLE "public"."Track" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Track_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Track_key" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -142,7 +142,7 @@ CREATE TABLE "public"."Video" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Video_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Video_key" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -156,7 +156,7 @@ CREATE TABLE "public"."FileFolder" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "FileFolder_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "FileFolder_key" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -168,7 +168,7 @@ CREATE TABLE "public"."SubmissionContributor" (
     "submissionId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "SubmissionContributor_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "SubmissionContributor_key" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -180,7 +180,7 @@ CREATE TABLE "public"."TrackContributor" (
     "trackId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "TrackContributor_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "TrackContributor_key" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -192,7 +192,7 @@ CREATE TABLE "public"."VideoContributor" (
     "videoId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "VideoContributor_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "VideoContributor_key" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -205,7 +205,7 @@ CREATE TABLE "public"."SubmissionApproval" (
     "approverId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "SubmissionApproval_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "SubmissionApproval_key" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -216,7 +216,7 @@ CREATE TABLE "public"."SubmissionComment" (
     "submissionId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "SubmissionComment_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "SubmissionComment_key" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -232,7 +232,7 @@ CREATE TABLE "public"."File" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "File_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "File_key" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -243,7 +243,7 @@ CREATE TABLE "public"."nhatKy" (
     "userId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "nhatKy_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "nhatKy_key" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -258,7 +258,7 @@ CREATE TABLE "public"."ExportTemplate" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "ExportTemplate_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "ExportTemplate_key" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -272,7 +272,7 @@ CREATE TABLE "public"."Export" (
     "exportedBy" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "Export_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Export_key" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -288,7 +288,7 @@ CREATE TABLE "public"."SignatureDocument" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "SignatureDocument_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "SignatureDocument_key" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -301,7 +301,7 @@ CREATE TABLE "public"."DistributionPlatform" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "DistributionPlatform_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "DistributionPlatform_key" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -341,82 +341,82 @@ CREATE UNIQUE INDEX "SignatureDocument_submissionId_key" ON "public"."SignatureD
 CREATE UNIQUE INDEX "DistributionPlatform_name_key" ON "public"."DistributionPlatform"("name");
 
 -- AddForeignKey
-ALTER TABLE "public"."User" ADD CONSTRAINT "User_labelId_fkey" FOREIGN KEY ("labelId") REFERENCES "public"."Label"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."User" ADD CONSTRAINT "User_labelId_key" FOREIGN KEY ("labelId") REFERENCES "public"."Label"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Profile" ADD CONSTRAINT "Profile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."Profile" ADD CONSTRAINT "Profile_userId_key" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Submission" ADD CONSTRAINT "Submission_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."Submission" ADD CONSTRAINT "Submission_userId_key" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Submission" ADD CONSTRAINT "Submission_labelId_fkey" FOREIGN KEY ("labelId") REFERENCES "public"."Label"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."Submission" ADD CONSTRAINT "Submission_labelId_key" FOREIGN KEY ("labelId") REFERENCES "public"."Label"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Track" ADD CONSTRAINT "Track_submissionId_fkey" FOREIGN KEY ("submissionId") REFERENCES "public"."Submission"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."Track" ADD CONSTRAINT "Track_submissionId_key" FOREIGN KEY ("submissionId") REFERENCES "public"."Submission"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Video" ADD CONSTRAINT "Video_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."Video" ADD CONSTRAINT "Video_userId_key" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Video" ADD CONSTRAINT "Video_labelId_fkey" FOREIGN KEY ("labelId") REFERENCES "public"."Label"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."Video" ADD CONSTRAINT "Video_labelId_key" FOREIGN KEY ("labelId") REFERENCES "public"."Label"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Video" ADD CONSTRAINT "Video_submissionId_fkey" FOREIGN KEY ("submissionId") REFERENCES "public"."Submission"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."Video" ADD CONSTRAINT "Video_submissionId_key" FOREIGN KEY ("submissionId") REFERENCES "public"."Submission"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."FileFolder" ADD CONSTRAINT "FileFolder_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "public"."FileFolder"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."FileFolder" ADD CONSTRAINT "FileFolder_parentId_key" FOREIGN KEY ("parentId") REFERENCES "public"."FileFolder"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."FileFolder" ADD CONSTRAINT "FileFolder_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "public"."User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."FileFolder" ADD CONSTRAINT "FileFolder_ownerId_key" FOREIGN KEY ("ownerId") REFERENCES "public"."User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."SubmissionContributor" ADD CONSTRAINT "SubmissionContributor_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."SubmissionContributor" ADD CONSTRAINT "SubmissionContributor_userId_key" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."SubmissionContributor" ADD CONSTRAINT "SubmissionContributor_submissionId_fkey" FOREIGN KEY ("submissionId") REFERENCES "public"."Submission"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."SubmissionContributor" ADD CONSTRAINT "SubmissionContributor_submissionId_key" FOREIGN KEY ("submissionId") REFERENCES "public"."Submission"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."TrackContributor" ADD CONSTRAINT "TrackContributor_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."TrackContributor" ADD CONSTRAINT "TrackContributor_userId_key" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."TrackContributor" ADD CONSTRAINT "TrackContributor_trackId_fkey" FOREIGN KEY ("trackId") REFERENCES "public"."Track"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."TrackContributor" ADD CONSTRAINT "TrackContributor_trackId_key" FOREIGN KEY ("trackId") REFERENCES "public"."Track"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."VideoContributor" ADD CONSTRAINT "VideoContributor_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."VideoContributor" ADD CONSTRAINT "VideoContributor_userId_key" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."VideoContributor" ADD CONSTRAINT "VideoContributor_videoId_fkey" FOREIGN KEY ("videoId") REFERENCES "public"."Video"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."VideoContributor" ADD CONSTRAINT "VideoContributor_videoId_key" FOREIGN KEY ("videoId") REFERENCES "public"."Video"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."SubmissionApproval" ADD CONSTRAINT "SubmissionApproval_submissionId_fkey" FOREIGN KEY ("submissionId") REFERENCES "public"."Submission"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."SubmissionApproval" ADD CONSTRAINT "SubmissionApproval_submissionId_key" FOREIGN KEY ("submissionId") REFERENCES "public"."Submission"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."SubmissionApproval" ADD CONSTRAINT "SubmissionApproval_approverId_fkey" FOREIGN KEY ("approverId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."SubmissionApproval" ADD CONSTRAINT "SubmissionApproval_approverId_key" FOREIGN KEY ("approverId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."SubmissionComment" ADD CONSTRAINT "SubmissionComment_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."SubmissionComment" ADD CONSTRAINT "SubmissionComment_userId_key" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."SubmissionComment" ADD CONSTRAINT "SubmissionComment_submissionId_fkey" FOREIGN KEY ("submissionId") REFERENCES "public"."Submission"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."SubmissionComment" ADD CONSTRAINT "SubmissionComment_submissionId_key" FOREIGN KEY ("submissionId") REFERENCES "public"."Submission"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."File" ADD CONSTRAINT "File_folderId_fkey" FOREIGN KEY ("folderId") REFERENCES "public"."FileFolder"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."File" ADD CONSTRAINT "File_folderId_key" FOREIGN KEY ("folderId") REFERENCES "public"."FileFolder"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."File" ADD CONSTRAINT "File_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."File" ADD CONSTRAINT "File_userId_key" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."nhatKy" ADD CONSTRAINT "nhatKy_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."nhatKy" ADD CONSTRAINT "nhatKy_userId_key" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."ExportTemplate" ADD CONSTRAINT "ExportTemplate_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."ExportTemplate" ADD CONSTRAINT "ExportTemplate_createdBy_key" FOREIGN KEY ("createdBy") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Export" ADD CONSTRAINT "Export_templateId_fkey" FOREIGN KEY ("templateId") REFERENCES "public"."ExportTemplate"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."Export" ADD CONSTRAINT "Export_templateId_key" FOREIGN KEY ("templateId") REFERENCES "public"."ExportTemplate"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Export" ADD CONSTRAINT "Export_exportedBy_fkey" FOREIGN KEY ("exportedBy") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."Export" ADD CONSTRAINT "Export_exportedBy_key" FOREIGN KEY ("exportedBy") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."SignatureDocument" ADD CONSTRAINT "SignatureDocument_submissionId_fkey" FOREIGN KEY ("submissionId") REFERENCES "public"."Submission"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."SignatureDocument" ADD CONSTRAINT "SignatureDocument_submissionId_key" FOREIGN KEY ("submissionId") REFERENCES "public"."Submission"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

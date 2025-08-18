@@ -18,12 +18,12 @@ const DEFAULT_VIDEOS = [
 ];
 
 export function BackgroundSystem() {
-  // State lưu log từ bảng nhatKy
+  // Khu vực lưu nhật ký từ bảng nhatKy
   const [logs, setLogs] = useState<
     Array<{ id: string; action: string; createdAt: string }>
   >([]);
 
-  // State cho background
+  // Khu vực cho ảnh bìa
   const [backgroundSettings, setBackgroundSettings] = useState({
     type: "gradient",
     gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
@@ -38,33 +38,20 @@ export function BackgroundSystem() {
   useEffect(() => {
     async function fetchLogs() {
       try {
-        const res = await fetch("/api/nhatky");
+        const res = await fetch("/api/nhatKy");
         if (res.ok) {
           const data = await res.json();
           setLogs(data);
         }
       } catch (err) {
         // Có thể log lỗi ra console nếu cần
+        console.error("Lỗi khi fetch logs:", err);
       }
     }
     fetchLogs();
   }, []);
 
   const [currentVideo, setCurrentVideo] = useState("");
-  const [textStyleDialogOpen, setTextStyleDialogOpen] = useState(false);
-  const [currentTextInput, setCurrentTextInput] = useState<
-    "Tiêu đề" | "Phụ đề" | null
-  >(null);
-  const [titleStyle, setTitleStyle] = useState<{
-    gradient: string;
-    animation: string;
-    font: string | undefined;
-  }>({ gradient: "", animation: "", font: "" });
-  const [subtitleStyle, setSubtitleStyle] = useState<{
-    gradient: string;
-    animation: string;
-    font: string | undefined;
-  }>({ gradient: "", animation: "", font: "" });
 
   useEffect(() => {
     // Load background settings
@@ -127,37 +114,20 @@ export function BackgroundSystem() {
         <iframe
           src={`https://www.youtube.com/embed/${currentVideo}?autoplay=1&mute=1&controls=0&loop=1&playlist=${currentVideo}&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1&origin=${window.location.origin}`}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          className={styles["background-video"]}
+          className={`${styles["background-video"]} bg-video`}
           title={`Background YouTube video ${currentVideo}`}
-          style={
-            {
-              // Sử dụng biến CSS cho opacity
-              "--bg-opacity": backgroundSettings.opacity,
-            } as React.CSSProperties
-          }
         />
       )}
       {backgroundSettings.type === "gradient" && (
         <div
           className={`absolute inset-0 transition-opacity duration-1000 background-gradient ${styles["background-gradient"]}`}
           data-gradient={backgroundSettings.gradient}
-          style={
-            {
-              "--bg-opacity": backgroundSettings.opacity,
-            } as React.CSSProperties
-          }
         />
       )}
       {backgroundSettings.type === "image" && backgroundSettings.imageUrl && (
         <div
           className={`absolute inset-0 bg-center bg-cover transition-opacity duration-1000 ${styles["background-image"]}`}
           data-bg={backgroundSettings.imageUrl}
-          style={
-            {
-              backgroundImage: `url(${backgroundSettings.imageUrl})`,
-              "--bg-opacity": backgroundSettings.opacity,
-            } as React.CSSProperties
-          }
         />
       )}
 
@@ -184,13 +154,13 @@ export function BackgroundSystem() {
 }
 
 // Move TextStyleDialog outside and pass props
-type TextStyleDialogProps = {
+type TextStyleDialogProps = Readonly<{
   open: boolean;
   currentTextInput: "title" | "subtitle" | null;
   titleStyle: { gradient: string; animation: string; font: string };
   subtitleStyle: { gradient: string; animation: string; font: string };
   onClose: () => void;
-};
+}>;
 
 export function TextStyleDialog({
   open,
@@ -239,17 +209,17 @@ export function TextStyleDialog({
     { name: "Rất đậm", class: "font-dosis-extrabold" },
   ];
 
+  // Extract dialog title
+  let dialogTitle = "";
+  if (currentTextInput === "title") dialogTitle = "Tiêu đề";
+  else if (currentTextInput === "subtitle") dialogTitle = "Phụ đề";
+
   return (
     <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-4">
       <div className="bg-gray-800 border border-gray-700 rounded-lg max-w-md w-full p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-white">
-            Tùy chỉnh{" "}
-            {currentTextInput === "title"
-              ? "Tiêu đề"
-              : currentTextInput === "subtitle"
-                ? "Phụ đề"
-                : ""}
+            Tùy chỉnh {dialogTitle}
           </h3>
           <button
             type="button"
@@ -273,19 +243,6 @@ export function TextStyleDialog({
                 <button
                   type="button"
                   key={option.name}
-                  onClick={() =>
-                    applyTextStyle({
-                      gradient: option.class,
-                      animation:
-                        currentTextInput === "title"
-                          ? titleStyle.animation
-                          : subtitleStyle.animation,
-                      font:
-                        currentTextInput === "title"
-                          ? titleStyle.font
-                          : subtitleStyle.font,
-                    })
-                  }
                   className="p-2 border border-gray-600 rounded text-xs hover:bg-gray-700"
                 >
                   <span className={option.class}>{option.name}</span>
@@ -306,19 +263,6 @@ export function TextStyleDialog({
                 <button
                   type="button"
                   key={option.name}
-                  onClick={() =>
-                    applyTextStyle({
-                      gradient:
-                        currentTextInput === "title"
-                          ? titleStyle.gradient
-                          : subtitleStyle.gradient,
-                      animation: option.class,
-                      font:
-                        currentTextInput === "title"
-                          ? titleStyle.font
-                          : subtitleStyle.font,
-                    })
-                  }
                   className="p-2 border border-gray-600 rounded text-xs hover:bg-gray-700 text-gray-200"
                 >
                   {option.name}
@@ -339,19 +283,6 @@ export function TextStyleDialog({
                 <button
                   type="button"
                   key={option.name}
-                  onClick={() =>
-                    applyTextStyle({
-                      gradient:
-                        currentTextInput === "title"
-                          ? titleStyle.gradient
-                          : subtitleStyle.gradient,
-                      animation:
-                        currentTextInput === "title"
-                          ? titleStyle.animation
-                          : subtitleStyle.animation,
-                      font: option.class,
-                    })
-                  }
                   className="p-2 border border-gray-600 rounded text-xs hover:bg-gray-700 text-gray-200"
                 >
                   <span className={option.class}>{option.name}</span>

@@ -1,99 +1,111 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { AuthorizedComponent } from "@/components/authorized-component"
-import { logger } from "@/lib/logger"
-import { multiDB } from "@/lib/database-api-service"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AuthorizedComponent } from "@/components/authorized-component";
+import { logger } from "@/lib/logger";
+import { multiDB } from "@/lib/database-api-service";
 
 export function DebugTools() {
-    const [result, setResult] = useState<string>("")
+  const [result, setResult] = useState<string>("");
 
-    const generateTestLogs = () => {
-        logger.debug('Test debug message', { testData: { value: 123 } })
-        logger.info('Test info message', { testData: { value: 456 } })
-        logger.warn('Test warning message', { testData: { value: 789 } })
-        logger.error('Test error message', { error: new Error('Test error') })
+  const generateTestLogs = () => {
+    logger.debug("Kiểm tra sửa lỗi", { testData: { value: 123 } });
+    logger.info("Kiểm tra thông báo thông tin", { testData: { value: 456 } });
+    logger.warn("Kiểm tra thông báo cảnh báo", { testData: { value: 789 } });
+    logger.error("Kiểm tra thông báo lỗi", {
+      error: new Error("Kiểm tra lỗi"),
+    });
 
-        setResult("Generated 4 test log entries")
+    setResult("Tạo 4 nhật ký thử nghiệm");
+  };
+
+  const checkDatabase = async () => {
+    const connection = await multiDB.getStatus();
+    setResult(JSON.stringify(connection, null, 2));
+
+    if (!connection.api) {
+      logger.warn("Kiểm tra kết nối dữ liệu thất bại", {
+        component: "Công cụ gỡ lỗi",
+        action: "Kiểm tra dữ liệu",
+        data: "API kết nối thất bại",
+      });
+    } else {
+      logger.info("Kiểm tra kết nối cơ sở dữ liệu thành công", {
+        component: "Công cụ gỡ lỗi",
+        action: "Kiểm tra dữ liệu",
+      });
     }
+  };
 
-    const checkDatabase = async () => {
-        const connection = await multiDB.getStatus()
-        setResult(JSON.stringify(connection, null, 2))
-
-        if (!connection.api) {
-            logger.warn('Database connection check failed', {
-                component: 'DebugTools',
-                action: 'checkDatabase',
-                data: 'API connection failed'
-            })
-        } else {
-            logger.info('Database connection check successful', {
-                component: 'DebugTools',
-                action: 'checkDatabase'
-            })
-        }
+  const clearAllData = () => {
+    if (typeof window !== "undefined") {
+      localStorage.clear();
+      logger.info("Đã xóa tất cả dữ liệu dữ liệu tại gốc", {
+        component: "Công cụ gỡ lỗi",
+        action: "clearAllData",
+      });
+      setResult("Đã xóa tất cả dữ liệu tại gốc");
     }
+  };
 
-    const clearAllData = () => {
-        if (typeof window !== 'undefined') {
-            localStorage.clear()
-            logger.info('Cleared all localStorage data', {
-                component: 'DebugTools',
-                action: 'clearAllData'
-            })
-            setResult("All localStorage data cleared")
-        }
-    }
+  return (
+    <AuthorizedComponent
+      requirePermission="debugTools"
+      fallbackMessage="Các công cụ gỡ lỗi chỉ dành cho quản trị và quản lí nhãn."
+    >
+      <Card className="shadow-md">
+        <CardHeader>
+          <CardTitle>Công cụ gỡ lỗi</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="logs">
+            <TabsList className="mb-4">
+              <TabsTrigger value="logs">Nhật ký</TabsTrigger>
+              <TabsTrigger value="db">Cơ sở dữ liệu</TabsTrigger>
+              <TabsTrigger value="storage">Lưu trữ</TabsTrigger>
+            </TabsList>
 
-    return (
-        <AuthorizedComponent
-            requirePermission="debugTools"
-            fallbackMessage="Debug tools are only available for Label Managers."
-        >
-            <Card className="shadow-md">
-                <CardHeader>
-                    <CardTitle>Debug Tools</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Tabs defaultValue="logs">
-                        <TabsList className="mb-4">
-                            <TabsTrigger value="logs">Logs</TabsTrigger>
-                            <TabsTrigger value="db">Database</TabsTrigger>
-                            <TabsTrigger value="storage">Storage</TabsTrigger>
-                        </TabsList>
+            <TabsContent value="logs">
+              <div className="space-y-4">
+                <Button onClick={generateTestLogs}>
+                  Tạo nhật ký thử nghiệm
+                </Button>
+                <Button variant="outline" onClick={() => logger.clearLogs()}>
+                  Xóa nhật ký
+                </Button>
+              </div>
+            </TabsContent>
 
-                        <TabsContent value="logs">
-                            <div className="space-y-4">
-                                <Button onClick={generateTestLogs}>Generate Test Logs</Button>
-                                <Button variant="outline" onClick={() => logger.clearLogs()}>Clear Logs</Button>
-                            </div>
-                        </TabsContent>
+            <TabsContent value="db">
+              <div className="space-y-4">
+                <Button onClick={checkDatabase}>
+                  Kiểm tra kết nối cơ sở dữ liệu
+                </Button>
+              </div>
+            </TabsContent>
 
-                        <TabsContent value="db">
-                            <div className="space-y-4">
-                                <Button onClick={checkDatabase}>Check Database Connection</Button>
-                            </div>
-                        </TabsContent>
-
-                        <TabsContent value="storage">
-                            <div className="space-y-4">
-                                <Button variant="destructive" onClick={clearAllData}>Clear All Data</Button>
-                                <p className="text-xs text-gray-500">Warning: This will clear all localStorage data including logs and submissions</p>
-                            </div>
-                        </TabsContent>
-                    </Tabs>
-
-                    {result && (
-                        <div className="mt-4 p-4 bg-gray-100 rounded-md">
-                            <pre className="text-xs overflow-auto max-h-40">{result}</pre>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
-        </AuthorizedComponent>
-    )
+            <TabsContent value="storage">
+              <div className="space-y-4">
+                <Button variant="destructive" onClick={clearAllData}>
+                  Xóa tất cả dữ liệu
+                </Button>
+                <p className="text-xs text-gray-500">
+                  Cảnh báo: Điều này sẽ xóa tất cả dữ liệu gốc bao gồm nhật ký
+                  và các bản gửi
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
+          {result && (
+            <div className="mt-4 p-4 bg-gray-100 rounded-md">
+              <pre className="text-xs overflow-auto max-h-40">{result}</pre>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </AuthorizedComponent>
+  );
 }

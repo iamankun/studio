@@ -12,19 +12,20 @@ datasource db {
 // --- BẢNG QUẢN LÝ NGƯỜI DÙNG & HỒ SƠ ---
 model User {
   UID            String       @id @default(cuid())
-  userName       String
+  userName       String       @unique
   email         String       @unique
-  name          String?      @unique
+  fullName      String?      @unique
   password      String
   roles         UserRole[]   @default([]) // Hạn chế tính năng vì chưa được quyền truy cập vào hệ thống
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
-
   profile       Profile?
   submissions   Submission[] @relation("SubmissionCreator")
   labelId       String?
-  label         Label?       @relation(fields: [labelId], references: [id])
-  files         File[]
+  label         Label?       @relation("UserLabel", fields: [labelId], references: [id]) // Quan hệ: user thuộc về một label (hãng đĩa), dùng labelId làm khóa ngoại, cho phép null nếu user không thuộc label nào
+  ownedLabel    Label?       @relation("LabelOwner") // Quan hệ: user là chủ sở hữu của một label
+  memberLabels  Label[]      @relation("LabelMembers") // Quan hệ: user là thành viên của nhiều label
+  files         File[]      @relation("FileFolderFiles")
   nhatKy        nhatKy[]
   videos        Video[]      @relation("VideoCreator")
   fileFolders   FileFolder[]
@@ -48,8 +49,8 @@ model Profile {
   artist        String? // Tên nghệ sĩ
   name          String? // Tên đầy đủ theo giấy tờ
   verified      Boolean @default(false) // Trạng thái xác minh khi đầy đủ các thông tin
-  userName        String @unique
-  user            User   @relation(fields: [userName], references: [name], onDelete: Cascade)
+  userUID         String @unique
+  user            User   @relation(fields: [userUID], references: [UID], onDelete: Cascade)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   socialLinks   String[] // Liên kết đến các mạng xã hội
@@ -65,15 +66,24 @@ model SocialLink {
   instagramUrl String?
   youtubeUrl String?
   spotifyUrl String?
-  soundcloudUrl String?
-  applenusicUrl String?
+  soundCloudUrl String?
+  appleMusicUrl String?
 }
-
+// --- BẢNG LIÊN KẾT MẠNG XÃ HỘI & MUSIC SOCIAL ---
+model Social {
+  id          String   @id @default(cuid()) // Khóa chính, tự sinh
+  type        String?   // Loại social: facebook, instagram, youtube, spotify, appleMusic, soundCloud, v.v.
+  name        String?
+  url         String?   // Đường dẫn liên kết
+}
 model Label {
   id            String       @id @default(cuid())
   name          String       @unique
-  ownerId       String       @unique
-  members       User[]
+  code          String       @unique
+  ownerUID       String      @unique
+  owner         User         @relation("LabelOwner", fields: [ownerUID], references: [UID])
+  members       User[]       @relation("LabelMembers")
+  users         User[]       @relation("UserLabel")
   submissions   Submission[]
   videos        Video[]
   createdAt     DateTime     @default(now())
@@ -110,7 +120,7 @@ model Submission {
   name          String?   // Tên người ký (phải khớp với name)
   nameSign         Image[]  @relation("SubmissionSignatures")
   isDocumentSigned Boolean   @default(false) // Trạng thái đã ký
-  username        String @unique
+  userName        String @unique
   labelId         String
   label           Label     @relation(fields: [labelId], references: [id])
   tracks          Track[]
@@ -120,7 +130,7 @@ model Submission {
   approvals       SubmissionApproval[]
   signatureDocument SignatureDocument? @relation("SubmissionSignature")
   creatorName    String
-  creator        User   @relation("SubmissionCreator", fields: [creatorName], references: [name])
+  creator        User   @relation("SubmissionCreator", fields: [creatorName], references: [userName])
   
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -144,7 +154,6 @@ model Track {
   ISRC          String     @unique // Cho phép gán thủ công và được cấp tự động khi hoàn thành gửi phát hành
   IPI           String?     // Là mã số quốc tế cho người tham gia
   ISWC          String?     // Là mã số quốc tế cho tác phẩm đang làm
-
   fileName      String?
   name          String?    // Tên đầy đủ nghệ sĩ từ Profile
   fileSize      Int?
@@ -179,8 +188,8 @@ model Video {
   language         String?  // Ngôn ngữ
   contentIdEnabled Boolean @default(false)
   contentIdStatus  String? // Mặc định đã có on nếu video đó đã duyệt
-  username        String
-  user          User        @relation("VideoCreator", fields: [username], references: [name])
+  userName        String
+  user          User        @relation("VideoCreator", fields: [userName], references: [userName])
   labelId       String
   label         Label       @relation(fields: [labelId], references: [id])
   submissionId  String?
@@ -198,11 +207,11 @@ model FileFolder {
   parentId      String?
   parent        FileFolder? @relation("FolderHierarchy", fields: [parentId], references: [id])
   children      FileFolder[] @relation("FolderHierarchy")
-  files         File[]
+  files         File[]      @relation("FileFolderFiles")
   
   // Permissions
-  ownerUID       String?
-  owner         User?       @relation(fields: [ownerUID], references: [UID])
+  ownerID       String?
+  owner         User?       @relation(fields: [ownerID], references: [UID])
   isPublic      Boolean     @default(false)
   
   createdAt     DateTime    @default(now())
@@ -215,8 +224,8 @@ model SubmissionContributor {
   id            String @id @default(cuid())
   role          String
   percentage    Float? // Phần trăm đóng góp
-  userName      String
-  user          User   @relation(fields: [userName], references: [name])
+  userUID       String
+  user          User   @relation(fields: [userUID], references: [UID])
   submissionId  String
   submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
@@ -226,8 +235,8 @@ model TrackContributor {
   id            String @id @default(cuid())
   role          ContributorRole
   percentage    Float?
-  username      String
-  user          User   @relation(fields: [username], references: [name])
+  userUID       String
+  user          User   @relation(fields: [userUID], references: [UID])
   trackId       String
   track         Track  @relation(fields: [trackId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
@@ -237,8 +246,8 @@ model VideoContributor {
   id            String @id @default(cuid())
   role          String // Director, Editor, etc.
   percentage    Float?
-  username      String
-  user          User   @relation(fields: [username], references: [name])
+  userUID       String
+  user          User   @relation(fields: [userUID], references: [UID])
   videoId       String
   video         Video  @relation(fields: [videoId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
@@ -251,16 +260,16 @@ model SubmissionApproval {
   reason          String?   // Lý do từ chối (nếu có)
   submissionId    String
   submission      Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
-  approverId      String
-  approver        User @relation(fields: [approverId], references: [name])
+  approverUID     String
+  approver        User @relation(fields: [approverUID], references: [UID])
   createdAt       DateTime @default(now())
 }
 
 model SubmissionComment {
   id            String @id @default(cuid())
   content       String
-  username      String
-  user          User   @relation(fields: [username], references: [name])
+  userUID       String
+  user          User   @relation(fields: [userUID], references: [UID])
   submissionId  String
   submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
@@ -278,9 +287,11 @@ model File {
   
   // Folder relationship
   folderId  String?
-  folder    FileFolder? @relation(fields: [folderId], references: [id])
-  username  String?
-  user      User?       @relation(fields: [username], references: [name])
+  folder    FileFolder? @relation("FileFolderFiles", fields: [folderId], references: [id])
+  labelId   String?
+  label     Label?      @relation("FileLabelFiles", fields: [labelId], references: [id])
+  userUID   String?
+  user      User?       @relation(fields: [userUID], references: [UID])
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 }
@@ -289,8 +300,8 @@ model nhatKy {
   id        String      @id @default(cuid())
   action    String
   details   Json?
-  username  String?
-  user      User?       @relation(fields: [username], references: [name])
+  userUID   String?
+  user      User?       @relation(fields: [userUID], references: [UID])
   createdAt DateTime    @default(now())
 }
 
@@ -302,8 +313,8 @@ model ExportTemplate {
   fields      Json   // Các field được chọn để export
   format      String // CSV, XLSX, TXT, PDF
   isActive    Boolean @default(true)
-  createdBy   String
-  creator     User     @relation("ExportTemplateCreator", fields: [createdBy], references: [name])
+  createdByUID   String
+  creator     User     @relation("ExportTemplateCreator", fields: [createdByUID], references: [UID])
   exports     Export[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -317,8 +328,8 @@ model Export {
   fileName   String
   format     String
   recordCount Int
-  exportedBy String
-  exporter   User   @relation("ExportCreator", fields: [exportedBy], references: [name])
+  exportedByUID String
+  exporter   User   @relation("ExportCreator", fields: [exportedByUID], references: [UID])
   createdAt  DateTime @default(now())
 }
 
@@ -350,51 +361,45 @@ model DistributionPlatform {
 // --- CÁC BỘ TRẠNG THÁI & VAI TRÒ (Cập nhật với Vietnamese support) ---
 // Một user có thể có nhiều vai trò được gán, họ có thể là nghệ sĩ, nhà sản xuất, hoặc người viết lời, nhãn đĩa, người biểu diễn.
 enum UserRole {
-  ARTIST // Nghệ sĩ là người sở hữu tác phẩm cũng như tạo track, release và thêm hồ sơ mới của Composer, producer và performer nhưng artist không thể xem các hồ sơ khác ngoài dữ liệu của Artist
-  COMPOSER // Sáng tác và viết lời bài hát
-  PRODUCER // Nhà sản xuất âm nhạc
+  COMPOSER // Sáng tác và viết lời bài hátẩm cũng như tạo track, release và thêm hồ sơ mới của Composer, producer và performer nhưng artist không thể xem các hồ sơ khác ngoài dữ liệu của Artist
+  PRODUCER // Nhà sản xuất âm nhạc bài hát
   PERFORMER // Người biểu diễn, có hồ sơ được quản lí bởi Label Manager và Artist
-  LABEL_MANAGER // Quản lý hãng đĩa, ngang như quản trị viên
-  ADMINISTRATOR // Quản trị viên hệ thống
+  LABEL_MANAGER // Quản lý hãng đĩa, ngang như quản trị viênbel Manager và Artist
+  ADMINISTRATOR // Quản trị viên hệ thốngg như quản trị viên
 }
-
 enum SubmissionStatus {
   PENDING
   APPROVED
   REJECTED
   PROCESSING
-  PUBLISHED
+  PUBLISHEDG
   CANCELLED
-  DRAFT
+  DRAFTLLED
 }
-
 enum ReleaseType {
   SINGLE // Album đơn - Single (1 - 3 bài tối thiểu 1, 2 bài có thể instrumental hoặc cái gì đó khác) - Dạng này phổ biến
-  EP // Album extended play - EP (4 - 6 bài tối thiểu 4) - Dạng này phổ biến
+  EP // Album extended play - EP (4 - 6 bài tối thiểu 4) - Dạng này phổ biếnntal hoặc cái gì đó khác) - Dạng này phổ biến
   ALBUM // Album đầy đủ - Album (7 bài trở lên) - Thường không có vì album chỉ có thể do hãng đĩa tổng hợp
   COMPILATION // Album tổng hợp - Compilation (Album tổng hợp các bài hát từ nghệ sĩ khác nhau) - Không có vì không có trang âm nhạc nào phát hành dạng này
 }
-
 enum ContributorRole {
   COMPOSER // Người sáng tác
   LYRICIST // Người viết lời
   SINGERSONGWRITER // Người sáng tác và biểu diễn
-  PRODUCER // Nhà sản xuất
+  PRODUCER // Nhà sản xuấti sáng tác và biểu diễn
   PERFORMER // Người biểu diễn
-  VOCALIST // Ca sĩ
-  RAPPER // Rapper
+  VOCALIST // Ca sĩi biểu diễn
+  RAPPER // Rapperĩ
 }
-
 enum ApprovalType {
   DSP // Dịch vụ phân phối
   CONTENT_ID // Nhận diện nội dung
-  ACR_CLOUD // ACR Cloud
+  ACR_CLOUD // ACR Cloudn nội dung
   LABEL_REVIEW // Đánh giá của hãng đĩa
 }
-
 enum FileCategory {
   AUDIO // Âm thanh
-  VIDEO // Video
+  VIDEO // Videoanh
   IMAGE // Hình ảnh
   DOCUMENT // Tài liệu
   OTHER // Khác

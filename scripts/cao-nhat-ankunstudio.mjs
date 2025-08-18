@@ -7,7 +7,7 @@ config({ path: '../.env.local' });
 
 const { Client } = pg;
 
-console.log('🔄 UPDATING ANKUNSTUDIO ID TO 1');
+console.log('🔄 ĐANG CẬP NHẬT ID ANKUNSTUDIO THÀNH 1');
 console.log('===============================');
 
 async function updateAnkunstudioId() {
@@ -16,153 +16,136 @@ async function updateAnkunstudioId() {
         ssl: { rejectUnauthorized: false }
     });
 
+    const username = 'ankunstudio';
+
+    // Cứu: In thông tin tài khoản
+    const printAccountInfo = (ADMINISTRATOR, LABEL_MANAGER, ARTIST) => {
+        if (ADMINISTRATOR.rows.length > 0) {
+            console.log('📋 Quản trị viên:', ADMINISTRATOR.rows[0]);
+        }
+        if (LABEL_MANAGER.rows.length > 0) {
+            console.log('📋 Quản lý nhãn:', LABEL_MANAGER.rows[0]);
+        }
+        if (ARTIST.rows.length > 0) {
+            console.log('🎤 Nghệ sĩ:', ARTIST.rows[0]);
+        }
+    };
+
+    // Helper: Kiểm tra ID 1 có khả dụng không
+    const checkIdAvailability = (ADMINISTRATORId1, LABEL_MANAGERId1, ARTISTId1) => {
+        if (ADMINISTRATORId1.rows.length > 0) {
+            console.log('⚠️ ID 1 của Quản trị viên đã được sử dụng bởi:', ADMINISTRATORId1.rows[0]);
+        } else {
+            console.log('✅ ID 1 của Quản trị viên đang trống');
+        }
+        if (LABEL_MANAGERId1.rows.length > 0) {
+            console.log('⚠️ ID 1 của Quản lý nhãn đã được sử dụng bởi:', LABEL_MANAGERId1.rows[0]);
+        } else {
+            console.log('✅ ID 1 của Quản lý nhãn đang trống');
+        }
+        if (ARTISTId1.rows.length > 0) {
+            console.log('⚠️ ID 1 của Nghệ sĩ đã được sử dụng bởi:', ARTISTId1.rows[0]);
+        } else {
+            console.log('✅ ID 1 của Nghệ sĩ đang trống');
+        }
+    };
+
+    // Helper: Di chuyển ID 1 sang tạm nếu cần
+    const moveIdToTemp = async (table, id1Rows) => {
+        if (id1Rows.rows.length > 0) {
+            await client.query(`
+                UPDATE ${table}
+                SET id = (SELECT COALESCE(MAX(id), 0) + 1 FROM ${table})
+                WHERE id = 1
+            `);
+            console.log(`🔄 Đã di chuyển ID 1 của bảng ${table} sang ID tạm thời`);
+        }
+    };
+
+    // Helper: Cập nhật ID của username thành 1
+    const updateUserIdTo1 = async (table, currentRows) => {
+        if (currentRows.rows.length > 0 && currentRows.rows[0].id !== 1) {
+            await client.query(`
+                UPDATE ${table}
+                SET id = 1
+                WHERE userName = $1
+            `, [username]);
+            console.log(`✅ Đã cập nhật ID của bảng ${table} thành 1`);
+        }
+    };
+
+    // Cứu: Khôi phục lại dữ liệu
+    const resetSequence = async (table) => {
+        await client.query(`
+            SELECT setval('${table}_id_seq', (SELECT COALESCE(MAX(id), 0) FROM ${table}), true)
+        `);
+    };
+
     try {
         await client.connect();
-        console.log('✅ Connected to database');
+        console.log('✅ Kết nối tới cơ sở dữ liệu thành công');
 
-        const username = 'ankunstudio';
+        // Lấy thông tin tài khoản hiện tại
+        const [currentADMINISTRATOR, currentLABEL_MANAGER, currentARTIST] = await Promise.all([
+            client.query(`SELECT UID, userName, fullname FROM ADMINISTRATOR WHERE userName = $1`, [userName]),
+            client.query(`SELECT UID, userName, fullname FROM LABEL_MANAGER WHERE userName = $1`, [userName]),
+            client.query(`SELECT UID, userName, fullname FROM ARTIST WHERE userName = $1`, [userName])
+        ]);
+        console.log('\n🔍 ID tài khoản hiện tại:');
+        printAccountInfo(currentADMINISTRATOR, currentLABEL_MANAGER, currentARTIST);
 
-        // First, check current IDs
-        console.log('\n🔍 Current account IDs:');
+        // Kiểm tra ID 1 có khả dụng không
+        console.log('\n🔍 Kiểm tra ID 1 có khả dụng không:');
+        const [labelManagerId1, artistId1] = await Promise.all([
+            client.query(`SELECT id, username FROM label_manager WHERE id = 1`),
+            client.query(`SELECT id, username FROM artist WHERE id = 1`)
+        ]);
+        checkIdAvailability(labelManagerId1, artistId1);
 
-        const currentLabelManager = await client.query(`
-            SELECT id, username, full_name FROM label_manager WHERE username = $1
-        `, [username]);
-
-        const currentArtist = await client.query(`
-            SELECT id, username, full_name FROM artist WHERE username = $1
-        `, [username]);
-
-        if (currentLabelManager.rows.length > 0) {
-            console.log('📋 Label Manager:', currentLabelManager.rows[0]);
-        }
-
-        if (currentArtist.rows.length > 0) {
-            console.log('🎤 Artist:', currentArtist.rows[0]);
-        }
-
-        // Check if ID 1 is already taken in either table
-        console.log('\n🔍 Checking if ID 1 is available:');
-
-        const labelManagerId1 = await client.query(`
-            SELECT id, username FROM label_manager WHERE id = 1
-        `);
-
-        const artistId1 = await client.query(`
-            SELECT id, username FROM artist WHERE id = 1
-        `);
-
-        if (labelManagerId1.rows.length > 0) {
-            console.log('⚠️ Label Manager ID 1 is taken by:', labelManagerId1.rows[0]);
-        } else {
-            console.log('✅ Label Manager ID 1 is available');
-        }
-
-        if (artistId1.rows.length > 0) {
-            console.log('⚠️ Artist ID 1 is taken by:', artistId1.rows[0]);
-        } else {
-            console.log('✅ Artist ID 1 is available');
-        }
-
-        // Begin transaction
+        // Bắt đầu transaction
         await client.query('BEGIN');
-
         try {
-            // Check and handle submissions that reference the current artist ID
+            // Kiểm tra các submissions liên kết với nghệ sĩ
             if (currentArtist.rows.length > 0) {
                 const currentArtistId = currentArtist.rows[0].id;
-
-                console.log(`\n🔗 Checking submissions linked to artist ID ${currentArtistId}:`);
+                console.log(`\n🔗 Kiểm tra submissions liên kết với nghệ sĩ ID ${currentArtistId}:`);
                 const linkedSubmissions = await client.query(`
                     SELECT id, title, uploader_username 
                     FROM submissions 
                     WHERE uploader_username = $1
                 `, [username]);
-
-                console.log(`Found ${linkedSubmissions.rows.length} submissions linked to ${username}`);
+                console.log(`Tìm thấy ${linkedSubmissions.rows.length} submissions liên kết với ${username}`);
                 if (linkedSubmissions.rows.length > 0) {
                     console.table(linkedSubmissions.rows);
                 }
             }
 
-            // Update Label Manager ID to 1 (if needed)
-            if (currentLabelManager.rows.length > 0 && currentLabelManager.rows[0].id !== 1) {
-                if (labelManagerId1.rows.length > 0) {
-                    // Move existing ID 1 to a temporary ID first
-                    await client.query(`
-                        UPDATE label_manager 
-                        SET id = (SELECT COALESCE(MAX(id), 0) + 1 FROM label_manager)
-                        WHERE id = 1
-                    `);
-                    console.log('🔄 Moved existing Label Manager ID 1 to temporary ID');
-                }
+            // Cập nhật ID cho Label Manager và Artist thành 1
+            await moveIdToTemp('label_manager', labelManagerId1);
+            await updateUserIdTo1('label_manager', currentLabelManager);
 
-                await client.query(`
-                    UPDATE label_manager 
-                    SET id = 1 
-                    WHERE username = $1
-                `, [username]);
+            await moveIdToTemp('artist', artistId1);
+            await updateUserIdTo1('artist', currentArtist);
 
-                console.log('✅ Updated Label Manager ID to 1');
-            }
-
-            // Update Artist ID to 1 (if needed)
-            if (currentArtist.rows.length > 0 && currentArtist.rows[0].id !== 1) {
-                if (artistId1.rows.length > 0) {
-                    // Move existing ID 1 to a temporary ID first
-                    await client.query(`
-                        UPDATE artist 
-                        SET id = (SELECT COALESCE(MAX(id), 0) + 1 FROM artist)
-                        WHERE id = 1
-                    `);
-                    console.log('🔄 Moved existing Artist ID 1 to temporary ID');
-                }
-
-                await client.query(`
-                    UPDATE artist 
-                    SET id = 1 
-                    WHERE username = $1
-                `, [username]);
-
-                console.log('✅ Updated Artist ID to 1');
-            }
-
-            // Reset sequence to ensure new records get proper IDs
-            await client.query(`
-                SELECT setval('label_manager_id_seq', (SELECT COALESCE(MAX(id), 0) FROM label_manager), true)
-            `);
-
-            await client.query(`
-                SELECT setval('artist_id_seq', (SELECT COALESCE(MAX(id), 0) FROM artist), true)
-            `);
-
-            console.log('🔄 Reset ID sequences');
+            // Reset lại sequence
+            await resetSequence('label_manager');
+            await resetSequence('artist');
+            console.log('🔄 Đã reset lại sequence ID');
 
             // Commit transaction
             await client.query('COMMIT');
-            console.log('✅ Transaction committed successfully');
+            console.log('✅ Đã commit transaction thành công');
 
-            // Verify final state
-            console.log('\n🎯 Final verification:');
+            // Kiểm tra lại lần cuối
+            console.log('\n🎯 Kiểm tra lại lần cuối:');
+            const [finalLabelManager, finalArtist] = await Promise.all([
+                client.query(`SELECT id, username, full_name FROM label_manager WHERE username = $1`, [username]),
+                client.query(`SELECT id, username, full_name FROM artist WHERE username = $1`, [username])
+            ]);
+            printAccountInfo(finalLabelManager, finalArtist);
 
-            const finalLabelManager = await client.query(`
-                SELECT id, username, full_name FROM label_manager WHERE username = $1
-            `, [username]);
-
-            const finalArtist = await client.query(`
-                SELECT id, username, full_name FROM artist WHERE username = $1
-            `, [username]);
-
-            if (finalLabelManager.rows.length > 0) {
-                console.log('📋 Label Manager final:', finalLabelManager.rows[0]);
-            }
-
-            if (finalArtist.rows.length > 0) {
-                console.log('🎤 Artist final:', finalArtist.rows[0]);
-            }
-
-            // Verify submissions still work
-            console.log('\n🔗 Verifying submissions still link correctly:');
+            // Kiểm tra submissions vẫn liên kết đúng
+            console.log('\n🔗 Kiểm tra submissions vẫn liên kết đúng:');
             const verifySubmissions = await client.query(`
                 SELECT s.id, s.title, s.uploader_username, a.id as artist_id, a.full_name
                 FROM submissions s
@@ -170,25 +153,51 @@ async function updateAnkunstudioId() {
                 WHERE s.uploader_username = $1
                 LIMIT 5
             `, [username]);
-
             if (verifySubmissions.rows.length > 0) {
                 console.table(verifySubmissions.rows);
             }
-
             return true;
-
         } catch (error) {
             await client.query('ROLLBACK');
-            console.error('❌ Transaction rolled back due to error:', error.message);
+            console.error('❌ Transaction đã bị rollback do lỗi:', error.message);
             throw error;
         }
-
     } catch (error) {
-        console.error('❌ Error:', error.message);
+        console.error('❌ Lỗi:', error.message);
         return false;
     } finally {
         await client.end();
     }
+}
+
+updateAnkunstudioId().then(success => {
+    if (success) {
+        console.log('\n🎉 ĐÃ HOÀN THÀNH CẬP NHẬT ID ANKUNSTUDIO!');
+        console.log('✅ Cả Quản lý nhãn và Nghệ sĩ đều có ID = 1');
+        console.log('✅ Tất cả submissions vẫn liên kết đúng');
+        console.log('✅ Sequence của database đã được reset lại');
+    } else {
+        console.log('\n❌ CẬP NHẬT ID THẤT BẠI');
+    }
+}).catch(console.error);
+if (verifySubmissions.rows.length > 0) {
+    console.table(verifySubmissions.rows);
+}
+
+return true;
+
+        } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('❌ Transaction rolled back due to error:', error.message);
+    throw error;
+}
+
+    } catch (error) {
+    console.error('❌ Error:', error.message);
+    return false;
+} finally {
+    await client.end();
+}
 }
 
 updateAnkunstudioId().then(success => {

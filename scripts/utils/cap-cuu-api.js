@@ -3,7 +3,7 @@
  * Utility để test API
  * File: scripts/utils/api-helper.js
  */
-import { logToFile } from './env-loader.js';
+import { logToFile } from './env.js';
 
 /**
  * Lấy base URL cho API
