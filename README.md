@@ -2,7 +2,7 @@
 
 # Tác giả: An Kun
 
-# Công cụ: AKs Studio CMS v1.5.0-beta
+# Công cụ: AKs Studio CMS v2.0.0
 
 ## 🎵 Giới thiệu
 
@@ -119,30 +119,6 @@ Password: [App Password]
 - **Footer:** Thông tin công ty và liên kết
 - **Font:** Dosis (cố định, không thay đổi)
 
-## 📁 Cấu trúc thư mục
-
-\`\`\`
-akscms/
-├── app/                    # Next.js App Router
-│   ├── (auth)/            # Authentication pages
-│   ├── api/               # API routes
-│   ├── data/              # Data management page
-│   └── globals.css        # Global styles
-├── components/             # React components
-│   ├── auth/              # Authentication components
-│   ├── modals/            # Modal components
-│   ├── sidebar/           # Sidebar navigation
-│   ├── views/             # Main view components
-│   └── ui/                # UI components (shadcn/ui)
-├── lib/                   # Utilities and data management
-│   ├── email.ts           # Email service
-│   ├── multi-database-service.ts # Database abstraction
-│   ├── (Đã loại bỏ supabase-config.ts)
-│   └── utils.ts           # Utility functions
-├── types/                 # TypeScript type definitions
-├── public/                # Static assets
-└── .env.local             # Environment variables
-\`\`\`
 
 ## 🔧 API và Tích hợp
 
