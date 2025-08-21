@@ -34,7 +34,8 @@
     "lib/next-env.d.ts",
     ".next/types/**/*.ts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "next.confi.mjs"
   ],
   "exclude": [
     "node_modules"
