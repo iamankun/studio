@@ -21,7 +21,7 @@ const DEFAULT_VIDEOS = [
   "CevxZvSJLk8",
   "JGwWNGJdvx8",
   "RgKAFK5djSk",
-  "OPf0YbXqDm0",
+  "OPf0YbXqDm0"
 ];
 
 // No props needed for this component
@@ -58,7 +58,7 @@ export function BackgroundSettingsPanel() {
           setOverlayOpacity(settings.opacity?.toString() ?? "0.5");
           setPreviewImageUrl(settings.imageUrl || "");
         }
-      } catch {}
+      } catch { }
     }
     fetchLatestBackground();
   }, []);

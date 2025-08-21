@@ -428,9 +428,8 @@ Trân trọng,
                 {emailMessages.map((message) => (
                   <Card
                     key={message.id}
-                    className={`cursor-pointer transition-colors ${
-                      message.read ? "bg-gray-700" : "bg-blue-900/30"
-                    } border-gray-600 hover:bg-gray-600`}
+                    className={`cursor-pointer transition-colors ${message.read ? "bg-gray-700" : "bg-blue-900/30"
+                      } border-gray-600 hover:bg-gray-600`}
                     onClick={() => markAsRead(message.id)}
                   >
                     <CardContent className="p-4">
@@ -438,11 +437,10 @@ Trân trọng,
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-1">
                             <span
-                              className={`px-2 py-1 rounded text-xs font-dosis-medium ${
-                                message.type === "sent"
+                              className={`px-2 py-1 rounded text-xs font-dosis-medium ${message.type === "sent"
                                   ? "bg-green-600"
                                   : "bg-blue-600"
-                              }`} // Changed font-dosis-medium to font-medium
+                                }`} // Changed font-dosis-medium to font-medium
                             >
                               {message.type === "sent" ? "Đã gửi" : "Nhận"}
                             </span>
@@ -648,11 +646,10 @@ Trân trọng,
                   <button
                     key={template.id}
                     type="button"
-                    className={`p-3 rounded-lg cursor-pointer transition-colors email-template-card text-left w-full ${
-                      selectedTemplate?.id === template.id
+                    className={`p-3 rounded-lg cursor-pointer transition-colors email-template-card text-left w-full ${selectedTemplate?.id === template.id
                         ? "bg-purple-600"
                         : "bg-gray-700 hover:bg-gray-600"
-                    }`}
+                      }`}
                     aria-pressed={selectedTemplate?.id === template.id}
                     onClick={() => setSelectedTemplate(template)}
                     onKeyDown={(e) => {
@@ -1106,11 +1103,10 @@ Trân trọng,
                     <div className="flex justify-between items-center p-3 bg-gray-700 rounded">
                       <span className="font-dosis">Email Sync</span>
                       <span
-                        className={`px-2 py-1 rounded text-sm font-dosis-medium ${
-                          syncStatus === "Connected"
+                        className={`px-2 py-1 rounded text-sm font-dosis-medium ${syncStatus === "Connected"
                             ? "bg-green-600 text-white"
                             : "bg-yellow-600 text-white"
-                        }`}
+                          }`}
                       >
                         {syncStatus}
                       </span>
@@ -1190,9 +1186,4 @@ Trân trọng,
 }
 
 // Default export for compatibility
-export default EmailCenterView;
-export default EmailCenterView;
-export default EmailCenterView;
-export default EmailCenterView;
-export default EmailCenterView;
 export default EmailCenterView;

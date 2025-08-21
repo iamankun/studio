@@ -52,7 +52,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useAuth } from "@/components/auth-provider";
+import { Auth } from "@/components/auth/login-view";
 import {
   validateImageFile,
   validateAudioFile,
@@ -79,7 +79,7 @@ export default function UploadFormView({
   onSubmissionAdded,
   showModal,
 }: Readonly<UploadFormViewProps>) {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser } = Auth();
 
   // Form state - initialize with safe defaults
   const [fullName, setFullName] = useState("");

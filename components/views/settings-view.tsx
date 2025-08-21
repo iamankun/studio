@@ -27,11 +27,11 @@ import {
   Database,
 } from "lucide-react";
 import { useSystemStatus } from "@/components/system-status-provider";
-import { useAuth } from "@/components/auth-provider";
+import { Auth } from "@/components/auth/login-view";
 import Image from "next/image";
 
 export function SettingsView() {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser } = Auth();
   const { status } = useSystemStatus();
 
   // Email settings removed - managed through environment variables

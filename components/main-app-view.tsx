@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuth } from "@/components/auth-provider";
 import { TopNavBar } from "@/components/top-nav-bar";
 import { DashboardView } from "@/components/views/dashboard-view";
 import UploadFormView from "@/components/views/upload-form-view";
@@ -8,19 +7,18 @@ import { SubmissionsView } from "@/components/views/submissions-view";
 import { MyProfileView } from "@/components/views/my-profile-view";
 import { SettingsView } from "@/components/views/settings-view";
 import { UsersView } from "@/components/views/users-view";
-import { AdminPanelView } from "@/components/labelmanager/admin-panel-view";
+import { AdminPanelView } from "@/components/labelmanager/label-manager";
 import { EmailCenterView } from "@/components/views/email-center-view";
 import { DynamicBackground } from "@/components/dynamic-background";
 import { NotificationSystem } from "@/components/notification-system";
 import { SoundSystem } from "@/components/sound-system";
 import { SystemStatusProvider } from "@/components/system-status-provider";
 import { useState, useEffect, useCallback } from "react";
-import type { Submission, SubmissionStatus } from "@/types/submission";
+import type { Submission } from "@/types/submission";
 import { LogsView } from "@/components/views/logs-view";
 import { logger } from "@/lib/logger";
 
 export default function MainAppView() {
-  const { user } = useAuth();
   const [currentView, setCurrentView] = useState("dashboard");
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [notifications, setNotifications] = useState<

@@ -24,7 +24,7 @@ import {
 import { ThemeToggle } from "./theme-toggle";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { useAuth } from "@/components/auth-provider";
+import { Auth } from "@/components/auth/login-view";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   DropdownMenu,
@@ -41,7 +41,7 @@ interface TopNavBarProps {
 }
 
 export function TopNavBar({ currentView, onViewChange }: TopNavBarProps) {
-  const { user, logout, showLoginModal, showRegisterModal } = useAuth();
+  const { user, logout, showLoginModal, showRegisterModal } = Auth();
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -69,11 +69,11 @@ export function TopNavBar({ currentView, onViewChange }: TopNavBarProps) {
     { id: "settings", label: "Cài đặt", icon: Settings },
     ...(user?.roles?.includes("Label Manager")
       ? [
-          { id: "users", label: "Quản lý Users", icon: Users },
-          { id: "admin", label: "Admin Panel", icon: Shield },
-          { id: "email", label: "Email Center", icon: Mail },
-          { id: "logs", label: "System Logs", icon: FileText },
-        ]
+        { id: "users", label: "Quản lý Users", icon: Users },
+        { id: "admin", label: "Admin Panel", icon: Shield },
+        { id: "email", label: "Email Center", icon: Mail },
+        { id: "logs", label: "System Logs", icon: FileText },
+      ]
       : []),
   ];
 

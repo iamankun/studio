@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { useAuth } from "@/components/auth-provider"
+import { Auth } from "@/components/auth/login-view"
 import Image from "next/image"
 
 interface MyProfileViewProps {
@@ -14,21 +14,21 @@ interface MyProfileViewProps {
 }
 
 export function MyProfileView({ showModal }: MyProfileViewProps) {
-  const { user: currentUser, login } = useAuth();
+  const { user: currentUser, login } = Auth();
 
   const [formData, setFormData] = useState({
-    username: "",
+    userName: "",
     fullName: "",
     email: "",
     bio: "",
-    avatar: "",
+    avatarUrl: "",
     socialLinks: {
-      facebook: "",
-      youtube: "",
-      spotify: "",
-      appleMusic: "",
-      tiktok: "",
-      instagram: "",
+      facebookUrl: "",
+      youtubeUrl: "",
+      spotifyUrl: "",
+      appleMusicUrl: "",
+      tiktokUrl: "",
+      instagramUrl: "",
     },
   });
   // No need to store the File object since we're uploading immediately
@@ -38,21 +38,21 @@ export function MyProfileView({ showModal }: MyProfileViewProps) {
   useEffect(() => {
     if (currentUser) {
       setFormData({
-        username: currentUser.username || "",
+        userName: currentUser.userName || "",
         fullName: currentUser.fullName || "",
         email: currentUser.email || "",
         bio: currentUser.bio || "",
-        avatar: currentUser.avatar || process.env.COMPANY_AVATAR || "/face.png",
+        avatarUrl: currentUser.avatarUrl || process.env.COMPANY_AVATAR || "/face.png",
         socialLinks: {
-          facebook: currentUser.socialLinks?.facebook || "",
-          youtube: currentUser.socialLinks?.youtube || "",
-          spotify: currentUser.socialLinks?.spotify || "",
-          appleMusic: currentUser.socialLinks?.appleMusic || "",
-          tiktok: currentUser.socialLinks?.tiktok || "",
-          instagram: currentUser.socialLinks?.instagram || "",
+          facebookUrl: currentUser.socialLinks?.facebookUrl || "",
+          youtubeUrl: currentUser.socialLinks?.youtubeUrl || "",
+          spotifyUrl: currentUser.socialLinks?.spotifyUrl || "",
+          appleMusicUrl: currentUser.socialLinks?.appleMusicUrl || "",
+          tiktokUrl: currentUser.socialLinks?.tiktokUrl || "",
+          instagramUrl: currentUser.socialLinks?.instagramUrl || "",
         },
       });
-      setAvatarPreview(currentUser.avatar || process.env.COMPANY_AVATAR || "/face.png");
+      setAvatarPreview(currentUser.avatarUrl || process.env.COMPANY_AVATAR || "/face.png");
     }
   }, [currentUser]);
 
@@ -184,11 +184,11 @@ export function MyProfileView({ showModal }: MyProfileViewProps) {
       const updatedProfile = {
         ...formData,
         id: currentUser.id,
-        username: currentUser.username,
+        userName: currentUser.userName,
         role: currentUser.role,
         table: currentUser.role === "Label Manager" ? "label_manager" : "artist",
         // Nếu formData.avatar không có, sử dụng avatarPreview nếu khác với mặc định
-        avatar: formData.avatar || (avatarPreview !== (process.env.COMPANY_AVATAR || "/face.png") ? avatarPreview : currentUser.avatar),
+        avatarUrl: formData.avatarUrl ?? (avatarPreview !== (process.env.COMPANY_AVATAR || "/face.png") ? avatarPreview : currentUser.avatarUrl),
         // Đảm bảo socialLinks chỉ có giá trị không rỗng
         socialLinks: Object.fromEntries(
           Object.entries(formData.socialLinks).filter(([, value]) => value.trim() !== "")
@@ -286,10 +286,10 @@ export function MyProfileView({ showModal }: MyProfileViewProps) {
             <CardContent className="p-6 md:p-10">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <Label htmlFor="username">Tên đăng nhập</Label>
+                  <Label htmlFor="userName">Tên đăng nhập</Label>
                   <Input
-                    id="username"
-                    value={formData.username}
+                    id="userName"
+                    value={formData.userName}
                     readOnly
                     className="rounded-xl mt-1 bg-gray-600 cursor-not-allowed"
                   />
@@ -376,20 +376,23 @@ export function MyProfileView({ showModal }: MyProfileViewProps) {
                           {platform === "appleMusic" ? "Apple Music" : platform}
                         </Label>
                         <div className="flex">
-                          <Input
-                            value={link}
-                            onChange={(e) => handleInputChange(`socialLinks.${platform}`, e.target.value)}
-                            className="rounded-xl rounded-r-none flex-grow"
-                            placeholder={
-                              platform === 'facebook' ? 'iamankun' :
-                                platform === 'youtube' ? '@ankun_music' :
-                                  platform === 'spotify' ? '5NIqsUlRfxkY4d2WjhcmXs' :
-                                    platform === 'appleMusic' ? '1545463988' :
-                                      platform === 'tiktok' ? '@iamankun' :
-                                        platform === 'instagram' ? 'iamankun' :
-                                          `https://${platform}.com/...`
-                            }
-                          />
+                          {(() => {
+                            let placeholder = `https://${platform}.com/...`;
+                            if (platform === 'facebookUrl') placeholder = 'iamankun';
+                            else if (platform === 'youtubeUrl') placeholder = '@ankun_music';
+                            else if (platform === 'spotifyUrl') placeholder = '5NIqsUlRfxkY4d2WjhcmXs';
+                            else if (platform === 'appleMusicUrl') placeholder = '1545463988';
+                            else if (platform === 'tiktokUrl') placeholder = '@iamankun';
+                            else if (platform === 'instagramUrl') placeholder = 'iamankun';
+                            return (
+                              <Input
+                                value={link}
+                                onChange={(e) => handleInputChange(`socialLinks.${platform}`, e.target.value)}
+                                className="rounded-xl rounded-r-none flex-grow"
+                                placeholder={placeholder}
+                              />
+                            );
+                          })()}
                           <Button
                             type="button"
                             variant="outline"
@@ -465,9 +468,9 @@ export function MyProfileView({ showModal }: MyProfileViewProps) {
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent flex items-center justify-center">
                   {formData.fullName || currentUser.fullName}
                   {/* Show verified badge if artist has YouTube, Spotify, or Apple Music */}
-                  {(formData.socialLinks.youtube ||
-                    formData.socialLinks.spotify ||
-                    formData.socialLinks.appleMusic) && (
+                  {(formData.socialLinks.youtubeUrl ||
+                    formData.socialLinks.spotifyUrl ||
+                    formData.socialLinks.appleMusicUrl) && (
                       <span className="ml-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm rounded-full w-6 h-6 flex items-center justify-center shadow-md" title="Nghệ sĩ đã xác thực">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
                           <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />

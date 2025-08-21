@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { AuthProvider } from "@/components/auth-provider"
+import { Auth } from "@/components/auth/login-view"
 import { ThemeProvider } from "@/components/theme-provider"
 import { MainContentLayout } from "@/components/main-content-layout"
 import { DynamicBackground } from "@/components/dynamic-background"
@@ -20,7 +20,7 @@ export function RootLayoutClient({ children, className }: RootLayoutClientProps)
     useEffect(() => {
         // Fix hydration mismatch: đảm bảo chỉ chạy trên client
         setIsClient(true)
-        
+
         // Không cần timer ở đây, để LoadingScreen tự quản lý
         // Timer sẽ được handle bởi LoadingScreen component
     }, [])
@@ -52,13 +52,13 @@ export function RootLayoutClient({ children, className }: RootLayoutClientProps)
                 />
             ) : (
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-                    <AuthProvider>
+                    <Auth>
                         <DynamicBackground />
                         <MainContentLayout>
                             {children}
                         </MainContentLayout>
                         <AiChatButton />
-                    </AuthProvider>
+                    </Auth>
                 </ThemeProvider>
             )}
         </body>

@@ -4,7 +4,7 @@
 "use client"
 import MainAppView from "@/components/main-app-view"
 import FallbackView from "@/components/fallback-view"
-import { AuthProvider } from "@/components/auth-provider"
+import { Auth } from "@/components/auth/login-view"
 import { useEffect, useState } from "react"
 import React from "react"
 
@@ -54,9 +54,9 @@ export default function HomePage() {
   // Otherwise use normal view with error boundary
   return (
     <ErrorBoundary fallback={<FallbackView />}>
-      <AuthProvider>
+      <Auth>
         <MainAppView />
-      </AuthProvider>
+      </Auth>
     </ErrorBoundary>
   );
 }

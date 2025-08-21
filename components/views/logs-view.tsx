@@ -25,10 +25,10 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { logger, type LogEntry, type LogLevel } from "@/lib/logger";
-import { useAuth } from "@/components/auth-provider";
+import { Auth } from "@/components/auth/login-view";
 
 export function LogsView() {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser } = Auth();
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [filteredLogs, setFilteredLogs] = useState<LogEntry[]>([]);
   const [levelFilter, setLevelFilter] = useState<LogLevel | "all">("all");

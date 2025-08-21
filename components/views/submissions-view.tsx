@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SubmissionDetailModal } from "@/components/modals/submission-detail-modal"
-import { useAuth } from "@/components/auth-provider"
+import { Auth } from "@/components/auth/login-view"
 import { AuthorizationService } from "@/lib/authorization-service"
 import type { Submission } from "@/types/submission"
 import { getStatusColor, getStatusText } from "@/types/submission"
@@ -27,7 +27,7 @@ export function SubmissionsView({
   onViewChange,
   submissions,
 }: Readonly<SubmissionsViewProps>) {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser } = Auth();
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("") // Thêm state tìm kiếm
@@ -552,7 +552,7 @@ export function SubmissionsView({
                   </tr>
                 </thead>
                 <tbody className="bg-gray-800 divide-y divide-gray-700">
-                    {filteredDisplaySubmissions.map((submission) => (
+                  {filteredDisplaySubmissions.map((submission) => (
                     <tr key={submission.id} className="hover:bg-gray-750 transition-colors duration-150">
                       <td className="px-4 py-3">
                         <span className="text-xs font-mono text-green-400">{submission.isrc || "N/A"}</span>
@@ -562,28 +562,28 @@ export function SubmissionsView({
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center space-x-2">
-                            <div className="relative h-10 w-10 overflow-hidden rounded-md border border-gray-600">
-                              <Image
-                                src={
-                                  submission.artistName === "Various Artist"
-                                    ? "/placeholders/various-artist.jpg"
-                                    : (submission.imageUrl || "/placeholders/default-cover.jpg")
-                                }
-                                alt="Cover"
-                                width={40}
-                                height={40}
-                                className="h-10 w-10 object-cover"
-                                style={{ objectPosition: 'center' }}
-                                unoptimized={submission.imageUrl?.startsWith("data:")}
-                                onError={(e) => {
-                                  // Fallback to default image if loading fails
-                                  const target = e.target as HTMLImageElement;
-                                  target.src = submission.artistName === "Various Artist"
-                                    ? "/placeholders/various-artist.jpg"
-                                    : "/placeholders/default-cover.jpg";
-                                }}
-                              />
-                            </div>
+                          <div className="relative h-10 w-10 overflow-hidden rounded-md border border-gray-600">
+                            <Image
+                              src={
+                                submission.artistName === "Various Artist"
+                                  ? "/placeholders/various-artist.jpg"
+                                  : (submission.imageUrl || "/placeholders/default-cover.jpg")
+                              }
+                              alt="Cover"
+                              width={40}
+                              height={40}
+                              className="h-10 w-10 object-cover"
+                              style={{ objectPosition: 'center' }}
+                              unoptimized={submission.imageUrl?.startsWith("data:")}
+                              onError={(e) => {
+                                // Fallback to default image if loading fails
+                                const target = e.target as HTMLImageElement;
+                                target.src = submission.artistName === "Various Artist"
+                                  ? "/placeholders/various-artist.jpg"
+                                  : "/placeholders/default-cover.jpg";
+                              }}
+                            />
+                          </div>
                           <Button
                             variant="ghost"
                             size="sm"
@@ -603,51 +603,51 @@ export function SubmissionsView({
                         <p className="text-xs text-gray-500">{submission.audioFilesCount} track(s)</p>
                       </td>
                       <td className="px-4 py-3">
-                          <div className="flex flex-col gap-1">
-                            {/* Nếu là album/ep có nhiều bài, hiển thị từng player */}
-                            {Array.isArray(submission.audioUrls) && submission.audioUrls.length > 0 ? (
-                              submission.audioUrls.map((url, idx) => (
-                                <div key={url} className="flex items-center space-x-2">
-                                  <audio controls src={url} className="h-8" preload="none" style={{ maxWidth: 180 }} />
-                                  <span className="text-xs text-gray-400">Track {idx + 1}</span>
-                                </div>
-                              ))
-                            ) : submission.audioUrl ? (
-                                <div className="flex items-center space-x-2">
-                                  <audio controls src={submission.audioUrl} className="h-8" preload="none" style={{ maxWidth: 180 }} />
-                                  <span className="text-xs text-gray-400">Single</span>
-                                </div>
-                            ) : (
-                                  <span className="text-xs text-gray-500">Không có audio</span>
-                            )}
-                            <div className="flex items-center space-x-2 mt-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDownloadAudio(submission)}
-                                className="p-1"
-                                title="Tải xuống audio"
-                              >
-                                <Download className="h-4 w-4" />
-                              </Button>
+                        <div className="flex flex-col gap-1">
+                          {/* Nếu là album/ep có nhiều bài, hiển thị từng player */}
+                          {Array.isArray(submission.audioUrls) && submission.audioUrls.length > 0 ? (
+                            submission.audioUrls.map((url, idx) => (
+                              <div key={url} className="flex items-center space-x-2">
+                                <audio controls src={url} className="h-8" preload="none" style={{ maxWidth: 180 }} />
+                                <span className="text-xs text-gray-400">Track {idx + 1}</span>
+                              </div>
+                            ))
+                          ) : submission.audioUrl ? (
+                            <div className="flex items-center space-x-2">
+                              <audio controls src={submission.audioUrl} className="h-8" preload="none" style={{ maxWidth: 180 }} />
+                              <span className="text-xs text-gray-400">Single</span>
                             </div>
+                          ) : (
+                            <span className="text-xs text-gray-500">Không có audio</span>
+                          )}
+                          <div className="flex items-center space-x-2 mt-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDownloadAudio(submission)}
+                              className="p-1"
+                              title="Tải xuống audio"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                          <span className="text-sm text-gray-400">{formatDate(submission.submissionDate)}</span>
+                        <span className="text-sm text-gray-400">{formatDate(submission.submissionDate)}</span>
                       </td>
                       <td className="px-4 py-3">
                         <span className="text-sm text-gray-400">
-                            {submission.releaseDate ? formatDate(submission.releaseDate) : "N/A"}
+                          {submission.releaseDate ? formatDate(submission.releaseDate) : "N/A"}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                          <span className={`status-badge ${getStatusColor(submission.status)}`}>
-                            {getStatusText(submission.status)}
-                          </span>
+                        <span className={`status-badge ${getStatusColor(submission.status)}`}>
+                          {getStatusText(submission.status)}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-sm space-x-2 whitespace-nowrap">
-                          {/* View button - everyone can view */}
+                        {/* View button - everyone can view */}
                         <Button
                           variant="outline"
                           size="sm"
@@ -656,65 +656,65 @@ export function SubmissionsView({
                         >
                           <Eye className="h-4 w-4 mr-1" />
                           Xem
-                          </Button>                        {/* Edit button - only for artists editing their own submissions in pending status, or label managers */}
-                          {(AuthorizationService.canEditSubmission(currentUser, {
-                            id: submission.id,
-                            track_title: submission.songTitle,
-                            artist_name: submission.artistName,
-                            user_id: submission.userId,
-                            genre: submission.mainCategory || 'pop',
-                            submission_date: submission.submissionDate,
-                            status: 'pending' // Default to pending for authorization check
-                          }).allowed) && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleEditSubmission(submission)}
-                                className="text-xs text-blue-400 hover:text-blue-300"
-                              >
-                                <Edit className="h-4 w-4 mr-1" />
-                                Sửa
-                              </Button>
-                            )}
-
-                          {/* Delete button - only for label managers */}
-                          {AuthorizationService.canDeleteSubmission(currentUser).allowed && (
+                        </Button>                        {/* Edit button - only for artists editing their own submissions in pending status, or label managers */}
+                        {(AuthorizationService.canEditSubmission(currentUser, {
+                          id: submission.id,
+                          track_title: submission.songTitle,
+                          artist_name: submission.artistName,
+                          user_id: submission.userId,
+                          genre: submission.mainCategory || 'pop',
+                          submission_date: submission.submissionDate,
+                          status: 'pending' // Default to pending for authorization check
+                        }).allowed) && (
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleDeleteSubmission(submission.id)}
-                              className="text-xs text-red-400 hover:text-red-300"
+                              onClick={() => handleEditSubmission(submission)}
+                              className="text-xs text-blue-400 hover:text-blue-300"
                             >
-                              <Trash2 className="h-4 w-4 mr-1" />
-                              Xóa
+                              <Edit className="h-4 w-4 mr-1" />
+                              Sửa
                             </Button>
                           )}
 
-                          {/* Approve/Reject buttons - only for label managers */}
-                          {AuthorizationService.canApproveRejectSubmission(currentUser).allowed && (
-                            <>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleApproveSubmission(submission.id)}
-                                className="text-xs text-green-400 hover:text-green-300"
-                              >
-                                <CheckCircle className="h-4 w-4 mr-1" />
-                                Duyệt
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleRejectSubmission(submission.id)}
-                                className="text-xs text-red-400 hover:text-red-300"
-                              >
-                                <XCircle className="h-4 w-4 mr-1" />
-                                Hủy
-                              </Button>
-                            </>
-                          )}
+                        {/* Delete button - only for label managers */}
+                        {AuthorizationService.canDeleteSubmission(currentUser).allowed && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteSubmission(submission.id)}
+                            className="text-xs text-red-400 hover:text-red-300"
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            Xóa
+                          </Button>
+                        )}
 
-                          {/* Status selector for label managers */}
+                        {/* Approve/Reject buttons - only for label managers */}
+                        {AuthorizationService.canApproveRejectSubmission(currentUser).allowed && (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleApproveSubmission(submission.id)}
+                              className="text-xs text-green-400 hover:text-green-300"
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Duyệt
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleRejectSubmission(submission.id)}
+                              className="text-xs text-red-400 hover:text-red-300"
+                            >
+                              <XCircle className="h-4 w-4 mr-1" />
+                              Hủy
+                            </Button>
+                          </>
+                        )}
+
+                        {/* Status selector for label managers */}
                         {currentUser.role === "Label Manager" && (
                           <Select
                             value={submission.status}
