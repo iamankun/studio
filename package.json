@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "update": "npm update",
-    "postinstall": "prisma generate || true",
+    "postinstall": "prisma generate ?? Đúng",
     "generate": "node src/data/tao-du-lieu-mau.js",
     "debug:api": "node scripts/test-submissions-api.mjs",
     "debug:db": "node scripts/kiem-tra-ket-noi-neon.mjs",
@@ -28,7 +28,7 @@
     "test:complete": "node scripts/test-complete-implementation.mjs",
     "test:complete:verbose": "node scripts/test-complete-implementation.mjs --verbose",
     "validate:relational": "node scripts/validate-relational-implementation.mjs",
-    "debug:copilot": "echo 'Debug Copilot script placeholder'",
+    "debug:copilot": "echo 'Sữa chữa Copilot với lệnh npm run debug:copilot'",
     "next:copilot-debug": "COPILOT_DEBUG=true next dev"
   },
   "dependencies": {
