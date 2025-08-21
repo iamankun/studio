@@ -1,35 +1,30 @@
+// Định nghĩa quyền cho các role
+type Role = "Admin" | "Label Manager" | "Artist" | "User";
+
+interface RolePermissions {
+  read: boolean;
+  write: boolean;
+}
+
+const rolePermissions: Record<Role, RolePermissions> = {
+  Admin: { read: true, write: true },
+  "Label Manager": { read: true, write: true },
+  Artist: { read: true, write: false },
+  User: { read: true, write: false },
+};
 // Tôi là An Kun
 // Hỗ trợ dự án, Copilot, Gemini
 // Tác giả kiêm xuất bản bởi An Kun Studio Digital Music
 
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Shield,
-  Database,
-  Users,
-  Settings,
-  Plus,
-  Edit,
-  Trash2,
-  RefreshCw,
-} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Auth } from "@/components/auth/login-view";
 import { DebugTools } from "@/components/debug-tools";
-import { useAuth } from "@/components/auth-provider";
+// Sử dụng Auth thực tế từ hệ thống
 import { useState, useEffect } from "react";
-import type { User } from "@/types/user";
-import type { Submission } from "@/types/submission";
 import { logger } from "@/lib/logger";
+import { Submission } from "@/types/submission";
 
 interface AdminPanelViewProps {
   readonly showModal: (
@@ -51,13 +46,15 @@ interface SystemStats {
 }
 
 export function AdminPanelView({ showModal }: AdminPanelViewProps) {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser } = Auth();
+  // Kiểm tra quyền của user hiện tại
+  const permissions = currentUser?.role ? rolePermissions[currentUser.role as Role] : { read: false, write: false };
   const [stats, setStats] = useState<SystemStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<
     "overview" | "users" | "submissions"
   >("overview");
-  const [users, setUsers] = useState<User[]>([]);
+  // Removed unused users state
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [submissionsLoading, setSubmissionsLoading] = useState(false);
@@ -68,13 +65,7 @@ export function AdminPanelView({ showModal }: AdminPanelViewProps) {
         const response = await fetch("/api/admin/stats");
         const data = await response.json();
 
-        if (data.success) {
-          setStats(data.data);
-        } else {
-          console.error("Failed to fetch admin stats:", data.error);
-        }
-      } catch (error) {
-        console.error("Error fetching admin stats:", error);
+        // Removed unused states
       } finally {
         setLoading(false);
       }
@@ -98,7 +89,8 @@ export function AdminPanelView({ showModal }: AdminPanelViewProps) {
     );
   }
 
-  if (currentUser.role !== "Label Manager") {
+  // Chỉ cho phép Admin hoặc Label Manager truy cập
+  if (!(currentUser.role === "Admin" || currentUser.role === "Label Manager")) {
     logger.warn("AdminPanelView: Access denied for non-label manager", {
       component: "AdminPanelView",
       userId: currentUser.id,
@@ -125,10 +117,16 @@ export function AdminPanelView({ showModal }: AdminPanelViewProps) {
   logger.info("AdminPanelView: Component rendered", {
     component: "AdminPanelView",
     userId: currentUser.id,
+    role: currentUser.role,
+    permissions,
   });
 
   return (
     <div className="p-6">
+      {/* Hiển thị quyền của user */}
+      <div className="mb-4 text-sm text-gray-600">
+        Quyền của bạn: {permissions.read ? "Đọc" : "Không đọc"} / {permissions.write ? "Ghi" : "Không ghi"}
+      </div>
       <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
         <Shield className="mr-3 text-purple-400" />
         Admin Panel
@@ -145,76 +143,73 @@ export function AdminPanelView({ showModal }: AdminPanelViewProps) {
           <CardContent>
             <div className="text-center py-4">
               <div
-                className={`w-2 h-2 rounded-full mx-auto mb-2 ${
-                  loading
-                    ? "bg-gray-400"
-                    : stats?.database.connected
-                      ? "bg-green-500"
-                      : "bg-red-500"
-                }`}
+                className={`w-2 h-2 rounded-full mx-auto mb-2 ${loading
+                  ? "bg-gray-400"
+                  : stats?.database.connected
+                    ? "bg-green-500"
+                    : "bg-red-500"
+                  }`}
               ></div>
               <p
-                className={`text-sm ${
-                  loading
-                    ? "text-gray-600"
-                    : stats?.database.connected
-                      ? "text-green-600"
-                      : "text-red-600"
-                }`}
+                className={`text-sm ${loading
+                  ? "text-gray-600"
+                  : stats?.database.connected
+                    ? "text-green-600"
+                    : "text-red-600"
+                  }`}
               >
                 {loading
                   ? "Checking..."
                   : stats?.database.connected
                     ? `Connected (${stats.database.type})`
-                    : "Disconnected"}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+              {(() => {
+                  let statusColor = "bg-gray-400";
+                  if (!loading) {
+                    statusColor = stats?.database.connected ? "bg-green-500" : "bg-red-500";
+                  }
+                  let textColor = "text-gray-600";
+                  if (!loading) {
+                    textColor = stats?.database.connected ? "text-green-600" : "text-red-600";
+                  }
+                  let statusText = "Checking...";
+                  if (!loading) {
+                    statusText = stats?.database.connected
+                      ? `Connected (${stats.database.type})`
+                      : "Disconnected";
+                  }
+                  return (
+                    <>
+                      <div className={`w-2 h-2 rounded-full mx-auto mb-2 ${statusColor}`}></div>
+                      <p className={`text-sm ${textColor}`}>{statusText}</p>
+                    </>
+                  );
+                })()}
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Users className="mr-2" />
-              Users
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-4">
-              <div className="text-2xl font-bold">
-                {loading ? "..." : (stats?.users.totalArtists ?? 0)}
-              </div>
-              <p className="text-sm text-gray-600">Active Artists</p>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Settings className="mr-2" />
+                      System
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center py-4">
+                      <div className="text-lg font-bold">
+                        {loading ? "..." : (stats?.system.version ?? "Unknown")}
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        {loading
+                          ? "Loading..."
+                          : (stats?.system.environment ?? "Unknown")}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
             </div>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Settings className="mr-2" />
-              System
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-4">
-              <div className="text-lg font-bold">
-                {loading ? "..." : (stats?.system.version ?? "Unknown")}
-              </div>
-              <p className="text-sm text-gray-600">
-                {loading
-                  ? "Loading..."
-                  : (stats?.system.environment ?? "Unknown")}
-              </p>
+            <div className="mb-8">
+              <DebugTools />
             </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="mb-8">
-        <DebugTools />
-      </div>
-    </div>
-  );
-}
+          </div>
+          );
 }

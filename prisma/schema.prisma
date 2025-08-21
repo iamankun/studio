@@ -1,6 +1,3 @@
-prisma
-// File: prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -88,6 +85,8 @@ model Label {
   users         User[]       @relation("UserLabel")
   submissions   Submission[]
   videos        Video[]
+  files         File[]       @relation("FileLabelFiles") // Opposite relation for File.label
+  signatureDocuments SignatureDocument[] @relation("LabelSignatureDocuments") // Opposite relation for SignatureDocument.label
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 }
@@ -123,6 +122,7 @@ model Submission {
   comments        SubmissionComment[]
   approvals       SubmissionApproval[]
   signatureDocument SignatureDocument? @relation("SubmissionSignature")
+  images          Image[]   @relation("SubmissionSignatures") // Opposite relation for Image.submission
   creatorUID    String // Đổi tên trường khóa ngoại
   creator        User   @relation("SubmissionCreator", fields: [creatorUID], references: [UID]) // Cập nhật references
 
