@@ -1,7 +1,6 @@
 // Tôi là An Kun
 "use server";
 // Dùng Prisma.schema
-import { ensureDefaultAdminUser } from "@/lib/server-actions";
 
 // Định nghĩa một interface cho dữ liệu đầu vào của postData
 interface SongInputData {
@@ -26,5 +25,5 @@ export async function getData() {
 
 export async function postData(data: SongInputData) {
   // Tôi là An Kun
-  await ensureDefaultAdminUser()
+  console.log("Processing song data:", data);
 }

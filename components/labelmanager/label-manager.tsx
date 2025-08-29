@@ -1,3 +1,9 @@
+"use client";
+
+// Tôi là An Kun
+// Hỗ trợ dự án, Copilot, Gemini
+// Tác giả kiêm xuất bản bởi An Kun Studio Digital Music
+
 // Định nghĩa quyền cho các role
 type Role = "Admin" | "Label Manager" | "Artist" | "User";
 
@@ -12,15 +18,11 @@ const rolePermissions: Record<Role, RolePermissions> = {
   Artist: { read: true, write: false },
   User: { read: true, write: false },
 };
-// Tôi là An Kun
-// Hỗ trợ dự án, Copilot, Gemini
-// Tác giả kiêm xuất bản bởi An Kun Studio Digital Music
-
-"use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Auth } from "@/components/auth/login-view";
 import { DebugTools } from "@/components/debug-tools";
+import { Shield, Database, Settings } from "lucide-react";
 // Sử dụng Auth thực tế từ hệ thống
 import { useState, useEffect } from "react";
 import { logger } from "@/lib/logger";
@@ -162,54 +164,12 @@ export function AdminPanelView({ showModal }: AdminPanelViewProps) {
                   ? "Checking..."
                   : stats?.database.connected
                     ? `Connected (${stats.database.type})`
-              {(() => {
-                  let statusColor = "bg-gray-400";
-                  if (!loading) {
-                    statusColor = stats?.database.connected ? "bg-green-500" : "bg-red-500";
-                  }
-                  let textColor = "text-gray-600";
-                  if (!loading) {
-                    textColor = stats?.database.connected ? "text-green-600" : "text-red-600";
-                  }
-                  let statusText = "Checking...";
-                  if (!loading) {
-                    statusText = stats?.database.connected
-                      ? `Connected (${stats.database.type})`
-                      : "Disconnected";
-                  }
-                  return (
-                    <>
-                      <div className={`w-2 h-2 rounded-full mx-auto mb-2 ${statusColor}`}></div>
-                      <p className={`text-sm ${textColor}`}>{statusText}</p>
-                    </>
-                  );
-                })()}
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Settings className="mr-2" />
-                      System
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center py-4">
-                      <div className="text-lg font-bold">
-                        {loading ? "..." : (stats?.system.version ?? "Unknown")}
-                      </div>
-                      <p className="text-sm text-gray-600">
-                        {loading
-                          ? "Loading..."
-                          : (stats?.system.environment ?? "Unknown")}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                    : "Disconnected"}
+              </p>
             </div>
-
-            <div className="mb-8">
-              <DebugTools />
-            </div>
-          </div>
-          );
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
 }

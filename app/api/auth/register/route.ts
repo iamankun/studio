@@ -18,12 +18,12 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await multiDB.createUser({
-      username,
+      userName: username,
       email,
       password,
       fullName: full_name,
       role: "Artist",
-    })
+    } as any)
 
     if (result.success) {
       console.log("✅ User registered successfully via:", result.source)

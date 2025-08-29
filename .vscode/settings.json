@@ -1,4 +1,7 @@
 {
     "git.ignoreLimitWarning": true,
-    "chat.mcp.autostart": "newAndOutdated"
+    "chat.mcp.autostart": "newAndOutdated",
+    "editor.defaultFormatter": "amazonwebservices.amazon-q-vscode",
+    "editor.formatOnSave": true,
+    "editor.mouseWheelZoom": true
 }

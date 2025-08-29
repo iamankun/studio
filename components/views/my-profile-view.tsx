@@ -416,7 +416,7 @@ export function MyProfileView({ showModal }: MyProfileViewProps) {
                       onClick={() => showModal("Profile Test", "Profile notification with musical sound!", "success")}
                       className="text-sm"
                     >
-                      🎵 Success Sound
+                      🎵 Âm thanh hoàn thành
                     </Button>
                     <Button
                       type="button"
@@ -424,7 +424,7 @@ export function MyProfileView({ showModal }: MyProfileViewProps) {
                       onClick={() => showModal("Error Test", "Error notification with alert sound!", "error")}
                       className="text-sm"
                     >
-                      🚨 Error Sound
+                      🚨 Âm thanh lỗi
                     </Button>
                   </div>
                 </div>
@@ -520,12 +520,12 @@ export function MyProfileView({ showModal }: MyProfileViewProps) {
                     <Button
                       type="button"
                       variant="outline"
-                      size="sm"
+                      size="sx"
                       className="bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/40 hover:to-red-600/40 text-red-400"
                       onClick={() => {
                         // In a real app, this would call an API to remove verification
                         // For demo purposes, just show a modal
-                        showModal("Hủy Tích Xanh", "Đã hủy tích xanh của nghệ sĩ thành công!", "success")
+                        showModal("Hủy tích xanh", "Đã hủy tích xanh của nghệ sĩ thành công!", "success")
                       }}
                     >
                       <AwesomeIcon icon="fa-times-circle" solid className="mr-2" />

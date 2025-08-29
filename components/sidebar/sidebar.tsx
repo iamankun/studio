@@ -38,15 +38,15 @@ export function Sidebar({ currentView, onViewChange, user, onLogout }: SidebarPr
   const debugStyle = { border: '3px solid red', minHeight: '100vh', background: '#18181b' };
 
   const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: Home },
-    { id: "submissions", label: "Submissions", icon: FileText },
+    { id: "dashboard", label: "Bảng quản lí", icon: Home },
+    { id: "submissions", label: "Tác phẩm", icon: FileText },
     { id: "profile", label: "Hồ sơ", icon: User },
     { id: "settings", label: "Cài đặt", icon: Settings },
-    ...(user?.role === "Label Manager" ? [
-      { id: "users", label: "Quản lý Users", icon: Users },
-      { id: "admin", label: "Admin Panel", icon: Shield },
-      { id: "email", label: "Email Center", icon: Mail },
-      { id: "logs", label: "System Logs", icon: FileText }
+    ...(user?.roles?.includes("Label Manager") ? [
+      { id: "users", label: "Quản lý thành viên", icon: Users },
+      { id: "admin", label: "Bảng quản lí Admin", icon: Shield },
+      { id: "email", label: "Trung tâm Email", icon: Mail },
+      { id: "logs", label: "Nhật ký hệ thống", icon: FileText }
     ] : [])
   ]
 

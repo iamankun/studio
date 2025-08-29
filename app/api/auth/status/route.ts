@@ -8,7 +8,7 @@ export async function GET() {
     const user = session.user;
 
     if (user) {
-      logger.info('User status checked: logged in', { userId: user.id });
+      logger.info('User status checked: logged in', { userId: (user as any).UID });
       return NextResponse.json({ isLoggedIn: true, user });
     } else {
       logger.info('User status checked: not logged in');

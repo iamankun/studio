@@ -68,13 +68,13 @@
 @layer base {
   * {
     border-color: hsl(var(--border));
-    font-family: url(./font/Dosis-VariableFont_wght.ttf), "Dosis", system-ui, sans-serif;
+    font-family: "Dosis", system-ui, sans-serif;
   }
 
   body {
     background: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: url(./font/Dosis-VariableFont_wght.ttf), "Dosis", system-ui, sans-serif;
+    font-family: "Dosis", system-ui, sans-serif;
     overflow-x: hidden;
     overflow-y: auto;
     height: 100%;
@@ -89,7 +89,7 @@
 
 /* Dosis font classes */
 .font-dosis {
-  font-family: url(./font/Dosis-VariableFont_wght.ttf), system-ui, sans-serif;
+  font-family: "Dosis", system-ui, sans-serif;
   letter-spacing: 0.025em;
 }
 

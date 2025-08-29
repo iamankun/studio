@@ -191,3 +191,11 @@ export function getStatusText(status: PrismaSubmissionStatus): string {
     default: return "Không xác định";
   }
 }
+
+// Convert Submission to SimpleSubmission
+export function toSimpleSubmission(submission: Submission): SimpleSubmission {
+  return {
+    id: submission.id?.title || '',
+    title: submission.id?.title || 'Untitled'
+  };
+}

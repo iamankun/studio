@@ -12,8 +12,8 @@ export async function POST(request: NextRequest) {
     const session = await getSession()
     let userId = null
 
-    if (session?.user?.id) {
-      userId = session.user.id
+    if (session?.user?.UID) {
+      userId = session.user.UID
     }
 
     // Try to create activity log entry in database with fallback
@@ -95,8 +95,8 @@ export async function GET(request: NextRequest) {
       include: {
         user: {
           select: {
-            id: true,
-            name: true,
+            UID: true,
+            fullName: true,
             email: true
           }
         }

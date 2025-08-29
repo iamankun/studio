@@ -28,9 +28,9 @@ export async function GET() {
             content: {
                 totalSubmissions: submissionsResult.success ? submissionsResult.data?.length : 0,
                 pendingSubmissions: submissionsResult.success ?
-                    submissionsResult.data?.filter(s => s.status === 'pending').length : 0,
+                    submissionsResult.data?.filter((s: any) => s.status === 'pending').length : 0,
                 approvedSubmissions: submissionsResult.success ?
-                    submissionsResult.data?.filter(s => s.status === 'approved').length : 0
+                    submissionsResult.data?.filter((s: any) => s.status === 'approved').length : 0
             },
             system: {
                 uptime: process.uptime(),

@@ -28,7 +28,7 @@ export async function GET() {
             }
         });
 
-        const resultData: User[] = artists.map(artist => ({
+        const resultData: User[] = artists.map((artist: any) => ({
             id: artist.id,
             username: artist.name ?? artist.email,
             email: artist.email,

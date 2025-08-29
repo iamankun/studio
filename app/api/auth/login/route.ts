@@ -27,9 +27,9 @@ export async function POST(request: NextRequest) {
     
     if (username === adminUsername && password === adminPassword) {
       user = {
-        id: "1",
-        username: adminUsername,
-        role: "Label Manager" as const,
+        UID: "1",
+        userName: adminUsername,
+        roles: ["LABEL_MANAGER"],
         fullName: process.env.COMPANY_NAME || "An Kun Studio Digital Music Distribution",
         email: process.env.COMPANY_EMAIL || "admin@ankun.dev",
         avatar: process.env.COMPANY_AVATAR || "/face.png",
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
         },
         createdAt: new Date().toISOString(),
         isrcCodePrefix: "VNA2P",
-      }
+      } as any
     } else {
       // Try database authentication
       user = await authenticateUserWithDatabase(username, password)

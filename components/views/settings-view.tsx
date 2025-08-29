@@ -27,11 +27,11 @@ import {
   Database,
 } from "lucide-react";
 import { useSystemStatus } from "@/components/system-status-provider";
-import { Auth } from "@/components/auth/login-view";
+import { useAuth } from "@/components/auth/login-view";
 import Image from "next/image";
 
 export function SettingsView() {
-  const { user: currentUser } = Auth();
+  const { currentUser } = useAuth();
   const { status } = useSystemStatus();
 
   // Email settings removed - managed through environment variables
@@ -43,7 +43,7 @@ export function SettingsView() {
     version: process.env.COMPANY_VERSION ?? "Chưa có thông tin phiên bản",
   });
 
-  const [appMode, setAppMode] = useState("demo"); // demo or production
+  const [appMode, setAppMode] = useState("production");
 
   const [backgroundSettings, setBackgroundSettings] = useState({
     type: "gradient",

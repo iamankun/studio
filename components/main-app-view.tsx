@@ -17,8 +17,10 @@ import { useState, useEffect, useCallback } from "react";
 import type { Submission } from "@/types/submission";
 import { LogsView } from "@/components/views/logs-view";
 import { logger } from "@/lib/logger";
+import { useUser } from "@/hooks/use-user";
 
 export default function MainAppView() {
+  const { user } = useUser();
   const [currentView, setCurrentView] = useState("dashboard");
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [notifications, setNotifications] = useState<

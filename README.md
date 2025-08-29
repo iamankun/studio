@@ -1,18 +1,18 @@
-# An Kun Studio - Digital Music Distribution
+ # An Kun Studio - Digital Music Distribution
 
-# Tác giả: An Kun
+##  Tác giả: An Kun
 
-# Công cụ: AKs Studio CMS v2.0.0
+##  Công cụ: AKs Studio CMS v2.0.0
 
 ## 🎵 Giới thiệu
 
 AKs Studio là nền tảng quản lý và phát hành âm nhạc chuyên nghiệp, được thiết kế đặc biệt cho các label và nghệ sĩ độc lập. Hệ thống cung cấp đầy đủ các tính năng quản lý metadata và phân phối trên các nền tảng streaming.
 
-## � Tài liệu
+## Tài liệu
 
 Tất cả tài liệu hướng dẫn của dự án đã được tổ chức trong thư mục [docs](./docs/README.md).
 
-## �🚀 Tính năng chính
+## 🚀 Tính năng chính
 
 ### Cho Label Manager
 

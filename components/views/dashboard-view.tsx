@@ -79,6 +79,8 @@ export function DashboardView({ onViewChange }: { readonly onViewChange?: (view:
         fetchStats()
     }, [])
 
+    return (
+    <div className="p-6">
     {/* Welcome Header - Simplified */ }
     <div className="mb-8 bg-card rounded-lg shadow-sm p-6 border">
         <div className="text-center">
@@ -217,6 +219,7 @@ export function DashboardView({ onViewChange }: { readonly onViewChange?: (view:
                 <APIDebugger />
             </CardContent>
         </Card>
+    </div>
     </div>
     )
 }

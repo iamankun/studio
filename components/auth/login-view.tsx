@@ -164,7 +164,6 @@ export function LoginView({
     // Giả lập lấy profile, thực tế sẽ lấy từ API
     // Ví dụ: nếu username hợp lệ thì lấy avatarUrl
     if (username && username.length >= 5) {
-      // TODO Replace with actual API call to fetch avatarUrl
       setUserProfile({
         avatarUrl: `/api/images/avatar?userId=${username}`,
       });
@@ -408,3 +407,6 @@ export function LoginView({
     </div>
   );
 }
+
+// Export Auth component for backward compatibility
+export const Auth = LoginView;

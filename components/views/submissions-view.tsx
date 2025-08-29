@@ -27,7 +27,7 @@ export function SubmissionsView({
   onViewChange,
   submissions,
 }: Readonly<SubmissionsViewProps>) {
-  const { user: currentUser } = Auth();
+  const { currentUser } = useAuth();
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("") // Thêm state tìm kiếm
@@ -45,7 +45,7 @@ export function SubmissionsView({
 
   const displaySubmissions =
     viewType === "mySubmissions"
-      ? submissions.filter((sub) => sub.uploaderUsername === currentUser.username)
+      ? submissions.filter((sub) => sub.uploaderUserName === currentUser.userName)
       : submissions
 
   // Lọc submissions theo từ khóa tìm kiếm
@@ -60,11 +60,11 @@ export function SubmissionsView({
     };
 
     return (
-      safeIncludes(submission.artistName) ||
-      safeIncludes(submission.songTitle) ||
-      safeIncludes(submission.albumName) ||
+      safeIncludes(submission.artist) ||
+      safeIncludes(submission.title) ||
+      safeIncludes(submission.album) ||
       safeIncludes(submission.id) ||
-      safeIncludes(submission.isrc) ||
+      safeIncludes(submission.ISRC) ||
       safeIncludes(submission.status)
     );
   });
