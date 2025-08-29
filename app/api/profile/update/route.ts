@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
                 bio,
                 avatar: avatar,
                 socialLinks: socialLinks
-            });
+            } as any);
             updateSuccess = result.success;
             updatedUser = result.data;
         }
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
                 bio,
                 avatar: avatar,
                 socialLinks: socialLinks
-            });
+            } as any);
             updateSuccess = result.success;
             updatedUser = result.data;
         }

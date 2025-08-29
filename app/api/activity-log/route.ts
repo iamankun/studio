@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
             userAgent: request.headers.get('user-agent'),
             ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
           },
-          userId: userId
+          userUID: userId
         }
       })
 

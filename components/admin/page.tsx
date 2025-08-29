@@ -14,7 +14,7 @@ import { cn } from "src/lib/utils";
 type ProfileCardProps = {
   name: string;
   role: string;
-  status: "online" | "offline" | "away";
+  status: "Trực tuyến" | "Ngoại tuyến" | "Đã lâu";
   avatar: string;
   tags?: string[];
   isVerified?: boolean;
@@ -25,7 +25,7 @@ const profiles: ProfileCardProps[] = [
   {
     name: "Alex Thompson",
     role: "UI/UX Designer",
-    status: "online",
+    status: "Trực tuyến",
     avatar: "/memoji-alex.png",
     tags: ["Premium"],
     isVerified: true,
@@ -34,7 +34,7 @@ const profiles: ProfileCardProps[] = [
   {
     name: "Michael Chen",
     role: "Frontend Developer",
-    status: "online",
+    status: "Trực tuyến",
     avatar: "/memoji-michael.png",
     tags: ["Guest"],
     isVerified: false,
@@ -43,7 +43,7 @@ const profiles: ProfileCardProps[] = [
   {
     name: "Emily Wilson",
     role: "Product Manager",
-    status: "away",
+    status: "Đã lâu",
     avatar: "/memoji-emily.png",
     tags: ["Premium"],
     isVerified: true,
@@ -52,7 +52,7 @@ const profiles: ProfileCardProps[] = [
   {
     name: "David Rodriguez",
     role: "Marketing Specialist",
-    status: "offline",
+    status: "Ngoại tuyến",
     avatar: "/memoji-david.png",
     tags: ["Guest"],
     isVerified: false,
@@ -88,10 +88,10 @@ export default function ProfileCardGrid() {
           </div>
           <div className="flex items-center gap-3">
             <button className="rounded-full bg-white p-3 shadow-[12px_12px_24px_rgba(0,0,0,0.15),-12px_-12px_24px_rgba(255,255,255,0.9)] transition-all hover:shadow-[2px_2px_5px_rgba(0,0,0,0.05),-2px_-2px_5px_rgba(255,255,255,0.8)]">
-              <Bell className="h-5 w-5 text-gray-600" />
+              <Bell className="size-5 text-gray-600" />
             </button>
             <button className="rounded-full bg-white p-3 shadow-[12px_12px_24px_rgba(0,0,0,0.15),-12px_-12px_24px_rgba(255,255,255,0.9)] transition-all hover:shadow-[2px_2px_5px_rgba(0,0,0,0.05),-2px_-2px_5px_rgba(255,255,255,0.8)]">
-              <Search className="h-5 w-5 text-gray-600" />
+              <Search className="size-5 text-gray-600" />
             </button>
           </div>
         </div>
@@ -144,18 +144,15 @@ export default function ProfileCardGrid() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredProfiles.map((profile, index) => (
-            <ProfileCard key={index} {...profile} />
+          {filteredProfiles.map((profile) => (
+            <ProfileCard key={profile.name} {...profile} />
           ))}
           <AddProfileCard />
         </div>
       </div>
     </div>
   );
-}
-
-// TODO: Add alt attribute to image
-function ProfileCard({
+} function ProfileCard({
   name,
   role,
   status,
@@ -163,28 +160,36 @@ function ProfileCard({
   tags = [],
   isVerified,
   followers,
-}: ProfileCardProps) {
+}: Readonly<ProfileCardProps>) {
   return (
     <div className="group relative overflow-hidden rounded-3xl bg-white p-6 shadow-[12px_12px_24px_rgba(0,0,0,0.15),-12px_-12px_24px_rgba(255,255,255,0.9)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[6px_6px_12px_rgba(0,0,0,0.1),-6px_-6px_12px_rgba(255,255,255,0.8)]">
       {/* Status indicator */}
       <div className="absolute right-4 top-4">
-        <div
-          className={cn(
-            "h-3 w-3 rounded-full border border-white",
-            status === "online"
-              ? "bg-green-500"
-              : status === "away"
-                ? "bg-amber-500"
-                : "bg-gray-400"
-          )}
-        ></div>
+        {(() => {
+          let statusColor = "bg-green-500";
+          if (status === "Trực tuyến") {
+            statusColor = "bg-red-400";
+          } else if (status === "Đã lâu") {
+            statusColor = "bg-yellow-500";
+          } else if (status === "Ngoại tuyến") {
+            statusColor = "bg-gray-400";
+          }
+          return (
+            <div
+              className={cn(
+                "h-3 w-3 rounded-full border border-white",
+                statusColor
+              )}
+            ></div>
+          );
+        })()}
       </div>
 
       {/* Verified badge */}
       {isVerified && (
         <div className="absolute right-4 top-10">
           <div className="rounded-full bg-blue-500 p-1 shadow-[2px_2px_4px_rgba(0,0,0,0.1)]">
-            <Star className="h-3 w-3 fill-white text-white" />
+            <Star className="size-3 fill-white text-white" />
           </div>
         </div>
       )}
@@ -192,11 +197,11 @@ function ProfileCard({
       {/* Profile Photo */}
       <div className="mb-4 flex justify-center">
         <div className="relative">
-          <div className="h-28 w-28 overflow-hidden rounded-full bg-white p-1 shadow-[inset_6px_6px_12px_rgba(0,0,0,0.1),inset_-6px_-6px_12px_rgba(255,255,255,0.9)]">
+          <div className="size-28 overflow-hidden rounded-full bg-white p-1 shadow-[inset_6px_6px_12px_rgba(0,0,0,0.1),inset_-6px_-6px_12px_rgba(255,255,255,0.9)]">
             <img
               src={avatar || "/placeholder.svg"}
               alt={name}
-              className="h-full w-full rounded-full object-contain"
+              className="size-full rounded-full object-contain"
             />
           </div>
         </div>
@@ -217,9 +222,9 @@ function ProfileCard({
       {/* Tags */}
       {tags.length > 0 && (
         <div className="mt-4 flex justify-center gap-2">
-          {tags.map((tag, i) => (
+          {tags.map((tag) => (
             <span
-              key={i}
+              key={tag}
               className={cn(
                 "inline-block rounded-full bg-white px-3 py-1 text-xs font-medium shadow-[2px_2px_4px_rgba(0,0,0,0.05),-2px_-2px_4px_rgba(255,255,255,0.8)]",
                 tag === "Premium" ? "text-blue-600" : "text-gray-600"
@@ -234,10 +239,10 @@ function ProfileCard({
       {/* Action Buttons */}
       <div className="mt-6 flex gap-2">
         <button className="flex-1 rounded-full bg-white py-2 text-sm font-medium text-blue-600 shadow-[6px_6px_12px_rgba(0,0,0,0.1),-6px_-6px_12px_rgba(255,255,255,0.9)] transition-all hover:shadow-[2px_2px_4px_rgba(0,0,0,0.05),-2px_-2px_4px_rgba(255,255,255,0.8)]">
-          <UserPlus className="mx-auto h-4 w-4" />
+          <UserPlus className="mx-auto size-4" />
         </button>
         <button className="flex-1 rounded-full bg-white py-2 text-sm font-medium text-gray-700 shadow-[6px_6px_12px_rgba(0,0,0,0.1),-6px_-6px_12px_rgba(255,255,255,0.9)] transition-all hover:shadow-[2px_2px_4px_rgba(0,0,0,0.05),-2px_-2px_4px_rgba(255,255,255,0.8)]">
-          <MessageCircle className="mx-auto h-4 w-4" />
+          <MessageCircle className="mx-auto size-4" />
         </button>
       </div>
     </div>
@@ -248,7 +253,7 @@ function AddProfileCard() {
   return (
     <div className="flex h-full min-h-[280px] cursor-pointer flex-col items-center justify-center rounded-3xl bg-white p-6 shadow-[12px_12px_24px_rgba(0,0,0,0.15),-12px_-12px_24px_rgba(255,255,255,0.9)] transition-all hover:shadow-[4px_4px_8px_rgba(0,0,0,0.05),-4px_-4px_8px_rgba(255,255,255,0.8)]">
       <div className="mb-4 rounded-full bg-white p-4 shadow-[4px_4px_8px_rgba(0,0,0,0.05),-4px_-4px_8px_rgba(255,255,255,0.8)]">
-        <PlusCircle className="h-8 w-8 text-gray-500" />
+        <PlusCircle className="size-8 text-gray-500" />
       </div>
       <h3 className="mb-2 text-lg font-semibold text-gray-900">
         Add New Member

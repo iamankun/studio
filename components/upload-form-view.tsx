@@ -22,15 +22,15 @@ function SuccessAnimation({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 shadow-lg text-center">
-        <h2 className="text-2xl font-bold text-green-600 mb-2">Thành công!</h2>
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black bg-opacity-50">
+      <div className="p-6 rounded-lg text-center bg-white shadow-lg">
+        <h2 className="mb-2 text-2xl font-bold text-green-600">Thành công!</h2>
         <p>
           Đã gửi bài hát <strong>{songTitle}</strong> của nghệ sĩ{" "}
           <strong>{artistName}</strong>.
         </p>
         <button
-          className="mt-4 px-4 py-2 bg-purple-600 text-white rounded"
+          className="mt-4 px-4 py-2 rounded bg-purple-600 text-white"
           onClick={onClose}
           onKeyDown={handleKeyDown}
           autoFocus
@@ -80,9 +80,9 @@ export function UploadFormView({ currentUser }: Readonly<UploadFormViewProps>) {
       {/* Nội dung form upload sẽ ở đây */}
       {/* Ví dụ nút submit giả lập */}
       <button
-        className="bg-purple-600 text-white px-4 py-2 rounded"
+        className="px-4 py-2 rounded bg-purple-600 text-white"
         onClick={() =>
-          handleSubmit(currentUser.name || "Nghệ sĩ", "Bài hát demo")
+          handleSubmit(currentUser.name || "Nghệ sĩ", "Bài hát ")
         }
       >
         Gửi bài hát
@@ -95,10 +95,6 @@ export function UploadFormView({ currentUser }: Readonly<UploadFormViewProps>) {
           songTitle={previewData.songTitle}
           onClose={handleCloseSuccess}
         />
-      )}
-    </div>
-  );
-}
       )}
     </div>
   );

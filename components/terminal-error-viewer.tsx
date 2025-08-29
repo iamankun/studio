@@ -331,4 +331,3 @@ export function TerminalErrorViewer() {
     </Card>
   );
 }
-}

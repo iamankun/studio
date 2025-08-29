@@ -105,13 +105,13 @@ export function BackgroundSettingsPanel() {
       try {
         // Sử dụng fetch để lấy danh sách video từ playlist
         // Lưu ý: Cần có API key hợp lệ, demo dùng fetch public API (giới hạn 50 video)
-        const apiKey = "YOUR_YOUTUBE_API_KEY"; // Thay bằng API key thật nếu có
+        const apiKey = "YOUTUBE_API_KEY"; // Thay bằng API key thật nếu có
         const apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${apiKey}`;
         const res = await fetch(apiUrl);
         const data = await res.json();
         if (data.items) {
           const ids = data.items
-            .map((item: any) => item.snippet.resourceId.videoId)
+            .map((item: { snippet: { resourceId: { videoId: string } } }) => item.snippet.resourceId.videoId)
             .filter(Boolean);
           setPlaylistVideos(ids);
           setBackgroundSettings((prev) => ({
@@ -123,9 +123,7 @@ export function BackgroundSettingsPanel() {
           }));
         }
       } catch (err) {
-        alert(
-          "Không thể lấy danh sách video từ playlist. Vui lòng kiểm tra API key hoặc link playlist."
-        );
+        console.error("Danh sách video từ playlist không thể lấy:", err);
       }
       setYoutubeUrl(playlistId);
     } else if (videoId) {
@@ -164,14 +162,14 @@ export function BackgroundSettingsPanel() {
 
   // Update video random mode và videoList
   const updateVideoSettings = (randomVideo: boolean) => {
+    let videoList: string[] = [];
+    if (randomVideo) {
+      videoList = playlistVideos.length > 0 ? playlistVideos : DEFAULT_VIDEOS;
+    }
     setBackgroundSettings((prev) => ({
       ...prev,
       randomVideo,
-      videoList: randomVideo
-        ? playlistVideos.length > 0
-          ? playlistVideos
-          : DEFAULT_VIDEOS
-        : [],
+      videoList,
     }));
   };
 
@@ -214,9 +212,9 @@ export function BackgroundSettingsPanel() {
   };
 
   return (
-    <div className="fixed top-16 right-4 z-50">
-      <div className="bg-gray-900/95 backdrop-blur-md border border-gray-700 rounded-lg p-6 w-80 max-h-[80vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-4">
+    <div className="fixed z-50 top-16 right-4">
+      <div className="w-80 max-h-[80vh] p-6 overflow-y-auto bg-gray-900/95 border border-gray-700 rounded-lg backdrop-blur-md">
+        <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-white">Tùy chỉnh nền</h3>
           <button
             className="text-gray-400 hover:text-white transition-colors"
@@ -277,7 +275,7 @@ export function BackgroundSettingsPanel() {
           </div>
 
           {backgroundSettings.type === "gradient" && (
-            <div className="space-y-4 bg-black/30 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl p-6">
+            <div className="space-y-4 p-6 bg-black/30 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-xl">
               <div className="space-y-2">
                 <label
                   htmlFor="gradient"
@@ -337,7 +335,7 @@ export function BackgroundSettingsPanel() {
           )}
 
           {backgroundSettings.type === "video" && (
-            <div className="space-y-4 bg-black/30 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl p-6">
+            <div className="space-y-4 p-6 bg-black/30 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-xl">
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <input
@@ -466,7 +464,7 @@ export function BackgroundSettingsPanel() {
           )}
 
           {backgroundSettings.type === "image" && (
-            <div className="space-y-4 bg-black/30 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl p-6">
+            <div className="space-y-4 p-6 bg-black/30 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-xl">
               <div className="space-y-2">
                 <label
                   htmlFor="imageUrl"
@@ -535,5 +533,4 @@ export function BackgroundSettingsPanel() {
       </div>
     </div>
   );
-}
 }

@@ -1,12 +1,8 @@
 // @ts-check
 /**
  * Script để kiểm tra API submissions
- * Chạy: node scripts/test-submissions-api.mjs
+ * Chạy: node scripts/kiem-tra-bang-bai-hat.mjs
  */
-
-// Sử dụng fetch native từ Node.js thay vì node-fetch
-// Cần Node.js v18+
-const fetch = (...args) => import('node:fetch').then(({ default: fetch }) => fetch(...args));
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';

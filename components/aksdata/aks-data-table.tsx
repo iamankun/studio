@@ -40,9 +40,10 @@ export function AksDataTable() {
   if (isLoading) {
     return (
       <div className="space-y-3">
-        {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="h-12 w-full" />
-        ))}
+        {[...Array(5)].map(() => {
+          const uniqueKey = crypto.randomUUID();
+          return <Skeleton key={uniqueKey} className="h-12 w-full" />;
+        })}
       </div>
     );
   }
@@ -50,7 +51,7 @@ export function AksDataTable() {
   if (error || !apiResponse?.success) {
     return (
       <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
+        <AlertCircle className="size-4" />
         <AlertTitle>Error Fetching Data</AlertTitle>
         <AlertDescription>
           {apiResponse?.error || error?.message || "An unknown error occurred while fetching your files."}
@@ -62,7 +63,7 @@ export function AksDataTable() {
   if (files.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-md border border-dashed p-8 text-center">
-        <FileWarning className="h-10 w-10 text-muted-foreground mb-4" />
+        <FileWarning className="mb-4 size-10 text-muted-foreground" />
         <h3 className="text-lg font-semibold">No Submissions Found</h3>
         <p className="text-sm text-muted-foreground">You haven't submitted any tracks yet.</p>
       </div>
@@ -81,9 +82,9 @@ export function AksDataTable() {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 )
               })}

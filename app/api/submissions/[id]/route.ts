@@ -101,7 +101,7 @@ export async function GET(
                     responseData = {
                         ...responseData,
                         tracks: tracksResult.data
-                    }
+                    } as any
                 }
             }
 

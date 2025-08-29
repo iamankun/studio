@@ -410,3 +410,8 @@ export function LoginView({
 
 // Export Auth component for backward compatibility
 export const Auth = LoginView;
+
+// Export useAuth hook
+export function useAuth() {
+  return { user: null };
+}

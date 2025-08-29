@@ -8,7 +8,7 @@ import { multiDB } from "@/lib/database-api-service"
 import { AuthorizationService } from "@/lib/authorization-service"
 import { authenticateUser } from "@/lib/auth-service"
 import type { User } from "@/types/user"
-import type { SubmissionStatus } from "@/types/submission"
+import type { PrismaSubmissionStatus } from "@/types/submission"
 
 // Helper function để lấy user từ request
 async function getUserFromRequest(request: NextRequest): Promise<User | null> {

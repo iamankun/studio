@@ -1,8 +1,6 @@
 "use client"
 
-import React from "react"
-
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -240,24 +238,6 @@ export function RegistrationView({ onSwitchToLogin }: Readonly<RegistrationViewP
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="username" className="flex items-center">
-                <AwesomeIcon icon="fa-solid fa-user" className="mr-2 text-blue-500" />
-                Tên đăng nhập *
-              </Label>
-              <Input
-                id="username"
-                name="username"
-                type="text"
-                placeholder="Nhập tên đăng nhập"
-                value={formData.username}
-                onChange={handleInputChange}
-                required
-                disabled={isLoading}
-                className="backdrop-blur-sm bg-white/80 border-blue-200 focus:border-blue-400 focus:ring-blue-400 transition-all"
-              />
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="email" className="flex items-center">
                 <AwesomeIcon icon="fa-solid fa-envelope" className="mr-2 text-purple-500" />
                 Email *
@@ -274,118 +254,81 @@ export function RegistrationView({ onSwitchToLogin }: Readonly<RegistrationViewP
                 className="backdrop-blur-sm bg-white/80 border-purple-200 focus:border-purple-400 focus:ring-purple-400 transition-all"
               />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="fullName" className="flex items-center">
-                <AwesomeIcon icon="fa-solid fa-id-card" className="mr-2 text-indigo-500" />
-                Họ và tên
-              </Label>
-              <Input
-                id="fullName"
-                name="fullName"
-                type="text"
-                placeholder="Nhập họ và tên (tùy chọn)"
-                value={formData.fullName}
-                onChange={handleInputChange}
-                disabled={isLoading}
-                className="backdrop-blur-sm bg-white/80 border-indigo-200 focus:border-indigo-400 focus:ring-indigo-400 transition-all"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password" className="flex items-center">
-                <AwesomeIcon icon="fa-solid fa-lock" className="mr-2 text-cyan-500" />
-                Mật khẩu *
-              </Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Nhập mật khẩu (ít nhất 6 ký tự)"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  required
-                  disabled={isLoading}
-                  className="backdrop-blur-sm bg-white/80 border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400 transition-all"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-cyan-600"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={isLoading}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="flex items-center">
-                <AwesomeIcon icon="fa-solid fa-lock-open" className="mr-2 text-teal-500" />
-                Xác nhận mật khẩu *
-              </Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Nhập lại mật khẩu"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  required
-                  disabled={isLoading}
-                  className="backdrop-blur-sm bg-white/80 border-teal-200 focus:border-teal-400 focus:ring-teal-400 transition-all"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-teal-600"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  disabled={isLoading}
-                >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-
-          <CardFooter className="flex flex-col space-y-4">
             <Button
-              type="submit"
-              className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium hover:shadow-lg transition-all duration-300"
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-cyan-600"
+              onClick={() => setShowPassword(!showPassword)}
               disabled={isLoading}
             >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Đang đăng ký...
-                </>
-              ) : (
-                  <>
-                    <AwesomeIcon icon="fa-solid fa-user-plus" className="mr-2" />
-                    Đăng ký
-                  </>
-              )}
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </Button>
+          </div>
 
-            <div className="text-sm text-center">
-              Đã có tài khoản?{" "}
-              <button
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword" className="flex items-center">
+              <AwesomeIcon icon="fa-solid fa-lock-open" className="mr-2 text-teal-500" />
+              Xác nhận mật khẩu *
+            </Label>
+            <div className="relative">
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Nhập lại mật khẩu"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                required
+                disabled={isLoading}
+                className="backdrop-blur-sm bg-white/80 border-teal-200 focus:border-teal-400 focus:ring-teal-400 transition-all"
+              />
+              <Button
                 type="button"
-                onClick={onSwitchToLogin}
-                className="text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-200 font-medium"
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-teal-600"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 disabled={isLoading}
               >
-                Đăng nhập ngay
-              </button>
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
             </div>
-          </CardFooter>
-        </form>
-      </Card>
-    </div>
-  )
-}
+          </div>
+        </CardContent>
+
+        <CardFooter className="flex flex-col space-y-4">
+          <Button
+            type="submit"
+            className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium hover:shadow-lg transition-all duration-300"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Đang đăng ký...
+              </>
+            ) : (
+              <>
+                <AwesomeIcon icon="fa-solid fa-user-plus" className="mr-2" />
+                Đăng ký
+              </>
+            )}
+          </Button>
+
+          <div className="text-sm text-center">
+            Đã có tài khoản?{" "}
+            <button
+              type="button"
+              onClick={onSwitchToLogin}
+              className="text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-200 font-medium"
+              disabled={isLoading}
+            >
+              Đăng nhập ngay
+            </button>
+          </div>
+        </CardFooter>
+      </form>
+    </Card>
+    </div >
+

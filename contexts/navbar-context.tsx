@@ -9,15 +9,17 @@ interface NavbarContextType {
 
 const NavbarContext = createContext<NavbarContextType | undefined>(undefined)
 
-export function NavbarProvider({ children }: { children: ReactNode }) {
+export function NavbarProvider({ children }: { readonly children: ReactNode }) {
     const [isCollapsed, setIsCollapsed] = useState(false)
 
-    const toggleCollapse = () => {
-        setIsCollapsed(!isCollapsed)
-    }
+    const toggleCollapse = useCallback(() => {
+        setIsCollapsed((prev) => !prev)
+    }, [])
+
+    const value = useMemo(() => ({ isCollapsed, toggleCollapse }), [isCollapsed, toggleCollapse])
 
     return (
-        <NavbarContext.Provider value={{ isCollapsed, toggleCollapse }}>
+        <NavbarContext.Provider value={value}>
             {children}
         </NavbarContext.Provider>
     )
@@ -30,3 +32,7 @@ export function useNavbar() {
     }
     return context
 }
+
+// Remove the custom useCallback implementation below.
+// In React, useCallback is imported from 'react' and should not be re-implemented.
+

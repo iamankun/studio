@@ -224,7 +224,6 @@ model SubmissionContributor {
   submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
 }
-
 model TrackContributor {
   id            String @id @default(cuid())
   role          ContributorRole

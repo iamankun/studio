@@ -41,19 +41,6 @@
     "@next/next/no-html-link-for-pages": "off",
     "react/no-unescaped-entities": "off",
     "@next/next/no-page-custom-font": "off",
-    "at-rule-no-unknown": [
-      true,
-      {
-        "ignoreAtRules": [
-          "tailwind",
-          "layer",
-          "apply",
-          "variants",
-          "responsive",
-          "screen"
-        ]
-      }
-    ],
     "jsx-a11y/no-autofocus": "warn",
     "jsx-a11y/alt-text": "error",
     "jsx-a11y/no-static-element-interactions": "warn",
@@ -63,7 +50,6 @@
     "tailwindcss/classnames-order": "warn",
     "tailwindcss/no-custom-classname": "off",
     "tailwindcss/no-contradicting-classname": "error",
-    "tailwindcss/enforces-shorthand": "warn",
-    "tailwindcss/migration": "warn"
+    "tailwindcss/enforces-shorthand": "warn"
   }
 }

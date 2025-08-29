@@ -20,7 +20,7 @@ export async function GET() {
         const artists = await prisma.user.findMany({
             where: {
                 roles: {
-                    has: 'Artist'
+                    has: 'PERFORMER'
                 }
             },
             include: {
@@ -28,7 +28,7 @@ export async function GET() {
             }
         });
 
-        const resultData: User[] = artists.map((artist: any) => ({
+        const resultData = artists.map((artist: any) => ({
             id: artist.id,
             username: artist.name ?? artist.email,
             email: artist.email,

@@ -50,7 +50,7 @@ export function RegisterView({
     let isValid = true;
 
     if (username.length < 3) {
-      errors.username = "Username phải có ít nhất 3 ký tự";
+      errors.username = "Tài khoản phải có ít nhất 3 ký tự";
       isValid = false;
     }
 
@@ -61,7 +61,7 @@ export function RegisterView({
     }
 
     if (password.length < 6) {
-      errors.password = "Password phải có ít nhất 6 ký tự";
+      errors.password = "Mật khẩu phải có ít nhất 6 ký tự";
       isValid = false;
     }
 
@@ -90,7 +90,7 @@ export function RegisterView({
 
     setLoading(true);
 
-    // Log the registration attempt
+    // Ghi lại nỗ lực đăng ký
     logUIInteraction("form", "register-form", {
       username: username,
       email_domain: email.split("@")[1],
@@ -98,9 +98,9 @@ export function RegisterView({
 
     try {
       const result = await onRegister(username, email, password);
-      console.log("[Copilot Debug] API register result:", result);
+      console.log("[Sữa lỗi] API đăng ký kết quả:", result);
       if (result.success) {
-        // Log successful registration
+        // Ghi lại đăng ký thành công
         logRegistration("email", "success", {
           username: username,
           email_domain: email.split("@")[1],
@@ -109,14 +109,14 @@ export function RegisterView({
         setSuccessMessage(
           "Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ."
         );
-        // Reset form
+        // Làm mới bản ghi
         setUsername("");
         setEmail("");
         setPassword("");
         setConfirmPassword("");
         setAgreed(false);
       } else {
-        // Log failed registration
+        // Ghi lại đăng ký thất bại
         logRegistration("email", "failed", {
           username: username,
           email_domain: email.split("@")[1],
@@ -126,9 +126,9 @@ export function RegisterView({
         setError(result.message || "Đăng ký thất bại, vui lòng thử lại");
       }
     } catch (error) {
-      console.error("[Copilot Debug] Register error:", error);
+      console.error("[Sữa lỗi] Đăng ký lỗi:", error);
 
-      // Log error during registration
+      // Ghi lại lỗi trong quá trình đăng ký
       logRegistration("email", "error", {
         username: username,
         email_domain: email.split("@")[1],
@@ -139,201 +139,4 @@ export function RegisterView({
     } finally {
       setLoading(false);
     }
-  };
-
-  return (
-    <div className="flex min-h-[100dvh] flex-col items-center justify-center p-4 relative overflow-hidden">
-      <Card
-        className="w-full max-w-md relative z-10 border-0 shadow-2xl 
-                bg-background/60 backdrop-blur-xl hover:bg-background/70 transition-all duration-300
-                before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/10 before:to-white/5 before:rounded-xl"
-      >
-        <CardHeader className="text-center space-y-2">
-          <div className="relative w-20 h-20 mx-auto mb-2">
-            <Image
-              src="/face.png"
-              alt="Logo"
-              fill
-              className="object-cover rounded-full p-1 bg-background/40 backdrop-blur-sm"
-              priority
-            />
-          </div>
-          <h2
-            className="text-2xl font-bold bg-clip-text text-transparent 
-                        bg-gradient-to-r from-indigo-500 to-pink-500"
-          >
-            Tạo tài khoản mới
-          </h2>
-          <p className="text-muted-foreground text-sm">
-            Tham gia cộng đồng AKs Studio
-          </p>
-        </CardHeader>
-
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="username" className="text-sm font-medium">
-                Username
-              </Label>
-              <div className="relative">
-                <Input
-                  id="username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="pl-10 bg-background/40 border-muted-foreground/20 focus:border-primary/50"
-                  placeholder="Choose a username"
-                  disabled={loading}
-                />
-                <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground/70" />
-              </div>
-              {validationErrors.username && (
-                <p className="text-destructive text-sm mt-1">
-                  {validationErrors.username}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
-                Email
-              </Label>
-              <div className="relative">
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 bg-background/40 border-muted-foreground/20 focus:border-primary/50"
-                  placeholder="Enter your email"
-                  disabled={loading}
-                />
-                <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground/70" />
-              </div>
-              {validationErrors.email && (
-                <p className="text-destructive text-sm mt-1">
-                  {validationErrors.email}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">
-                Password
-              </Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 bg-background/40 border-muted-foreground/20 focus:border-primary/50"
-                  placeholder="Choose a password"
-                  disabled={loading}
-                />
-                <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground/70" />
-              </div>
-              {validationErrors.password && (
-                <p className="text-destructive text-sm mt-1">
-                  {validationErrors.password}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-sm font-medium">
-                Confirm Password
-              </Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="pl-10 bg-background/40 border-muted-foreground/20 focus:border-primary/50"
-                  placeholder="Confirm your password"
-                  disabled={loading}
-                />
-                <Shield className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground/70" />
-              </div>
-              {validationErrors.confirmPassword && (
-                <p className="text-destructive text-sm mt-1">
-                  {validationErrors.confirmPassword}
-                </p>
-              )}
-            </div>
-
-            <label className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={agreed}
-                onChange={(e) => setAgreed(e.target.checked)}
-                className="rounded border-muted-foreground/20"
-              />
-              <span className="text-sm text-muted-foreground">
-                Tôi đồng ý với các điều khoản sử dụng
-              </span>
-            </label>
-
-            {error && (
-              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-                {error}
-              </div>
-            )}
-
-            {successMessage && (
-              <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-500 text-sm">
-                {successMessage}
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              className="w-full relative overflow-hidden group"
-              disabled={loading}
-            >
-              {loading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <>
-                  <span className="relative z-10">Register</span>
-                  <span
-                    className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/20 to-primary/0 
-                                        translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"
-                  />
-                </>
-              )}
-            </Button>
-
-            {/* Switch to Login Button */}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                logUIInteraction("button", "switch-to-login", {
-                  from: "register",
-                });
-                onSwitchToLogin();
-              }}
-              className="h-10 bg-gradient-to-r from-blue-500/10 to-indigo-600/10 
-                              border-blue-500/30 hover:border-blue-500/50 text-foreground hover:text-blue-500
-                              hover:bg-gradient-to-r hover:from-blue-500/20 hover:to-indigo-600/20
-                              transition-all duration-300 backdrop-blur-sm group relative overflow-hidden
-                              hover:shadow-lg hover:shadow-blue-500/20"
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                <i className="fas fa-sign-in-alt text-xs"></i>
-                Already have an account? <strong>Login</strong>
-              </span>
-              <div
-                className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 
-                              translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"
-              ></div>
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+  }

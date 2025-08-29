@@ -38,10 +38,10 @@ export async function GET() {
             return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
         }
 
-        logger.info('Fetching files for user', { userId: user.id, role: user.role });
+        logger.info('Fetching files for user', { userId: (user as any).UID, role: (user as any).role });
 
         // Depending on the role, fetch specific or all submissions
-        const usernameToFetch = user.role === 'Artist' ? user.username : undefined;
+        const usernameToFetch = (user as any).role === 'Artist' ? (user as any).username : undefined;
         const result = await multiDB.getSubmissions(usernameToFetch);
 
         if (!result.success || !result.data) {
