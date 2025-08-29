@@ -14,7 +14,7 @@ import { NotificationSystem } from "@/components/notification-system";
 import { SoundSystem } from "@/components/sound-system";
 import { SystemStatusProvider } from "@/components/system-status-provider";
 import { useState, useEffect, useCallback } from "react";
-import type { Submission } from "@/types/submission";
+import type { Submission, SubmissionStatus } from "@/types/submission";
 import { LogsView } from "@/components/views/logs-view";
 import { logger } from "@/lib/logger";
 import { useUser } from "@/hooks/use-user";
@@ -37,7 +37,7 @@ export default function MainAppView() {
     if (!user) return;
 
     logger.debug("MainAppView: Loading submissions", {
-      userId: user.id,
+      userId: user.UID,
       component: "MainAppView",
       action: "loadSubmissions",
     });
@@ -52,12 +52,12 @@ export default function MainAppView() {
       setSubmissions(data);
       logger.info("MainAppView: Submissions loaded successfully", {
         count: data.length,
-        userId: user.id,
+        userId: user.UID,
         component: "MainAppView",
       });
     } catch (error) {
       logger.error("MainAppView: Failed to load submissions", error, {
-        userId: user.id,
+        userId: user.UID,
         component: "MainAppView",
         action: "loadSubmissions",
       });
@@ -72,9 +72,9 @@ export default function MainAppView() {
 
     if (user) {
       logger.info("MainAppView: User logged in", {
-        userId: user.id,
-        username: user.username,
-        role: user.role,
+        userId: user.UID,
+        username: user.userName,
+        role: user.roles,
         component: "MainAppView",
       });
       loadSubmissions();
@@ -191,16 +191,16 @@ export default function MainAppView() {
                 <MyProfileView showModal={showNotification} />
               )}
               {currentView === "settings" && <SettingsView />}
-              {currentView === "users" && user?.role === "Label Manager" && (
+              {currentView === "users" && user?.roles.includes("Artist") && (
                 <UsersView />
               )}
-              {currentView === "admin" && user?.role === "Label Manager" && (
+              {currentView === "admin" && user?.roles.includes("Label_Manager") && (
                 <AdminPanelView showModal={showNotification} />
               )}
               {currentView === "email" && (
                 <EmailCenterView showModal={showNotification} />
               )}
-              {currentView === "logs" && user?.role === "Label Manager" && (
+              {currentView === "logs" && user?.roles.includes("Administrator") && (
                 <LogsView />
               )}
             </div>

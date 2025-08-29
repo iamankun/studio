@@ -1,15 +1,16 @@
-import { PrismaClient } from '@prisma/client'
-import { withOptimize } from '@prisma/extension-optimize'
+// lib/prisma.ts
+// Prisma Client configuration for An Kun Studio
+// Tác giả: An Kun Studio Digital Music Distribution
 
-const createPrisma = () => new PrismaClient().$extends(
-  withOptimize({ apiKey: process.env.OPTIMIZE_API_KEY }),
-)
+import { PrismaClient } from '@prisma/client'
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: ReturnType<typeof createPrisma> | undefined
+  prisma: PrismaClient | undefined
 }
 
-export const prisma = globalForPrisma.prisma ?? createPrisma()
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({
+  log: ['query', 'error', 'warn'],
+})
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 

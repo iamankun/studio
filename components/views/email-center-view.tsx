@@ -692,7 +692,7 @@ Trân trọng,
                         <button
                           type="button"
                           aria-label="Delete template"
-                          className="h-8 w-8 p-0 text-red-400 hover:text-red-300 font-sans inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground cursor-pointer"
+                          className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-accent font-sans inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteTemplate(template.id);

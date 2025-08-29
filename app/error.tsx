@@ -17,7 +17,6 @@ export default function ErrorPage({
     // Log error details using logger service
     logger.error("Application Error", error, {
       component: "ErrorPage",
-      digest: error.digest,
     })
 
     // Store error in localStorage for debugging

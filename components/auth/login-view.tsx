@@ -117,9 +117,7 @@ export function LoginView({
           role: userRole ?? "user",
         });
         // Chuyển hướng sau khi đăng nhập thành công
-        if (router) {
-          router.push("/dashboard"); // hoặc trang bạn muốn chuyển tới
-        }
+        router.push("/dashboard");
       }
     } catch (err) {
       console.error("[Cần sửa lỗi] Đăng nhập:", err);
@@ -131,7 +129,10 @@ export function LoginView({
         error: err instanceof Error ? err.message : "Unknown error",
       });
     } finally {
-      setLoading(false);
+      // Đảm bảo loading được tắt sau một khoảng thời gian ngắn
+      setTimeout(() => {
+        setLoading(false);
+      }, 100);
     }
   };
 
@@ -215,8 +216,9 @@ export function LoginView({
                 src={userProfile.avatarUrl}
                 fill
                 alt="User avatar"
-                className="object-cover rounded-full p-1 bg-background/10 backdrop-blur-xl border border-white/20 hover:border-white/40 transition-all duration-300 hover:scale-105"
+                className="object-cover rounded-full border-2 border-white/20 hover:border-primary/50 transition-all duration-300 hover:scale-105"
                 priority
+                sizes="80px"
               />
             )}
           </div>
@@ -411,7 +413,22 @@ export function LoginView({
 // Export Auth component for backward compatibility
 export const Auth = LoginView;
 
-// Export useAuth hook
+// Export useAuth hook - sửa lỗi trả về user thực tế
 export function useAuth() {
-  return { user: null };
+  // Lấy user từ localStorage hoặc context thực tế
+  const [user, setUser] = useState<any>(null);
+  
+  useEffect(() => {
+    // Kiểm tra user từ localStorage hoặc session
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error('Error parsing stored user:', error);
+      }
+    }
+  }, []);
+  
+  return { user };
 }

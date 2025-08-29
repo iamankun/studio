@@ -1,7 +1,5 @@
 "use client";
-
-import type React from "react";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -18,29 +16,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeToggle } from "@/components/theme-toggle";
+import Image from "next/image";
 import {
   logUIInteraction,
   logSubmissionActivity,
 } from "@/lib/client-activity-log";
-import type { User } from "@/types/user";
-import type {
-  Submission,
-  TrackInfo,
-  AdditionalArtist,
-  MainCategory,
-  SubCategory,
-  ReleaseType,
-  CopyrightOwnershipStatus,
-  ReleaseHistoryStatus,
-  LyricsStatus,
-  Platform,
-  ArtistPrimaryRole,
-  AdditionalArtistRole,
-  PrismaSubmission,
-  PrismaTrack,
-  convertLegacySubmissionToPrisma,
-} from "@/types/submission";
-import { PrismaReleaseType, PrismaSubmissionStatus } from "@/types/submission";
+import type { Users } from "@/types/users";
+import { PrismaSubmissionStatus } from "@/types/submission";
+import { PrismaReleaseType } from "@/types/submission";
 import {
   Rocket,
   UserIcon,
@@ -52,13 +35,26 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { Auth } from "@/components/auth/login-view";
+import { useAuth } from "@/components/auth/login-view";
 import {
   validateImageFile,
   validateAudioFile,
   getMinimumReleaseDate,
 } from "@/lib/utils";
 import { multiDB } from "@/lib/database-api-service";
+
+interface TrackInfo {
+  fileName: string;
+  ISRC: string; // Đồng bộ với schema.prisma
+  songTitle: string;
+  fullName: string;
+  artist: string; // Sửa typo từ 'artistt'
+  additionalArtists: AdditionalArtist[];
+  duration?: number;
+  mainCategory?: MainCategory;
+  subCategory?: SubCategory;
+  lyrics?: string;
+}
 
 interface AudioTrack {
   file: File;
@@ -67,7 +63,7 @@ interface AudioTrack {
 }
 
 interface UploadFormViewProps {
-  onSubmissionAdded: (submission: Submission) => void;
+  onSubmissionAdded: (submission: PrismaSubmission) => void;
   showModal: (
     title: string,
     messages: string[],
@@ -79,7 +75,7 @@ export default function UploadFormView({
   onSubmissionAdded,
   showModal,
 }: Readonly<UploadFormViewProps>) {
-  const { user: currentUser } = Auth();
+  const { currentUser } = useAuth();
 
   // Form state - initialize with safe defaults
   const [fullName, setFullName] = useState("");
@@ -134,7 +130,6 @@ export default function UploadFormView({
     );
   }
 
-  // Additional artist management functions
   const addAdditionalArtist = (trackId: string) => {
     setAudioTracks((prev) =>
       prev.map((track) => {
@@ -219,21 +214,25 @@ export default function UploadFormView({
       if (currentlyPlaying) {
         audioRefs.current[currentlyPlaying]?.pause();
       }
-
-      // Play new track
       if (!audioRefs.current[trackId]) {
-        audioRefs.current[trackId] = new Audio(audioUrl);
-        audioRefs.current[trackId].addEventListener("ended", () => {
-          setCurrentlyPlaying(null);
-        });
+        try {
+          audioRefs.current[trackId] = new Audio(audioUrl);
+          audioRefs.current[trackId].addEventListener("ended", () => {
+            setCurrentlyPlaying(null);
+          });
+        } catch (error) {
+          showModal("Lỗi", ["Không thể tạo audio player"], "error");
+          return;
+        }
       }
 
-      audioRefs.current[trackId].play();
+      audioRefs.current[trackId].play().catch(() => {
+        showModal("Lỗi", ["Không thể phát nhạc"], "error");
+      });
       setCurrentlyPlaying(trackId);
     }
   };
 
-  // Platform selection handlers
   const handlePlatformChange = (platform: Platform, checked: boolean) => {
     if (checked) {
       setPlatforms((prev) => [...prev, platform]);
@@ -242,7 +241,6 @@ export default function UploadFormView({
     }
   };
 
-  // File upload handlers
   const handleImageUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -284,8 +282,6 @@ export default function UploadFormView({
           return;
         }
 
-        // Không tự động tạo ISRC khi upload track
-        // ISRC sẽ được tạo ở giai đoạn release hoặc người dùng có thể nhập ISRC cũ
         const trackId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
         const newTrack: AudioTrack = {
@@ -293,21 +289,19 @@ export default function UploadFormView({
           id: trackId,
           info: {
             fileName: file.name,
-            isrc: "", // Để trống, sẽ điền sau
-            songTitle: file.name.replace(/\.[^/.]+$/, ""), // Default to filename without extension
-            artistName: artistName,
-            artistFullName: fullName,
+            ISRC: "",
+            songTitle: file.name.replace(/\.[^/.]+$/, ""),
+            artist: artistName,
+            fullName: fullName,
             additionalArtists: [],
           },
         };
-
         setAudioTracks((prev) => [...prev, newTrack]);
       } catch (error) {
         showModal("Lỗi", [`Có lỗi xảy ra khi tải file ${file.name}`], "error");
       }
     });
   };
-
   const removeAudioTrack = (trackId: string) => {
     setAudioTracks((prev) => prev.filter((track) => track.id !== trackId));
     if (currentlyPlaying === trackId) {
@@ -341,18 +335,11 @@ export default function UploadFormView({
   // Update ISRC for a specific track
   const updateTrackISRC = (trackId: string, isrc: string) => {
     setAudioTracks((prev) =>
-      prev.map((track) => {
-        if (track.id === trackId) {
-          return {
-            ...track,
-            info: {
-              ...track.info,
-              isrc: isrc,
-            },
-          };
-        }
-        return track;
-      })
+      prev.map((track) =>
+        track.id === trackId
+          ? { ...track, info: { ...track.info, ISRC: isrc } }
+          : track
+      )
     );
   };
 
@@ -362,15 +349,12 @@ export default function UploadFormView({
 
     setAudioTracks((prev) =>
       prev.map((track) => {
-        if (!track.info.isrc || track.info.isrc === "") {
+        if (!track.info.ISRC) {
           const { isrc, newCounter } = generateISRC(currentUser, counter);
           counter = newCounter;
           return {
             ...track,
-            info: {
-              ...track.info,
-              isrc: isrc,
-            },
+            info: { ...track.info, ISRC: isrc },
           };
         }
         return track;
@@ -380,7 +364,6 @@ export default function UploadFormView({
     setLastISRCCounter(counter);
   };
 
-  // Form submission handler
   const handleSubmit = async () => {
     // Validation
     const validationErrors = [];
@@ -455,9 +438,9 @@ export default function UploadFormView({
       // Wait a bit for state to update
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Get the first track's ISRC for the image upload (legacy compatibility)
+      // Get the first track's ISRC for the image upload
       const firstTrackISRC =
-        audioTracks[0]?.info.isrc ||
+        audioTracks[0]?.info.ISRC ||
         `VNA2P${new Date().getFullYear().toString().slice(2)}00001`;
 
       // Upload ảnh bìa
@@ -466,7 +449,7 @@ export default function UploadFormView({
         imageFormData.append("file", imageFile);
       }
       imageFormData.append("type", "image");
-      imageFormData.append("userId", currentUser.id);
+      imageFormData.append("userUID", currentUser.UID);
       imageFormData.append("artistName", artistName);
       imageFormData.append("songTitle", songTitle);
       imageFormData.append("isrc", firstTrackISRC);
@@ -511,12 +494,12 @@ export default function UploadFormView({
         // Tạo dữ liệu track cho cấu trúc Prisma
         tracksData.push({
           title: track.info.songTitle,
-          artist: track.info.artistName,
+          artist: track.info.artist,
           filePath: audioResult.url,
           duration: track.info.duration || 0,
-          isrc: track.id,
+          ISRC: track.info.ISRC,
           fileName: track.file.name,
-          artistFullName: track.info.artistFullName,
+          artistFullName: track.info.fullName,
           fileSize: track.file.size,
           format: track.file.type,
           bitrate: null, // Sẽ được điền bởi xử lý bitrate
@@ -528,7 +511,7 @@ export default function UploadFormView({
       }
 
       // Convert release type to Prisma enum
-      const prismaReleaseType: PrismaReleaseType =
+      const prismaReleaseType =
         releaseType === "single"
           ? PrismaReleaseType.SINGLE
           : releaseType === "ep"
@@ -536,7 +519,7 @@ export default function UploadFormView({
             : releaseType === "album"
               ? PrismaReleaseType.ALBUM
               : releaseType === "lp"
-                ? PrismaReleaseType.ALBUM
+                ? PrismaReleaseType.LP
                 : PrismaReleaseType.SINGLE;
 
       // Tạo yêu cầu dữ liệu cho cấu trúc Prisma
@@ -567,11 +550,10 @@ export default function UploadFormView({
         signedAt: null,
         signerFullName: null,
         isDocumentSigned: false,
-        userId: currentUser.id,
-        labelId: currentUser.id, // Dùng ID của user hiện tại
+        userId: currentUser.UID,
+        labelId: currentUser.UID,
       };
 
-      // Dùng mới dữ liệu dịch vụ
       const result = await multiDB.createSubmissionWithTracks(
         submissionData,
         tracksData
@@ -581,7 +563,6 @@ export default function UploadFormView({
         throw new Error(result.message || "Không thể tạo submission");
       }
 
-      // Chuyển đổi về định dạng cũ để tương thích ngược
       const legacySubmission: Submission = {
         id: result.data!.submission.id,
         userId: currentUser.id,
@@ -613,9 +594,8 @@ export default function UploadFormView({
         trackInfos: audioTracks.map((track) => track.info),
       };
 
-      onSubmissionAdded(legacySubmission);
+      onSubmissionAdded(result.data!.submission);
 
-      // Ghi nhật ký hoạt động
       logSubmissionActivity(result.data!.submission.id, "create", "success", {
         artistName,
         songTitle,
@@ -626,7 +606,6 @@ export default function UploadFormView({
         releaseDate,
       });
 
-      // Làm mới biểu mẫu
       resetForm();
 
       showModal("Thành công", ["Đã gửi bài hát để chờ duyệt!"], "success");
@@ -636,7 +615,6 @@ export default function UploadFormView({
           ? error.message
           : "Có lỗi xảy ra khi gửi bài hát";
 
-      // Ghi nhật ký lỗi không xác định
       logSubmissionActivity("Không xác định", "create", "error", {
         artistName,
         songTitle,
@@ -841,9 +819,11 @@ export default function UploadFormView({
                     </Button>
                     {imagePreviewUrl && (
                       <div className="mt-4">
-                        <img
+                        <Image
                           src={imagePreviewUrl}
                           alt="Xem trước nè"
+                          width={400}
+                          height={400}
                           className="mx-auto max-w-xs rounded-lg"
                         />
                         <Button
@@ -968,7 +948,7 @@ export default function UploadFormView({
                                 </Label>
                                 <Input
                                   id={`track-isrc-${track.id}`}
-                                  value={track.info.isrc}
+                                  value={track.info.ISRC}
                                   onChange={(e) =>
                                     updateTrackISRC(track.id, e.target.value)
                                   }
@@ -976,12 +956,11 @@ export default function UploadFormView({
                                   className="mt-1"
                                   maxLength={12}
                                 />
-                                {track.info.isrc && (
+                                {track.info.ISRC ? (
                                   <p className="text-xs text-green-600 mt-1">
-                                    ✓ ISRC đã có: {track.info.isrc}
+                                    ✓ ISRC đã có: {track.info.ISRC}
                                   </p>
-                                )}
-                                {!track.info.isrc && (
+                                ) : (
                                   <p className="text-xs text-blue-600 mt-1">
                                     📋 Sẽ tự tạo ISRC khi gửi submission
                                   </p>
@@ -1405,6 +1384,6 @@ export default function UploadFormView({
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </div >
   );
 }

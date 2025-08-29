@@ -330,5 +330,6 @@ export function RegistrationView({ onSwitchToLogin }: Readonly<RegistrationViewP
         </CardFooter>
       </form>
     </Card>
-    </div >
-
+    </div>
+  )
+}

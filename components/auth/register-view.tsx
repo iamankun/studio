@@ -139,4 +139,176 @@ export function RegisterView({
     } finally {
       setLoading(false);
     }
-  }
+  };
+
+  return (
+    <div className="flex min-h-[100dvh] flex-col items-center justify-center p-4 pt-24 relative overflow-hidden font-dosis">
+      <Card className="w-full max-w-md relative z-40 border border-white/10 shadow-2xl bg-background/5 backdrop-blur-2xl hover:bg-background/10 transition-all duration-500">
+        <CardHeader className="text-center relative z-10">
+          <div className="relative w-20 h-20 mx-auto mb-2">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-purple-600/20 rounded-full blur-lg"></div>
+            <Image
+              src="/face.png"
+              fill
+              alt="User avatar"
+              className="object-cover rounded-full p-1 bg-background/10 backdrop-blur-xl border border-white/20 hover:border-white/40 transition-all duration-300 hover:scale-105"
+              priority
+            />
+          </div>
+          <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-pink-500 select-none">
+            Đăng ký tài khoản
+          </h2>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="username" className="text-sm font-medium">
+                Tên tài khoản
+              </Label>
+              <div className="relative">
+                <Input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="pl-10 bg-background/30 border-white/10 focus:border-primary/50"
+                  placeholder="Nhập tên tài khoản"
+                  disabled={loading}
+                />
+                <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground/50" />
+              </div>
+              {validationErrors.username && (
+                <div className="text-xs text-destructive mt-1 ml-1">
+                  <i className="fas fa-exclamation-circle"></i>
+                  {validationErrors.username}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-medium">
+                Email
+              </Label>
+              <div className="relative">
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10 bg-background/30 border-white/10 focus:border-primary/50"
+                  placeholder="your@email.com"
+                  disabled={loading}
+                />
+                <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground/50" />
+              </div>
+              {validationErrors.email && (
+                <div className="text-xs text-destructive mt-1 ml-1">
+                  <i className="fas fa-exclamation-circle"></i>
+                  {validationErrors.email}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-medium">
+                Mật khẩu
+              </Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10 bg-background/30 border-white/10 focus:border-primary/50"
+                  placeholder="Nhập mật khẩu"
+                  disabled={loading}
+                />
+                <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground/50" />
+              </div>
+              {validationErrors.password && (
+                <div className="text-xs text-destructive mt-1 ml-1">
+                  <i className="fas fa-exclamation-circle"></i>
+                  {validationErrors.password}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword" className="text-sm font-medium">
+                Xác nhận mật khẩu
+              </Label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="pl-10 bg-background/30 border-white/10 focus:border-primary/50"
+                  placeholder="Nhập lại mật khẩu"
+                  disabled={loading}
+                />
+                <Shield className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground/50" />
+              </div>
+              {validationErrors.confirmPassword && (
+                <div className="text-xs text-destructive mt-1 ml-1">
+                  <i className="fas fa-exclamation-circle"></i>
+                  {validationErrors.confirmPassword}
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="agree"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                className="rounded"
+              />
+              <Label htmlFor="agree" className="text-sm">
+                Tôi đồng ý với điều khoản sử dụng
+              </Label>
+            </div>
+
+            {error && (
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                <i className="fas fa-exclamation-triangle"></i>
+                <span className="ml-2">{error}</span>
+              </div>
+            )}
+
+            {successMessage && (
+              <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm">
+                <i className="fas fa-check-circle"></i>
+                <span className="ml-2">{successMessage}</span>
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-primary via-purple-600 to-primary hover:scale-[1.02] hover:shadow-xl"
+              disabled={loading}
+            >
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                "Đăng ký"
+              )}
+            </Button>
+
+            <div className="text-center">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={onSwitchToLogin}
+                className="text-muted-foreground hover:text-primary"
+              >
+                Đã có tài khoản? Đăng nhập
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

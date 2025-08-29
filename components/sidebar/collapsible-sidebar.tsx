@@ -106,7 +106,7 @@ export function CollapsibleSidebar({ currentUser, currentView, onViewChange }: R
       )}
 
       <Card
-        className={`h-full bg-gray-800 border-4 border-yellow-400 border-gray-700 rounded-none overflow-hidden transition-all duration-300 ${
+        className={`h-full bg-gray-800 border-4 border-gray-700 hover:border-yellow-400 rounded-none overflow-hidden transition-all duration-300 ${
           collapsed ? "w-16" : "w-64"
         }`}
       >

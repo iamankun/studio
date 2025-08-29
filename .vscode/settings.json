@@ -3,5 +3,13 @@
     "chat.mcp.autostart": "newAndOutdated",
     "editor.defaultFormatter": "amazonwebservices.amazon-q-vscode",
     "editor.formatOnSave": true,
-    "editor.mouseWheelZoom": true
+    "editor.mouseWheelZoom": true,
+    "amazonQ.showCodeWithReferences": false,
+    "editor.formatOnPaste": true,
+    "editor.aiStats.enabled": true,
+    "editor.allowVariableFontsInAccessibilityMode": true,
+    "editor.autoIndentOnPaste": true,
+    "editor.codeActions.triggerOnFocusChange": true,
+    "editor.bracketPairColorization.independentColorPoolPerBracketType": true,
+    "editor.codeLensFontSize": 16
 }

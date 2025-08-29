@@ -231,7 +231,7 @@ export function BackgroundSettingsPanel() {
               className="block text-sm font-medium text-gray-200"
             >
               <span className="flex items-center">
-                Độ mờ nền&nbsp;
+                Độ mờ nền
                 <span className="text-xs text-gray-400 ml-2">
                   ({Math.round(Number(overlayOpacity) * 100)}%)
                 </span>

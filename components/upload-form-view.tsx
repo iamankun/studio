@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import type { User } from "@/types/user";
 
+// Constants for fallback values
+const FALLBACK_ARTIST_NAME = "Nghệ sĩ";
+const FALLBACK_SONG_TITLE = "Bài hát";
+
 export interface UploadFormViewProps {
   readonly currentUser: User;
 }
@@ -17,6 +21,7 @@ function SuccessAnimation({
   // Keyboard handler for accessibility
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
       onClose();
     }
   };
@@ -26,8 +31,8 @@ function SuccessAnimation({
       <div className="p-6 rounded-lg text-center bg-white shadow-lg">
         <h2 className="mb-2 text-2xl font-bold text-green-600">Thành công!</h2>
         <p>
-          Đã gửi bài hát <strong>{songTitle}</strong> của nghệ sĩ{" "}
-          <strong>{artistName}</strong>.
+          Đã gửi bài hát <strong>{songTitle?.replace(/[<>"'&]/g, '')}</strong> của nghệ sĩ{" "}
+          <strong>{artistName?.replace(/[<>"'&]/g, '')}</strong>.
         </p>
         <button
           className="mt-4 px-4 py-2 rounded bg-purple-600 text-white"
@@ -66,12 +71,12 @@ export function UploadFormView({ currentUser }: Readonly<UploadFormViewProps>) {
   // Áp dụng cursor pointer toàn trang khi animation hiển thị
   useEffect(() => {
     if (showSuccess) {
-      document.body.style.cursor = "pointer";
+      document.body.classList.add('cursor-pointer');
     } else {
-      document.body.style.cursor = "";
+      document.body.classList.remove('cursor-pointer');
     }
     return () => {
-      document.body.style.cursor = "";
+      document.body.classList.remove('cursor-pointer');
     };
   }, [showSuccess]);
 
@@ -82,7 +87,7 @@ export function UploadFormView({ currentUser }: Readonly<UploadFormViewProps>) {
       <button
         className="px-4 py-2 rounded bg-purple-600 text-white"
         onClick={() =>
-          handleSubmit(currentUser.name || "Nghệ sĩ", "Bài hát ")
+          handleSubmit(currentUser.fullName || FALLBACK_ARTIST_NAME, FALLBACK_SONG_TITLE)
         }
       >
         Gửi bài hát

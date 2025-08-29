@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { authenticateUser } from "@/lib/auth-service"
 import type { User } from "@/types/user"
-import type { PrismaSubmission, PrismaTrack } from "@/types/submission"
+import type { PrismaSubmission, PrismaTrack } from "@/types/prisma"
 import { logger } from "@/lib/logger"
 
 // Helper function to get user from request (using session, token, etc.)
@@ -55,7 +55,8 @@ export async function POST(request: NextRequest) {
       const newSubmission = await tx.submission.create({
         data: {
           ...submission,
-          userId: currentUser.id,
+          creatorUID: currentUser.UID,
+          labelId: currentUser.labelId || currentUser.UID,
         }
       });
       

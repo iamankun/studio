@@ -7,11 +7,12 @@ import type {
   VideoInfo,
   FileInfo,
   FolderInfo,
+  Submission
+} from "@/types/submission"
+import {
   PrismaSubmission,
   PrismaTrack,
-  Submission // <-- Add this import
-} from "@/types/submission"
-import { convertLegacySubmissionToPrisma } from "@/types/submission"
+} from "@/types/prisma"
 import { logger } from "@/lib/logger"
 
 export interface DatabaseResult<T = unknown> {
@@ -702,12 +703,50 @@ export class DatabaseApiService {
    */
   public async createSubmissionFromLegacy(legacySubmission: Omit<Submission, 'id'>): Promise<DatabaseResult<{ submission: PrismaSubmission; tracks: PrismaTrack[] }>> {
     try {
-      const { submission, tracks } = convertLegacySubmissionToPrisma(legacySubmission as Submission);
-      // Fix: cast tracks to the correct type
-      return await this.createSubmissionWithTracks(
-        submission,
-        tracks as Omit<PrismaTrack, 'id' | 'createdAt' | 'updatedAt' | 'submissionId'>[]
-      );
+      // Convert legacy submission to Prisma format
+      const submissionData: Omit<PrismaSubmission, 'id' | 'createdAt' | 'updatedAt'> = {
+        title: legacySubmission.songTitle,
+        artist: legacySubmission.artistName,
+        UPC: null,
+        type: legacySubmission.releaseType === 'single' ? 'SINGLE' as any : 'SINGLE' as any,
+        coverImagePath: legacySubmission.imageUrl || '',
+        releaseDate: new Date(legacySubmission.releaseDate),
+        status: 'PENDING' as any,
+        metadataLocked: false,
+        published: false,
+        albumName: legacySubmission.albumName || null,
+        mainCategory: legacySubmission.mainCategory || null,
+        subCategory: legacySubmission.subCategory || null,
+        platforms: null,
+        distributionLink: null,
+        distributionPlatforms: null,
+        statusVietnamese: legacySubmission.status,
+        rejectionReason: null,
+        notes: legacySubmission.lyrics || null,
+        creatorUID: legacySubmission.userId,
+        labelId: legacySubmission.userId,
+      };
+
+      const tracksData: Omit<PrismaTrack, 'id' | 'createdAt' | 'updatedAt' | 'submissionId'>[] = [
+        {
+          title: legacySubmission.songTitle,
+          artist: legacySubmission.artistName,
+          filePath: legacySubmission.audioUrl || '',
+          duration: 0,
+          ISRC: legacySubmission.isrc || '',
+          fileName: null,
+          name: legacySubmission.fullName || null,
+          fileSize: null,
+          format: null,
+          bitrate: null,
+          sampleRate: null,
+          mainCategory: legacySubmission.mainCategory || null,
+          subCategory: legacySubmission.subCategory || null,
+          lyrics: legacySubmission.lyrics || null,
+        }
+      ];
+
+      return await this.createSubmissionWithTracks(submissionData, tracksData);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       logger.error('DatabaseApiService: Create submission from legacy error', {

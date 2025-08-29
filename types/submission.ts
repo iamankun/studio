@@ -1,20 +1,33 @@
-export enum SubmissionStatus {
-  PENDING = "PENDING",
-  APPROVED = "APPROVED",
-  REJECTED = "REJECTED",
-  PROCESSING = "PROCESSING",
-  PUBLISHED = "PUBLISHED",
-  CANCELLED = "CANCELLED",
-  DRAFT = "DRAFT"
-}
-
+// Legacy submission interface for backward compatibility
 export interface Submission {
   id: string
-  title: string
-  artist: string
-  status: SubmissionStatus
-  createdAt: Date
-  updatedAt: Date
+  userId: string
+  isrc: string
+  uploaderUsername: string
+  artistName: string
+  songTitle: string
+  albumName?: string
+  userEmail: string
+  imageFile: string
+  imageUrl: string
+  audioUrl?: string
+  audioUrls?: string[]
+  audioFilesCount: number
+  status: string
+  submissionDate: string
+  mainCategory: string
+  subCategory?: string
+  releaseType: string
+  isCopyrightOwner: string
+  hasBeenReleased: string
+  platforms: string[]
+  hasLyrics: string
+  lyrics: string
+  releaseDate: string
+  artistRole: string
+  fullName: string
+  additionalArtists: AdditionalArtist[]
+  trackInfos?: any[]
 }
 
 export interface SimpleSubmission {
@@ -25,46 +38,65 @@ export interface SimpleSubmission {
 export function toSimpleSubmission(submission: Submission): SimpleSubmission {
   return {
     id: submission.id,
-    title: submission.title
+    title: submission.songTitle
   }
 }
 
-export enum ReleaseType {
-  SINGLE = "SINGLE",
-  EP = "EP",
-  ALBUM = "ALBUM",
-  COMPILATION = "COMPILATION"
+// Form types for upload form
+export interface AdditionalArtist {
+  name: string
+  fullName: string
+  role: AdditionalArtistRole
+  percentage: number
 }
 
-export const PrismaReleaseType = ReleaseType;
-export const PrismaSubmissionStatus = SubmissionStatus;
+export type MainCategory = "pop" | "singer-songwriter" | "hiphoprap" | "edm" | "rnb" | "ballad" | "acoustic" | "indie" | "other_main"
+export type SubCategory = "official" | "cover" | "vpop" | "lofi" | "chill" | "trap" | "house" | "alternative" | "folk" | "other_sub"
+export type ReleaseType = "single" | "ep" | "album" | "compilation"
+export type CopyrightOwnershipStatus = "yes" | "no"
+export type ReleaseHistoryStatus = "yes" | "no"
+export type LyricsStatus = "yes" | "no"
+export type Platform = "youtube" | "spotify" | "apple_music" | "soundcloud" | "other_platform"
+export type ArtistPrimaryRole = "singer" | "singer-songwriter" | "rapper" | "producer" | "composer" | "songwriter" | "instrumental"
+export type AdditionalArtistRole = "featuring" | "vocalist" | "rapper" | "producer" | "composer" | "songwriter" | "instrumental"
 
-export function getStatusColor(status: SubmissionStatus): string {
-  switch (status) {
-    case SubmissionStatus.PENDING: return "#facc15";
-    case SubmissionStatus.APPROVED: return "#22c55e";
-    case SubmissionStatus.REJECTED: return "#ef4444";
-    case SubmissionStatus.PROCESSING: return "#38bdf8";
-    case SubmissionStatus.PUBLISHED: return "#10b981";
-    case SubmissionStatus.CANCELLED: return "#a3a3a3";
-    case SubmissionStatus.DRAFT: return "#e5e7eb";
-    default: return "#d1d5db";
-  }
+// Video and File types
+export interface VideoInfo {
+  id: string
+  title: string
+  artist: string
+  youtubeVideoId?: string
+  youtubeUrl?: string
+  thumbnailUrl?: string
+  duration?: number
+  description?: string
+  tags?: string
+  category?: string
+  language?: string
+  contentIdEnabled: boolean
+  contentIdStatus?: string
+  createdAt: Date
+  updatedAt: Date
 }
 
-export function getStatusText(status: SubmissionStatus): string {
-  switch (status) {
-    case SubmissionStatus.PENDING: return "Đang chờ";
-    case SubmissionStatus.APPROVED: return "Đã phê duyệt";
-    case SubmissionStatus.REJECTED: return "Đã từ chối";
-    case SubmissionStatus.PROCESSING: return "Đang xử lý";
-    case SubmissionStatus.PUBLISHED: return "Đã xuất bản";
-    case SubmissionStatus.CANCELLED: return "Đã hủy";
-    case SubmissionStatus.DRAFT: return "Bản nháp";
-    default: return "Không xác định";
-  }
+export interface FileInfo {
+  id: string
+  name: string
+  path: string
+  mimetype: string
+  size: number
+  category: string
+  folderId?: string
+  createdAt: Date
+  updatedAt: Date
 }
 
-export function convertLegacySubmissionToPrisma(submission: any): any {
-  return { submission: {}, tracks: [] };
+export interface FolderInfo {
+  id: string
+  name: string
+  path: string
+  parentId?: string
+  isPublic: boolean
+  createdAt: Date
+  updatedAt: Date
 }
