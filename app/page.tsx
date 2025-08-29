@@ -4,7 +4,7 @@
 "use client"
 import MainAppView from "@/components/main-app-view"
 import FallbackView from "@/components/fallback-view"
-import { Auth } from "@/components/auth/login-view"
+import { Auth } from "@/components/auth"
 import { useEffect, useState } from "react"
 import React from "react"
 

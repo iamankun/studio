@@ -17,7 +17,7 @@
     "kiem-tra:nguoi-dung": "node scripts/kiem-tra-nguoi-dung-thuc-te.js",
     "kiem-tra:bai-hat": "node scripts/kiem-tra-bang-bai-hat.mjs",
     "kiem-tra:bien-moi-truong": "node scripts/kiem-tra-env.mjs",
-    "kiem-tra:on-dinh": "node scripts/kiem-tra-on-dinh.mjs",
+    "kiem-tra:on-dinh": "node scripts/ondinh.mjs",
     "xac-minh:he-thong": "node scripts/xac-minh-he-thong.js",
     "kiem-tra:routes": "node scripts/kiem-tra-api.mjs",
     "test:hoan-chinh": "node scripts/test-complete-implementation.mjs",

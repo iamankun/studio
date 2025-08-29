@@ -60,7 +60,7 @@ function analyzeTypeScriptFile(content, type) {
     };
 
     // Tìm imports
-    const importRegex = /import\s+(?:{([^}]+)}|\*\s+as\s+([^\s]+)|([^\s,]+))\s+from\s+['"]([^'"]+)['"]/g;
+    const importRegex = /import\s+(?:{([^}]+)}|([^\s]+)|\*\s+as\s+([^\s]+))\s+from\s+['"]([^'"]+)['"]/g;
     let importMatch;
     while ((importMatch = importRegex.exec(content)) !== null) {
         const namedImports = importMatch[1] ? importMatch[1].split(',').map(i => i.trim()) : [];
@@ -116,6 +116,7 @@ function analyzeTypeScriptFile(content, type) {
 
     // Tìm classes (nếu là file service)
     if (type === 'service') {
+        // Đơn giản hóa regex để giảm độ phức tạp
         const classRegex = /class\s+([^\s{]+)(?:\s+extends\s+([^\s{]+))?(?:\s+implements\s+([^\s{]+))?\s*{([^}]*)}/g;
         let classMatch;
         while ((classMatch = classRegex.exec(content)) !== null) {
@@ -125,7 +126,7 @@ function analyzeTypeScriptFile(content, type) {
             const body = classMatch[4];
 
             // Parse methods
-            const methodRegex = /(?:public|private|protected|async)?\s*([a-zA-Z0-9_]+)\s*\(([^)]*)\)(?:\s*:\s*([^{]+))?\s*{/g;
+            const methodRegex = /(?:public|private|protected|async)?\s*(\w+)\s*\(([^)]*)\)(?:\s*:\s*([^{]+))?\s*{/g;
             const methods = [];
             let methodMatch;
 

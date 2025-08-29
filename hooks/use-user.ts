@@ -11,7 +11,8 @@ import type { User } from "@/types/user"
 // Import từ AuthProvider để tránh circular dependency
 interface AuthContextType {
     user: User | null
-    login: (username: string, password: string) => Promise<boolean>
+    login: (username: string, password: string) => Promise<{ success: boolean; message?: string }>
+    register: (userData: any) => Promise<{ success: boolean; message?: string }>
     logout: () => void
     loading: boolean
 }
@@ -23,7 +24,8 @@ export interface UseUserReturn {
     user: User | null
     isAuthenticated: boolean
     isLoading: boolean
-    login: (username: string, password: string) => Promise<boolean>
+    login: (username: string, password: string) => Promise<{ success: boolean; message?: string }>
+    register: (userData: any) => Promise<{ success: boolean; message?: string }>
     logout: () => void
 }
 
@@ -36,7 +38,8 @@ export function useUser(): UseUserReturn {
             user: null,
             isAuthenticated: false,
             isLoading: false,
-            login: async () => false,
+            login: async () => ({ success: false, message: "No auth provider" }),
+            register: async () => ({ success: false, message: "No auth provider" }),
             logout: () => { }
         }
     }
@@ -46,6 +49,7 @@ export function useUser(): UseUserReturn {
         isAuthenticated: !!context.user,
         isLoading: context.loading,
         login: context.login,
+        register: context.register,
         logout: context.logout
     }
 }

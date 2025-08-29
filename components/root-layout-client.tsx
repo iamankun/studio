@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { Auth } from "@/components/auth/login-view"
+import { AuthProvider } from "@/components/auth-provider"
 import { ThemeProvider } from "@/components/theme-provider"
 import { MainContentLayout } from "@/components/main-content-layout"
 import { DynamicBackground } from "@/components/dynamic-background"
@@ -52,13 +52,13 @@ export function RootLayoutClient({ children, className }: RootLayoutClientProps)
                 />
             ) : (
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-                    <Auth>
+                    <AuthProvider>
                         <DynamicBackground />
                         <MainContentLayout>
                             {children}
                         </MainContentLayout>
                         <AiChatButton />
-                    </Auth>
+                    </AuthProvider>
                 </ThemeProvider>
             )}
         </body>

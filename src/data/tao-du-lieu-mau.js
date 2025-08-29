@@ -1,23 +1,7 @@
 /**
  * Data Generation Script for AKS Studio
  * 
- * This script generates sampl    full_name: 'An Kun Studio',
-    profile_picture: '/face.png',
-    is_active: true,
-    created_at: new Date('2025-07-02 11:38:14.506125'),
-    updated_at: new Date()
-  },
-  {
-    username: 'ankunstudio',
-    email: 'ankunstudio@ankun.dev',
-    password_hash: '$2b$10$example.hash.for.manager.password',
-    role: 'Artist',
-    full_name: 'An Kun Studio',
-    profile_picture: '/face.png',
-    is_active: true,
-    created_at: new Date('2025-07-02 11:38:14.506125'),
-    updated_at: new Date()
-  },plication including:
+ * This script generates sample data for the application including:
  * - Users (artists, label managers, admins)
  * - Submissions (songs, albums, artwork)
  * - Labels and label assignments
@@ -74,7 +58,7 @@ if (!DATABASE_URL) {
       if (line.startsWith('DATABASE_URL=')) {
         DATABASE_URL = line.split('=')[1].replace(/"/g, '');
         console.log('✅ Đã tìm thấy DATABASE_URL từ file trực tiếp');
-        break;;
+        break;
       }
     }
   } catch (error) {
@@ -92,312 +76,319 @@ if (!DATABASE_URL) {
 // Sample data generators
 const generateUsers = () => [
   // === TÀI KHOẢN THỰC (CHÍNH CHỦ) ===
-  // ankunstudio là tài khoản chính của chủ sở hữu hệ thống
-  // Có cả 2 quyền: Label Manager và Artist
   {
-    username: 'ankunstudio',
+    userName: 'ankunstudio',
     email: 'ankunstudio@ankun.dev',
-    password_hash: '$2b$10$CnaLK1FPWHiHNrBa4FToxOutmeDM7uapyR2K.cUrCYKRn5v8rWQxi',
-    role: 'Label Manager & Artist', // Quyền đặc biệt: cả Label Manager và Artist
-    full_name: 'An Kun Studio',
-    profile_picture: '/face.png',
-    is_active: true,
-    created_at: new Date('2025-07-02 11:38:14.506125'),
-    updated_at: new Date()
-  }
-]
-
-const generateSubmissions = (userIds) => [
+    password: '$2b$10$CnaLK1FPWHiHNrBa4FToxOutmeDM7uapyR2K.cUrCYKRn5v8rWQxi',
+    roles: ['ADMINISTRATOR', 'LABEL_MANAGER', 'COMPOSER', 'PRODUCER', 'PERFORMER'],
+    fullName: 'An Kun Studio',
+    createdAt: new Date('2025-07-02 11:38:14.506125'),
+    updatedAt: new Date()
+  },
+  // === DATA GIẢ ĐỂ TEST ===
   {
+    userName: 'artist1',
+    email: 'artist1@test.com',
+    password: '$2b$10$testpassword1',
+    roles: ['COMPOSER', 'PERFORMER'],
+    fullName: 'Test Artist 1',
+    createdAt: new Date('2024-01-15'),
+    updatedAt: new Date()
+  },
+  {
+    userName: 'producer1',
+    email: 'producer1@test.com',
+    password: '$2b$10$testpassword2',
+    roles: ['PRODUCER'],
+    fullName: 'Test Producer 1',
+    createdAt: new Date('2024-02-20'),
+    updatedAt: new Date()
+  }
+];
+
+const generateProfiles = (userIds) => [
+  {
+    id: `profile_${Date.now()}`,
+    bio: 'An Kun Studio - Digital Music Distribution Platform',
+    avatarUrl: '/face.png',
+    artist: 'An Kun Studio',
+    name: 'An Kun',
+    verified: true,
+    userUID: userIds[0],
+    socialLinks: ['https://ankun.dev', 'https://facebook.com/ankunstudio'],
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    id: `profile_${Date.now() + 1}`,
+    bio: 'Independent artist focusing on pop music',
+    avatarUrl: '/default-avatar.png',
+    artist: 'Test Artist 1',
+    name: 'Nguyen Van A',
+    verified: false,
+    userUID: userIds[1],
+    socialLinks: ['https://instagram.com/testartist1'],
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    id: `profile_${Date.now() + 2}`,
+    bio: 'Music producer specializing in electronic beats',
+    avatarUrl: '/default-avatar.png',
+    artist: 'Test Producer 1',
+    name: 'Tran Van B',
+    verified: false,
+    userUID: userIds[2],
+    socialLinks: ['https://soundcloud.com/testproducer1'],
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
+];
+
+const generateLabels = (userIds) => [
+  {
+    id: `label_${Date.now()}`,
+    name: 'An Kun Studio',
+    code: 'AKS',
+    ownerUID: userIds[0],
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    id: `label_${Date.now() + 1}`,
+    name: 'Independent Records',
+    code: 'INDIE',
+    ownerUID: userIds[1],
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
+];
+
+const generateSubmissions = (userIds, labelIds) => [
+  {
+    id: `sub_${Date.now()}`,
     title: 'Summer Vibes',
-    artist_name: 'Independent Artist',
-    genre: 'Pop',
-    description: 'An upbeat summer anthem perfect for the beach',
-    submission_type: 'song',
-    file_path: '/uploads/summer_vibes.mp3',
-    artwork_path: '/uploads/summer_vibes_cover.jpg',
-    status: 'pending',
-    user_id: userIds[2], // artist1
-    submitted_at: new Date('2024-03-01'),
-    reviewed_at: null,
-    reviewed_by: null,
-    feedback: null
+    artist: 'An Kun Studio',
+    type: 'SINGLE',
+    coverImagePath: '/uploads/summer_vibes_cover.jpg',
+    releaseDate: new Date('2024-06-01'),
+    status: 'APPROVED',
+    published: true,
+    labelId: labelIds[0],
+    creatorUID: userIds[0],
+    createdAt: new Date('2024-03-01'),
+    updatedAt: new Date()
   },
   {
-    title: 'Midnight Dreams Album',
-    artist_name: 'Rising Star',
-    genre: 'R&B',
-    description: 'A collection of soulful tracks exploring love and life',
-    submission_type: 'album',
-    file_path: '/uploads/midnight_dreams_album.zip',
-    artwork_path: '/uploads/midnight_dreams_cover.jpg',
-    status: 'approved',
-    user_id: userIds[3], // artist2
-    submitted_at: new Date('2024-02-20'),
-    reviewed_at: new Date('2024-02-25'),
-    reviewed_by: userIds[1], // labelmanager1
-    feedback: 'Excellent work! Love the production quality.'
-  },
-  {
-    title: 'City Lights',
-    artist_name: 'Independent Artist',
-    genre: 'Electronic',
-    description: 'Atmospheric electronic piece inspired by urban nightlife',
-    submission_type: 'song',
-    file_path: '/uploads/city_lights.mp3',
-    artwork_path: '/uploads/city_lights_cover.jpg',
-    status: 'rejected',
-    user_id: userIds[2], // artist1
-    submitted_at: new Date('2024-01-30'),
-    reviewed_at: new Date('2024-02-05'),
-    reviewed_by: userIds[1], // labelmanager1
-    feedback: 'Good concept but needs better mixing. Please resubmit after improvements.'
+    id: `sub_${Date.now() + 1}`,
+    title: 'City Nights EP',
+    artist: 'Test Artist 1',
+    type: 'EP',
+    coverImagePath: '/uploads/city_nights_cover.jpg',
+    releaseDate: new Date('2024-08-15'),
+    status: 'PENDING',
+    published: false,
+    labelId: labelIds[1],
+    creatorUID: userIds[1],
+    createdAt: new Date('2024-07-01'),
+    updatedAt: new Date()
   }
 ];
 
-const generateActivityLogs = (userIds) => [
+const generateTracks = (submissionIds) => [
   {
-    user_id: userIds[0],
+    id: `track_${Date.now()}`,
+    title: 'Summer Vibes',
+    artist: 'An Kun Studio',
+    filePath: '/uploads/tracks/summer_vibes.wav',
+    duration: 180,
+    ISRC: 'VNA2P2400001',
+    fileName: 'summer_vibes.wav',
+    fileSize: 52428800,
+    format: 'WAV',
+    bitrate: '24-bit',
+    sampleRate: '44.1 kHz',
+    mainCategory: 'Pop',
+    submissionId: submissionIds[0],
+    createdAt: new Date('2024-03-01'),
+    updatedAt: new Date()
+  },
+  {
+    id: `track_${Date.now() + 1}`,
+    title: 'City Nights',
+    artist: 'Test Artist 1',
+    filePath: '/uploads/tracks/city_nights.wav',
+    duration: 210,
+    ISRC: 'VNA2P2400002',
+    fileName: 'city_nights.wav',
+    fileSize: 61440000,
+    format: 'WAV',
+    bitrate: '24-bit',
+    sampleRate: '48 kHz',
+    mainCategory: 'Electronic',
+    submissionId: submissionIds[1],
+    createdAt: new Date('2024-07-01'),
+    updatedAt: new Date()
+  }
+];
+
+const generateNhatKy = (userIds) => [
+  {
+    id: `log_${Date.now()}`,
     action: 'user_login',
-    description: 'Admin logged into the system',
-    entity_type: 'auth',
-    entity_id: null,
-    status: 'success',
-    ip_address: '192.168.1.100',
-    user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-    created_at: new Date()
+    details: { ip: '192.168.1.100', userAgent: 'Mozilla/5.0' },
+    userUID: userIds[0],
+    createdAt: new Date()
   },
   {
-    user_id: userIds[2],
+    id: `log_${Date.now() + 1}`,
     action: 'submission_create',
-    description: 'New song submission: Summer Vibes',
-    entity_type: 'submission',
-    entity_id: 1,
-    status: 'success',
-    ip_address: '192.168.1.105',
-    user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-    created_at: new Date('2024-03-01')
-  },
-  {
-    user_id: userIds[1],
-    action: 'submission_review',
-    description: 'Reviewed and approved album submission',
-    entity_type: 'submission',
-    entity_id: 2,
-    status: 'success',
-    ip_address: '192.168.1.102',
-    user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-    created_at: new Date('2024-02-25')
+    details: { submissionTitle: 'Summer Vibes', type: 'SINGLE' },
+    userUID: userIds[0],
+    createdAt: new Date('2024-03-01')
   }
 ];
 
-const generateLabelData = () => ({
-  templates: [
-    {
-      name: 'Standard Music Release',
-      description: 'Template for standard music releases',
-      fields: JSON.stringify([
-        { name: 'title', type: 'text', required: true },
-        { name: 'artist', type: 'text', required: true },
-        { name: 'genre', type: 'select', options: ['Pop', 'Rock', 'Hip-Hop', 'Electronic', 'R&B'] },
-        { name: 'release_date', type: 'date', required: true }
-      ]),
-      created_at: new Date('2024-01-01'),
-      updated_at: new Date()
-    },
-    {
-      name: 'Album Release',
-      description: 'Template for full album releases',
-      fields: JSON.stringify([
-        { name: 'album_title', type: 'text', required: true },
-        { name: 'artist', type: 'text', required: true },
-        { name: 'track_count', type: 'number', required: true },
-        { name: 'total_duration', type: 'text', required: true },
-        { name: 'genre', type: 'select', options: ['Pop', 'Rock', 'Hip-Hop', 'Electronic', 'R&B'] }
-      ]),
-      created_at: new Date('2024-01-01'),
-      updated_at: new Date()
-    }
-  ],
-  managers: [
-    {
-      name: 'Main Label Manager',
-      description: 'Primary label management for AKS Studio',
-      settings: JSON.stringify({
-        auto_approve: false,
-        email_notifications: true,
-        workflow_stages: ['submission', 'review', 'approval', 'release']
-      }),
-      is_active: true,
-      created_at: new Date('2024-01-01'),
-      updated_at: new Date()
-    }
-  ]
-});
+const generateDistributionPlatforms = () => [
+  {
+    id: `platform_${Date.now()}`,
+    name: 'Spotify',
+    logoUrl: '/logos/spotify.png',
+    isActive: true,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    id: `platform_${Date.now() + 1}`,
+    name: 'Apple Music',
+    logoUrl: '/logos/apple-music.png',
+    isActive: true,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
+];
+
+
+
+
 
 async function createTables(pool) {
   console.log(chalk.yellow('Creating tables if they don\'t exist...'));
   
-  // Users table
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS users (
-      id SERIAL PRIMARY KEY,
-      username VARCHAR(50) UNIQUE NOT NULL,
-      email VARCHAR(100) UNIQUE NOT NULL,
-      password_hash VARCHAR(255) NOT NULL,
-      role VARCHAR(50) NOT NULL DEFAULT 'Artist',
-      full_name VARCHAR(100),
-      profile_picture TEXT,
-      is_active BOOLEAN DEFAULT true,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+  console.log(chalk.yellow('Sử dụng schema từ final.sql - bỏ qua tạo tables'));
+  // Tables đã được tạo bởi final.sql migration
 
-  // Submissions table
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS submissions (
-      id SERIAL PRIMARY KEY,
-      title VARCHAR(200) NOT NULL,
-      artist_name VARCHAR(100) NOT NULL,
-      genre VARCHAR(50),
-      description TEXT,
-      submission_type VARCHAR(50) DEFAULT 'song',
-      file_path TEXT,
-      artwork_path TEXT,
-      status VARCHAR(50) DEFAULT 'pending',
-      user_id INTEGER REFERENCES users(id),
-      submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      reviewed_at TIMESTAMP,
-      reviewed_by INTEGER REFERENCES users(id),
-      feedback TEXT
-    )
-  `);
 
-  // Activity logs table
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS nhat_ky_studio (
-      id SERIAL PRIMARY KEY,
-      user_id INTEGER REFERENCES users(id),
-      action VARCHAR(100) NOT NULL,
-      description TEXT,
-      entity_type VARCHAR(50),
-      entity_id INTEGER,
-      status VARCHAR(20) DEFAULT 'success',
-      ip_address INET,
-      user_agent TEXT,
-      details JSONB,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
 
-  // Label templates table
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS label_templates (
-      id SERIAL PRIMARY KEY,
-      name VARCHAR(100) NOT NULL,
-      description TEXT,
-      fields JSONB,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
 
-  // Label manager table
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS label_manager (
-      id SERIAL PRIMARY KEY,
-      name VARCHAR(100) NOT NULL,
-      description TEXT,
-      settings JSONB,
-      is_active BOOLEAN DEFAULT true,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
 
-  // Label assignments table
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS label_assignments (
-      id SERIAL PRIMARY KEY,
-      label_manager_id INTEGER REFERENCES label_manager(id),
-      user_id INTEGER REFERENCES users(id),
-      submission_id INTEGER REFERENCES submissions(id),
-      template_id INTEGER REFERENCES label_templates(id),
-      assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      completed_at TIMESTAMP,
-      status VARCHAR(50) DEFAULT 'assigned'
-    )
-  `);
 
-  console.log(chalk.green('✅ Tables created successfully'));
+
+  console.log(chalk.green('✅ Using existing schema from final.sql'));
 }
 
 async function insertSampleData(pool) {
   console.log(chalk.yellow('Inserting sample data...'));
   
-  // Clear existing data
-  await pool.query('TRUNCATE label_assignments, submissions, nhat_ky_studio, label_manager, label_templates, users RESTART IDENTITY CASCADE');
+  // Clear existing data - chỉ truncate các bảng chính
+  try {
+    await pool.query('TRUNCATE "Track", "Submission", "Profile", "Label", "User" RESTART IDENTITY CASCADE');
+  } catch (error) {
+    console.log(chalk.yellow('⚠️  Some tables may not exist yet, continuing...'));
+  }
+  
+  // Clear additional tables if they exist
+  try {
+    await pool.query('TRUNCATE "nhatKy", "DistributionPlatform" RESTART IDENTITY CASCADE');
+  } catch (error) {
+    console.log(chalk.yellow('⚠️  Additional tables not found, will create data anyway'));
+  }
   
   // Insert users
   const users = generateUsers();
   const userIds = [];
   
   for (const user of users) {
+    const uid = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const result = await pool.query(`
-      INSERT INTO users (username, email, password_hash, role, full_name, profile_picture, is_active, created_at, updated_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-      RETURNING id
-    `, [user.username, user.email, user.password_hash, user.role, user.full_name, user.profile_picture, user.is_active, user.created_at, user.updated_at]);
-    userIds.push(result.rows[0].id);
+      INSERT INTO "User" ("UID", "userName", "email", "password", "roles", "fullName", "createdAt", "updatedAt")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING "UID"
+    `, [uid, user.userName, user.email, user.password, user.roles, user.fullName, user.createdAt, user.updatedAt]);
+    userIds.push(result.rows[0].UID);
   }
   
   console.log(chalk.green(`✅ Inserted ${users.length} users`));
   
+  // Insert profiles
+  const profiles = generateProfiles(userIds);
+  for (const profile of profiles) {
+    await pool.query(`
+      INSERT INTO "Profile" ("id", "bio", "avatarUrl", "artist", "name", "verified", "userUID", "socialLinks", "createdAt", "updatedAt")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    `, [profile.id, profile.bio, profile.avatarUrl, profile.artist, profile.name, profile.verified, profile.userUID, profile.socialLinks, profile.createdAt, profile.updatedAt]);
+  }
+  
+  console.log(chalk.green(`✅ Inserted ${profiles.length} profiles`));
+  
+  // Insert labels
+  const labels = generateLabels(userIds);
+  const labelIds = [];
+  for (const label of labels) {
+    await pool.query(`
+      INSERT INTO "Label" ("id", "name", "code", "ownerUID", "createdAt", "updatedAt")
+      VALUES ($1, $2, $3, $4, $5, $6)
+    `, [label.id, label.name, label.code, label.ownerUID, label.createdAt, label.updatedAt]);
+    labelIds.push(label.id);
+  }
+  
+  console.log(chalk.green(`✅ Inserted ${labels.length} labels`));
+  
   // Insert submissions
-  const submissions = generateSubmissions(userIds);
+  const submissions = generateSubmissions(userIds, labelIds);
+  const submissionIds = [];
   for (const submission of submissions) {
     await pool.query(`
-      INSERT INTO submissions (title, artist_name, genre, description, submission_type, file_path, artwork_path, status, user_id, submitted_at, reviewed_at, reviewed_by, feedback)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-    `, [submission.title, submission.artist_name, submission.genre, submission.description, submission.submission_type, submission.file_path, submission.artwork_path, submission.status, submission.user_id, submission.submitted_at, submission.reviewed_at, submission.reviewed_by, submission.feedback]);
+      INSERT INTO "Submission" ("id", "title", "artist", "type", "coverImagePath", "releaseDate", "status", "published", "labelId", "creatorUID", "createdAt", "updatedAt")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+    `, [submission.id, submission.title, submission.artist, submission.type, submission.coverImagePath, submission.releaseDate, submission.status, submission.published, submission.labelId, submission.creatorUID, submission.createdAt, submission.updatedAt]);
+    submissionIds.push(submission.id);
   }
   
   console.log(chalk.green(`✅ Inserted ${submissions.length} submissions`));
   
-  // Insert activity logs
-  const activityLogs = generateActivityLogs(userIds);
-  for (const log of activityLogs) {
+  // Insert tracks
+  const tracks = generateTracks(submissionIds);
+  for (const track of tracks) {
     await pool.query(`
-      INSERT INTO nhat_ky_studio (user_id, action, description, entity_type, entity_id, status, ip_address, user_agent, created_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-    `, [log.user_id, log.action, log.description, log.entity_type, log.entity_id, log.status, log.ip_address, log.user_agent, log.created_at]);
+      INSERT INTO "Track" ("id", "title", "artist", "filePath", "duration", "ISRC", "fileName", "fileSize", "format", "bitrate", "sampleRate", "mainCategory", "submissionId", "createdAt", "updatedAt")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+    `, [track.id, track.title, track.artist, track.filePath, track.duration, track.ISRC, track.fileName, track.fileSize, track.format, track.bitrate, track.sampleRate, track.mainCategory, track.submissionId, track.createdAt, track.updatedAt]);
   }
   
-  console.log(chalk.green(`✅ Inserted ${activityLogs.length} activity logs`));
+  console.log(chalk.green(`✅ Inserted ${tracks.length} tracks`));
   
-  // Insert label data
-  const labelData = generateLabelData();
-  
-  // Insert label templates
-  for (const template of labelData.templates) {
+  // Insert nhatKy
+  const logs = generateNhatKy(userIds);
+  for (const log of logs) {
     await pool.query(`
-      INSERT INTO label_templates (name, description, fields, created_at, updated_at)
+      INSERT INTO "nhatKy" ("id", "action", "details", "userUID", "createdAt")
       VALUES ($1, $2, $3, $4, $5)
-    `, [template.name, template.description, template.fields, template.created_at, template.updated_at]);
+    `, [log.id, log.action, JSON.stringify(log.details), log.userUID, log.createdAt]);
   }
   
-  console.log(chalk.green(`✅ Inserted ${labelData.templates.length} label templates`));
+  console.log(chalk.green(`✅ Inserted ${logs.length} activity logs`));
   
-  // Insert label managers
-  for (const manager of labelData.managers) {
+  // Insert distribution platforms
+  const platforms = generateDistributionPlatforms();
+  for (const platform of platforms) {
     await pool.query(`
-      INSERT INTO label_manager (name, description, settings, is_active, created_at, updated_at)
+      INSERT INTO "DistributionPlatform" ("id", "name", "logoUrl", "isActive", "createdAt", "updatedAt")
       VALUES ($1, $2, $3, $4, $5, $6)
-    `, [manager.name, manager.description, manager.settings, manager.is_active, manager.created_at, manager.updated_at]);
+    `, [platform.id, platform.name, platform.logoUrl, platform.isActive, platform.createdAt, platform.updatedAt]);
   }
   
-  console.log(chalk.green(`✅ Inserted ${labelData.managers.length} label managers`));
+  console.log(chalk.green(`✅ Inserted ${platforms.length} distribution platforms`));
 }
 
 async function main() {
@@ -427,6 +418,14 @@ async function main() {
     
     console.log('='.repeat(50));
     console.log(chalk.green('🎉 Sample data generation completed successfully!'));
+    console.log(chalk.blue('✅ Created:'));
+    console.log(chalk.blue('   - 3 Users: ankunstudio + 2 test users'));
+    console.log(chalk.blue('   - 3 Profiles: An Kun Studio + test profiles'));
+    console.log(chalk.blue('   - 2 Labels: An Kun Studio (AKS) + Independent Records'));
+    console.log(chalk.blue('   - 2 Submissions: Summer Vibes + City Nights EP'));
+    console.log(chalk.blue('   - 2 Tracks: Summer Vibes + City Nights'));
+    console.log(chalk.blue('   - 2 Activity Logs: login + submission create'));
+    console.log(chalk.blue('   - 2 Distribution Platforms: Spotify + Apple Music'));
     console.log(chalk.blue('You can now start the development server with: npm run dev'));
     
   } catch (error) {
