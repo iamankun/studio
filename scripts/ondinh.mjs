@@ -59,7 +59,7 @@ async function DatabaseSchema(client) {
             console.log(`❌ Bảng ${table}: Lỗi - ${error.message}`);
         }
     }
-    console.log(`📊 Schema Score: ${tableCount}/${requiredTables.length}`);
+    console.log(`📊 Điểm Schema: ${tableCount}/${requiredTables.length}`);
     return tableCount === requiredTables.length;
 }
 
@@ -69,7 +69,7 @@ async function AuthenticationSystem(client) {
         const adminPassword = process.env.ADMIN_PASSWORD || '@iamAnKun';
 
         const labelManager = await client.query(`
-            SELECT id, username, password_hash FROM label_manager 
+            SELECT id, username, password_hash FROM users
             WHERE username = $1
         `, [adminUsername]);
 
@@ -79,46 +79,45 @@ async function AuthenticationSystem(client) {
                 labelManager.rows[0].password_hash
             );
             if (isValidPassword) {
-                console.log('✅ Label Manager authentication: Valid');
+                console.log('✅ Nhãn quản lý: Hợp lệ');
                 return true;
             } else {
-                console.log('❌ Label Manager authentication: Invalid password');
+                console.log('❌ Nhãn quản lý: Mật khẩu không hợp lệ');
             }
         } else {
-            console.log('❌ Label Manager authentication: User not found');
+            console.log('❌ Nhãn quản lý: Không tìm thấy người dùng');
         }
 
-        const artist = await client.query(`
-            SELECT id, username, password_hash FROM artist 
-            WHERE username = $1
+        const ADMINISTRATOR = await client.query(`
+            SELECT UID, userName, password FROM users
+            WHERE userName = $1
         `, [adminUsername]);
 
-        if (artist.rows.length > 0) {
+        if (ADMINISTRATOR.rows.length > 0) {
             const isValidPassword = await bcrypt.compare(
                 adminPassword,
-                artist.rows[0].password_hash
+                ADMINISTRATOR.rows[0].password
             );
-            console.log(`✅ Artist authentication: ${isValidPassword ? 'Valid' : 'Invalid'}`);
+            console.log(`✅ ADMINISTRATOR xác thực: ${isValidPassword ? 'Hợp lệ' : 'Không hợp lệ'}`);
         }
     } catch (error) {
-        console.log('❌ Authentication test failed:', error.message);
+        console.log('❌ Xác thực thất bại:', error.message);
     }
     return false;
 }
 
 async function AuthorizationLogic(client) {
     try {
-        const dualRole = await client.query(`
+        const label_manager = await client.query(`
             SELECT 
-                lm.id as label_id, lm.username as label_username,
-                a.id as artist_id, a.username as artist_username
+                lm.id as label_id, lm.username as label_username
             FROM label_manager lm
             FULL OUTER JOIN artist a ON lm.username = a.username
             WHERE lm.username = $1 OR a.username = $1
         `, [process.env.ADMIN_USERNAME || 'ankunstudio']);
 
-        if (dualRole.rows.length > 0 && dualRole.rows[0].label_id && dualRole.rows[0].artist_id) {
-            console.log('✅ Dual role (Label Manager + Artist): Configured');
+        if (label_manager.rows.length > 0 && label_manager.rows[0].label_id && label_manager.rows[0].artist_id) {
+            console.log('✅  Quản lí nhãn phát hành có - Chấp nhận     (La: Configured');
             return true;
         } else {
             console.log('❌ Dual role: Not properly configured');
