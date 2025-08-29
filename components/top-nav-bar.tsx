@@ -78,9 +78,7 @@ export function TopNavBar({ currentView, onViewChange }: TopNavBarProps) {
   ];
 
   return (
-    <nav
-      className={`fixed top-0 w-full z-50 bg-background/95 backdrop-blur-sm shadow-sm border-b transition-all duration-300 ${isCollapsed ? "h-12" : "h-auto"}`}
-    >
+    <nav className="bg-background/95 backdrop-blur-sm border-b" style={{position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50}}>
       {/* Logo section */}
       <div className="flex justify-between items-center px-4 py-2">
         <Link href="/" className="flex items-center gap-2">

@@ -4,7 +4,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL=postgresql://aksstudio_owner:npg_HzPUo8Xn1wfD@ep-mute-rice-a17ojtca-pooler.ap-southeast-1.aws.neon.tech/aksstudio?sslmode=require&channel_binding=require")
+
 }
 
 // --- BẢNG QUẢN LÝ NGƯỜI DÙNG & HỒ SƠ ---

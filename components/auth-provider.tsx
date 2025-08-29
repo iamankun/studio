@@ -1,30 +1,39 @@
 "use client";
 
-import { useState, useEffect, ReactNode } from "react";
-import { AuthContext } from "@/hooks/use-user";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import type { User } from "@/types/user";
 
-interface AuthProviderProps {
-  children: ReactNode;
+interface AuthContextType {
+  user: User | null;
+  login: (username: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  register: (userData: any) => Promise<{ success: boolean; message?: string }>;
+  logout: () => void;
+  loading: boolean;
 }
 
-export function AuthProvider({ children }: AuthProviderProps) {
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check localStorage for existing user
-    try {
-      const storedUser = localStorage.getItem('currentUser');
-      if (storedUser) {
-        const userData = JSON.parse(storedUser);
-        setUser(userData);
+    // Check for existing session
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/status');
+        const result = await response.json();
+        if (result.success && result.user) {
+          setUser(result.user);
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Error loading user from localStorage:", error);
-      localStorage.removeItem('currentUser');
-    }
-    setLoading(false);
+    };
+
+    checkAuth();
   }, []);
 
   const login = async (username: string, password: string) => {
@@ -39,14 +48,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       if (result.success && result.user) {
         setUser(result.user);
-        localStorage.setItem('currentUser', JSON.stringify(result.user));
         return { success: true };
-      } else {
-        return { success: false, message: result.message || "Đăng nhập thất bại" };
       }
+      
+      return { success: false, message: result.message || 'Đăng nhập thất bại' };
     } catch (error) {
-      console.error("Login error:", error);
-      return { success: false, message: "Lỗi kết nối" };
+      return { success: false, message: 'Lỗi kết nối' };
     }
   };
 
@@ -61,19 +68,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const result = await response.json();
       
       if (result.success) {
-        return { success: true, message: "Đăng ký thành công" };
-      } else {
-        return { success: false, message: result.message || "Đăng ký thất bại" };
+        return { success: true };
       }
+      
+      return { success: false, message: result.message || 'Đăng ký thất bại' };
     } catch (error) {
-      console.error("Register error:", error);
-      return { success: false, message: "Lỗi kết nối" };
+      return { success: false, message: 'Lỗi kết nối' };
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('currentUser');
+  const logout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+    }
   };
 
   return (
@@ -81,4 +92,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       {children}
     </AuthContext.Provider>
   );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
 }

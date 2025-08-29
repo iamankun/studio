@@ -1,24 +1,17 @@
 import { NextResponse } from 'next/server';
-import { getSession } from '@/lib/session';
-import { logger } from '@/lib/logger';
 
 export async function GET() {
   try {
-    const session = await getSession();
-    const user = session.user;
-
-    if (user) {
-      logger.info('User status checked: logged in', { userId: (user as any).UID });
-      return NextResponse.json({ isLoggedIn: true, user });
-    } else {
-      logger.info('User status checked: not logged in');
-      return NextResponse.json({ isLoggedIn: false });
-    }
+    // For now, return no user (not authenticated)
+    // This will be implemented with proper session management later
+    return NextResponse.json({
+      success: false,
+      user: null
+    });
   } catch (error) {
-    logger.error('Error checking auth status', error);
-    return NextResponse.json(
-      { isLoggedIn: false, error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      success: false,
+      message: 'Failed to check auth status'
+    }, { status: 500 });
   }
 }

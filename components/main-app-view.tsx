@@ -3,6 +3,7 @@
 import { TopNavBar } from "@/components/top-nav-bar";
 import { DashboardView } from "@/components/views/dashboard-view";
 import UploadFormView from "@/components/views/upload-form-view";
+import type { UserRoles } from "@/types/user"; // Adjust path if needed
 import { SubmissionsView } from "@/components/views/submissions-view";
 import { MyProfileView } from "@/components/views/my-profile-view";
 import { SettingsView } from "@/components/views/settings-view";
@@ -14,7 +15,8 @@ import { NotificationSystem } from "@/components/notification-system";
 import { SoundSystem } from "@/components/sound-system";
 import { SystemStatusProvider } from "@/components/system-status-provider";
 import { useState, useEffect, useCallback } from "react";
-import type { Submission, SubmissionStatus } from "@/types/submission";
+import type { Submission } from "@/types/submission";
+import { SubmissionStatus } from "@/types/prisma";
 import { LogsView } from "@/components/views/logs-view";
 import { logger } from "@/lib/logger";
 import { useUser } from "@/hooks/use-user";
@@ -163,49 +165,47 @@ export default function MainAppView() {
 
   return (
     <SystemStatusProvider>
-      <div className="flex min-h-screen bg-background relative main-container">
+      <div className="min-h-screen relative">
         <DynamicBackground />
         <TopNavBar currentView={currentView} onViewChange={setCurrentView} />
-        <div className="w-full min-h-screen">
-          <main className="flex-1 relative pt-20 min-h-screen">
-            <div className="min-h-screen bg-background transition-colors duration-300 pb-8">
-              {currentView === "dashboard" && (
-                <DashboardView onViewChange={setCurrentView} />
-              )}
-              {currentView === "upload" && (
-                <UploadFormView
-                  onSubmissionAdded={handleSubmissionAdded}
-                  showModal={showNotification}
-                />
-              )}
-              {currentView === "submissions" && (
-                <SubmissionsView
-                  submissions={submissions}
-                  viewType="all"
-                  onUpdateStatus={handleStatusUpdate}
-                  showModal={showNotification}
-                  onViewChange={setCurrentView}
-                />
-              )}
-              {currentView === "profile" && (
-                <MyProfileView showModal={showNotification} />
-              )}
-              {currentView === "settings" && <SettingsView />}
-              {currentView === "users" && user?.roles.includes("Artist") && (
-                <UsersView />
-              )}
-              {currentView === "admin" && user?.roles.includes("Label_Manager") && (
-                <AdminPanelView showModal={showNotification} />
-              )}
-              {currentView === "email" && (
-                <EmailCenterView showModal={showNotification} />
-              )}
-              {currentView === "logs" && user?.roles.includes("Administrator") && (
-                <LogsView />
-              )}
-            </div>
-          </main>
-        </div>
+        <main className="pt-24 min-h-screen" style={{ paddingTop: '6rem' }}>
+          <div className="container mx-auto p-4">
+            {currentView === "dashboard" && (
+              <DashboardView onViewChange={setCurrentView} />
+            )}
+            {currentView === "upload" && (
+              <UploadFormView
+                onSubmissionAdded={handleSubmissionAdded}
+                showModal={showNotification}
+              />
+            )}
+            {currentView === "submissions" && (
+              <SubmissionsView
+                submissions={submissions}
+                viewType="all"
+                onUpdateStatus={handleStatusUpdate}
+                showModal={showNotification}
+                onViewChange={setCurrentView}
+              />
+            )}
+            {currentView === "profile" && (
+              <MyProfileView showModal={showNotification} />
+            )}
+            {currentView === "settings" && <SettingsView />}
+            {currentView === "users" && user?.roles.includes("Artist") && (
+              <UsersView />
+            )}
+            {currentView === "admin" && user?.roles.includes("Label_Manager") && (
+              <AdminPanelView showModal={showNotification} />
+            )}
+            {currentView === "email" && (
+              <EmailCenterView showModal={showNotification} />
+            )}
+            {currentView === "logs" && user?.roles.includes("Administrator") && (
+              <LogsView />
+            )}
+          </div>
+        </main>
         <NotificationSystem
           notifications={notifications}
           onRemove={removeNotification}

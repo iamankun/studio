@@ -18,14 +18,10 @@ export function RootLayoutClient({ children, className }: RootLayoutClientProps)
     const [isClient, setIsClient] = useState(false)
 
     useEffect(() => {
-        // Fix hydration mismatch: đảm bảo chỉ chạy trên client
         setIsClient(true)
 
-        // Không cần timer ở đây, để LoadingScreen tự quản lý
-        // Timer sẽ được handle bởi LoadingScreen component
     }, [])
 
-    // Prevent hydration mismatch: render basic content on server
     if (!isClient) {
         return (
             <body className={className} suppressHydrationWarning>

@@ -9,7 +9,7 @@ import { SubmissionDetailModal } from "@/components/modals/submission-detail-mod
 import { Auth } from "@/components/auth/login-view"
 import { AuthorizationService } from "@/lib/authorization-service"
 import type { Submission } from "@/types/submission"
-import { getStatusColor, getStatusText } from "@/types/submission"
+import { getStatusColor, getStatusText } from "@/types/prisma"
 import { Eye, Download, Volume2, FileText, Music, Upload, Edit, Trash2, CheckCircle, XCircle } from "lucide-react"
 
 interface SubmissionsViewProps {

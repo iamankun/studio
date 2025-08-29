@@ -4,7 +4,7 @@ import { useState, useEffect, ReactNode } from "react";
 import { LoginView } from "./login-view";
 import { RegisterView } from "./register-view";
 import { ForgotPasswordView } from "./forgot-password-view";
-import { useUser } from "@/hooks/use-user";
+import { useAuth } from "@/components/auth-provider";
 import { DynamicBackground } from "@/components/dynamic-background";
 
 interface AuthProps {
@@ -12,7 +12,7 @@ interface AuthProps {
 }
 
 export function Auth({ children }: AuthProps) {
-  const { user, login, register } = useUser();
+  const { user, login, register } = useAuth();
   const [authView, setAuthView] = useState<"login" | "register" | "forgot">("login");
   const [loading, setLoading] = useState(true);
 

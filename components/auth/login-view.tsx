@@ -196,31 +196,15 @@ export function LoginView({
     }
   };
 
-  const inputTransitionClasses =
-    "transition-all duration-300 bg-transparent border-gray-600 hover:border-gray-400 focus:border-primary focus:ring-primary/20";
-  const buttonTransitionClasses =
-    "transition-all duration-500 bg-gradient-to-r from-primary via-purple-600 to-primary hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/20 active:scale-[0.98]";
+  const inputTransitionClasses = "bg-background/50 border-white/20 focus:border-primary";
+  const buttonTransitionClasses = "bg-primary hover:bg-primary/90";
 
   return (
     <div className="flex min-h-[100dvh] flex-col items-center justify-center p-4 pt-24 relative overflow-hidden font-dosis">
-      <Card
-        className="w-full max-w-md relative z-40 border border-white/10 shadow-2xl
-        bg-background/5 backdrop-blur-2xl hover:bg-background/10 transition-all duration-500
-        before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/5 before:to-white/0 before:rounded-xl"
-      >
-        <CardHeader className="text-center relative z-10">
-          <div className="relative w-20 h-20 mx-auto mb-2">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-purple-600/20 rounded-full blur-lg"></div>
-            {userProfile?.avatarUrl && userProfile.avatarUrl !== "" && (
-              <Image
-                src={userProfile.avatarUrl}
-                fill
-                alt="User avatar"
-                className="object-cover rounded-full border-2 border-white/20 hover:border-primary/50 transition-all duration-300 hover:scale-105"
-                priority
-                sizes="80px"
-              />
-            )}
+      <Card className="w-full max-w-md bg-white/10 backdrop-blur-md border border-white/20 shadow-2xl">
+        <CardHeader className="text-center relative z-10 bg-white/5 rounded-t-lg">
+          <div className="w-20 h-20 mx-auto mb-2 bg-primary/20 rounded-full flex items-center justify-center">
+            <User className="w-8 h-8 text-white" />
           </div>
           <h2
             className="text-2xl font-bold bg-clip-text text-transparent 
@@ -234,7 +218,7 @@ export function LoginView({
             </div>
           )}
         </CardHeader>
-        <CardContent>
+        <CardContent className="bg-white/5 rounded-b-lg">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2 group/username">
               <Label
@@ -252,11 +236,9 @@ export function LoginView({
                     setUsername(e.target.value);
                     validateUsername(e.target.value);
                   }}
-                  className={`pl-10 bg-background/30 border-white/10 focus:border-primary/50
-                    placeholder:text-muted-foreground/50 ${inputTransitionClasses}
-                    focus:bg-background/40 focus:ring-2 focus:ring-offset-0
-                    ${usernameError ? "border-destructive/50 focus:border-destructive" : ""}`}
+                  className="pl-10 bg-background/50 border-white/20 focus:border-primary"
                   placeholder="Tên người dùng"
+                  autoComplete="username"
                   aria-invalid={!!usernameError}
                   aria-describedby={
                     usernameError ? "username-error" : undefined
@@ -293,10 +275,7 @@ export function LoginView({
                     setPassword(e.target.value);
                     validatePassword(e.target.value);
                   }}
-                  className={`pl-10 bg-background/30 border-white/10 focus:border-primary/50
-                    placeholder:text-muted-foreground/50 ${inputTransitionClasses}
-                    focus:bg-background/40 focus:ring-2 focus:ring-offset-0
-                    ${passwordError ? "border-destructive/50 focus:border-destructive" : ""}`}
+                  className="pl-10 bg-background/50 border-white/20 focus:border-primary"
                   placeholder="Mật khẩu của bạn?"
                   aria-invalid={!!passwordError}
                   aria-describedby={
@@ -336,7 +315,7 @@ export function LoginView({
 
             <Button
               type="submit"
-              className={`w-full relative overflow-hidden group login-button ${buttonTransitionClasses}`}
+              className="w-full bg-primary hover:bg-primary/90"
               disabled={loading}
               variant="default"
             >

@@ -23,7 +23,7 @@ const DEFAULT_BACKGROUND_SETTINGS: BackgroundSettings = {
 };
 
 const BACKGROUND_SETTINGS_KEY = "backgroundSettings";
-const FALLBACK_VIDEOS = ["dQw4w9WgXcQ"]; // Example fallback video ID
+const FALLBACK_VIDEOS = ["jfKfPfyJRdk", "M7lc1UVf-VE", "2Vv-BfVoq4g"]; // Lofi music videos
 
 function getRandomVideoId(list: string[]): string {
   return list[Math.floor(Math.random() * list.length)];
@@ -190,19 +190,26 @@ export function DynamicBackground() {
   useEffect(() => {
     if (hasUserInteracted) return;
 
-    // Listen for user interactions
-    const events = ["click", "touchstart", "keydown", "mousedown", "scroll"];
+    // Listen for user interactions with passive events
+    const events = ["click", "touchstart", "keydown", "mousedown"];
     events.forEach((event) => {
       document.addEventListener(event, handleUserInteraction, {
         once: true,
         passive: true,
       });
     });
+    
+    // Separate scroll listener
+    document.addEventListener("scroll", handleUserInteraction, {
+      once: true,
+      passive: true,
+    });
 
     return () => {
       events.forEach((event) => {
         document.removeEventListener(event, handleUserInteraction);
       });
+      document.removeEventListener("scroll", handleUserInteraction);
     };
   }, [hasUserInteracted]);
 
@@ -238,8 +245,8 @@ export function DynamicBackground() {
           key={iframeKey}
           src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1&origin=${window.location.origin}`}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none youtube-bg-iframe"
-          title={`YouTube Background Video ${iframeKey}`}
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+          title="YouTube Background Video"
           onLoad={(e) => {
             const iframe = e.currentTarget;
             if (iframe?.contentWindow) {
@@ -272,21 +279,11 @@ export function DynamicBackground() {
 
   return (
     <>
-      <div className="fixed inset-0 z-0">
-        {backgroundContent}
-        {/* Dynamic opacity overlay */}
-        <div
-          className={`absolute inset-0 bg-black ${getOpacityClass(settings.opacity)}`}
-        />
+      <div className="fixed inset-0 -z-10">
+        <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600" />
       </div>
 
-      {/* Show sound control only when video is playing */}
-      {settings.type === "video" && videoId && (
-        <SoundControl
-          enableSound={settings.enableSound}
-          onSoundToggle={updateSoundSetting}
-        />
-      )}
+
     </>
   );
 }

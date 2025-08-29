@@ -21,9 +21,26 @@ import {
   logUIInteraction,
   logSubmissionActivity,
 } from "@/lib/client-activity-log";
-import type { Users } from "@/types/users";
-import { PrismaSubmissionStatus } from "@/types/submission";
-import { PrismaReleaseType } from "@/types/submission";
+import type { User } from "@/types/user";
+import type {
+  AdditionalArtist,
+  MainCategory,
+  SubCategory,
+  ReleaseType,
+  CopyrightOwnershipStatus,
+  ReleaseHistoryStatus,
+  LyricsStatus,
+  Platform,
+  ArtistPrimaryRole,
+  AdditionalArtistRole,
+  Submission,
+} from "@/types/submission";
+import {
+  PrismaSubmission,
+  PrismaTrack,
+  SubmissionStatus,
+  ReleaseType as PrismaReleaseType,
+} from "@/types/prisma";
 import {
   Rocket,
   UserIcon,
@@ -499,7 +516,7 @@ export default function UploadFormView({
           duration: track.info.duration || 0,
           ISRC: track.info.ISRC,
           fileName: track.file.name,
-          artistFullName: track.info.fullName,
+          name: track.info.fullName,
           fileSize: track.file.size,
           format: track.file.type,
           bitrate: null, // Sẽ được điền bởi xử lý bitrate
@@ -533,7 +550,7 @@ export default function UploadFormView({
         type: prismaReleaseType,
         coverImagePath: imageResult.url,
         releaseDate: new Date(releaseDate),
-        status: PrismaSubmissionStatus.PENDING,
+        status: SubmissionStatus.PENDING,
         metadataLocked: false,
         published: false,
         albumName: albumName || null,
@@ -545,13 +562,8 @@ export default function UploadFormView({
         statusVietnamese: "Đã nhận, đang chờ duyệt",
         rejectionReason: null,
         notes: hasLyrics === "yes" ? lyrics : null,
-        // Signature fields
-        signedDocumentPath: null,
-        signedAt: null,
-        signerFullName: null,
-        isDocumentSigned: false,
-        userId: currentUser.UID,
-        labelId: currentUser.UID,
+        creatorUID: currentUser.UID,
+        labelId: currentUser.labelId || currentUser.UID,
       };
 
       const result = await multiDB.createSubmissionWithTracks(
@@ -566,7 +578,7 @@ export default function UploadFormView({
       const legacySubmission: Submission = {
         id: result.data!.submission.id,
         userId: currentUser.id,
-        isrc: tracksData[0]?.isrc || "",
+        isrc: tracksData[0]?.ISRC || "",
         uploaderUsername: currentUser.username,
         artistName,
         songTitle,
